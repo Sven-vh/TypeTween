@@ -68,9 +68,9 @@ namespace TypeTween::Detail {
 		/* [Note] OnUpdate callback is handled by ITween<T> specialization and gets called during the interpolation */
 
 		// --------------------------------------------------------------- control
-		void stop() { bPaused = true; }
-		void start() { bPaused = false; }
-		void restart() {
+		void Pause() { bPaused = true; }
+		void Resume() { bPaused = false; }
+		void Restart() {
 			Elapsed = 0.f;
 			FrameCount = 0;
 			bStartFired = false;
@@ -80,10 +80,10 @@ namespace TypeTween::Detail {
 			LastPhase = ECyclePhase::Forward;
 			bPaused = false;
 		}
-		void finish() { Elapsed = GetMaxElapsed(); }
+		void Finish() { Elapsed = GetMaxElapsed(); }
 
-		bool is_paused() const { return bPaused; }
-		bool is_done()   const {
+		bool IsPaused() const { return bPaused; }
+		bool IsDone()   const {
 			if (RepeatCount < 0) return false;
 			return Elapsed >= GetMaxElapsed();
 		}
