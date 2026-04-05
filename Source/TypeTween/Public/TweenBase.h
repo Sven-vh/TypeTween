@@ -90,7 +90,7 @@ namespace TypeTween::Detail {
 
 		// ------------------------------------------------------------------ tick
 		void Tick(float DeltaTime) {
-			if (bPaused || is_done()) return;
+			if (bPaused || IsDone()) return;
 
 			if (Elapsed == 0.f && OnPreStartCB) OnPreStartCB();
 

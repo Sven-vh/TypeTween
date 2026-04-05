@@ -9,7 +9,7 @@ namespace TypeTween {
 	/* Tween a user provided value, user must make sure value does not get invalidated during the tween's lifetime */
 	template <typename T>
 		requires (!TIsConst<T>::Value)
-	ITween<T>& Tween(T& Value, const UObject* WorldContext) {
+	inline ITween<T>& Tween(T& Value, const UObject* WorldContext) {
 		UTweenSubsystem* Sub = UTweenSubsystem::Get(WorldContext);
 		checkf(Sub, TEXT("Tweening::tween — UTweenSubsystem not found. Is WorldContext valid?"));
 		return Sub->RegisterTween(MakeShared<ITween<T>>(&Value));
@@ -17,7 +17,7 @@ namespace TypeTween {
 
 	/* Tween an internal value owned by the tween, useful for fire-and-forget or when the value is only needed in the update callback. */
 	template <typename T>
-	ITween<T>& Tween(const UObject* WorldContext) {
+	inline ITween<T>& Tween(const UObject* WorldContext) {
 		UTweenSubsystem* Sub = UTweenSubsystem::Get(WorldContext);
 		checkf(Sub, TEXT("UTweenSubsystem not found."));
 		return Sub->RegisterTween(
@@ -29,7 +29,7 @@ namespace TypeTween {
 
 	/* Type-deducing overload, if you provide an initial value, the tween can deduce the type and you don't have to specify it. Also sets the start value to provided value by default. */
 	template <typename T>
-	ITween<typename TDecay<T>::Type>& Tween(T&& InitialValue, const UObject* WorldContext) {
+	inline ITween<typename TDecay<T>::Type>& Tween(T&& InitialValue, const UObject* WorldContext) {
 		using Decayed = typename TDecay<T>::Type;
 
 		UTweenSubsystem* Sub = UTweenSubsystem::Get(WorldContext);
@@ -44,7 +44,7 @@ namespace TypeTween {
 	}
 
 	/* Tween with no value, useful for just using the timing and callbacks. */
-	ITween<void>& Tween(const UObject* WorldContext) {
+	inline ITween<void>& Tween(const UObject* WorldContext) {
 		UTweenSubsystem* Sub = UTweenSubsystem::Get(WorldContext);
 		checkf(Sub, TEXT("UTweenSubsystem not found."));
 		return Sub->RegisterTween(MakeShared<ITween<void>>());

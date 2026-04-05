@@ -23,7 +23,7 @@ public:
 		FActiveTween Entry;
 		Entry.Lifetime = InTween;                                    // keeps it alive
 		Entry.FnTick = [Raw](float Dt) { Raw->Tick(Dt); };
-		Entry.FnIsDone = [Raw]() { return Raw->is_done(); };
+		Entry.FnIsDone = [Raw]() { return Raw->IsDone(); };
 		ActiveTweens.Add(MoveTemp(Entry));
 
 		return *Raw;
