@@ -14,7 +14,7 @@ namespace TypeTween {
 	class ITween;
 
 	// -----------------------------------------------------------------------
-	// Default specialization — works for any IsLerpable type:
+	// Default specialization - works for any IsLerpable type:
 	//   float, double, FVector, FVector2D, FRotator, FQuat, FColor, etc.
 	// -----------------------------------------------------------------------
 	template<typename T>
@@ -54,6 +54,7 @@ namespace TypeTween {
 				*Value = A + (B - A) * Frame.Alpha;
 			}
 
+			// Fire typed OnUpdate callback with value
 			if (OnUpdateCB && Value) OnUpdateCB(Frame.Alpha, *Value);
 		}
 
@@ -86,6 +87,7 @@ namespace TypeTween {
 
 		// Contract with TweenBase
 		void Interpolate(const Detail::FTweenFrame& Frame) {
+			// Fire typed callback
 			if (OnUpdateCB) OnUpdateCB(Frame.Alpha);
 		}
 

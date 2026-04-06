@@ -2,6 +2,12 @@
 #include "CoreMinimal.h"
 #include "TweenTypes.generated.h"
 
+// -----------------------------------------------------------------------
+// Dynamic Delegates for Blueprint-bindable callbacks
+// -----------------------------------------------------------------------
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FTweenSimpleDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTweenAlphaDelegate, float, Alpha);
+
 UENUM(BlueprintType)
 enum class ETweenEase : uint8 {
 	Linear,
@@ -67,6 +73,96 @@ struct TYPETWEEN_API FTweenSettings {
 		ToolTip = "Delay after the tween finishes playing before firing OnComplete."
 		))
 	float EndDelay = 0.f;
+};
+
+/* Forward declare */
+namespace TypeTween::Detail {
+	template<typename T>
+	class TweenBase;
+}
+
+// -----------------------------------------------------------------------
+// Callback container - holds both Blueprint delegates and C++ TFunctions
+// -----------------------------------------------------------------------
+USTRUCT(BlueprintType)
+struct TYPETWEEN_API FTweenCallbacks {
+	GENERATED_BODY()
+
+	void OnPreStart(TFunction<void()> Callback) { OnPreStartFn = MoveTemp(Callback); }
+	void OnStart(TFunction<void()> Callback) { OnStartFn = MoveTemp(Callback); }
+	void OnCycleBegin(TFunction<void()> Callback) { OnCycleBeginFn = MoveTemp(Callback); }
+	void OnForwardEnd(TFunction<void()> Callback) { OnForwardEndFn = MoveTemp(Callback); }
+	void OnReverseBegin(TFunction<void()> Callback) { OnReverseBeginFn = MoveTemp(Callback); }
+	void OnCycleEnd(TFunction<void()> Callback) { OnCycleEndFn = MoveTemp(Callback); }
+	void OnRepeat(TFunction<void()> Callback) { OnRepeatFn = MoveTemp(Callback); }
+	void OnComplete(TFunction<void()> Callback) { OnCompleteFn = MoveTemp(Callback); }
+	void OnTick(TFunction<void()> Callback) { OnTickFn = MoveTemp(Callback); }
+
+private:
+	template<typename T>
+	friend class TypeTween::Detail::TweenBase;
+	// ---- Blueprint-bindable delegates ----
+
+	/** Fired first frame when the tween is triggered, before StartDelay begins. */
+	UPROPERTY(BlueprintAssignable, Category = "Tween|Events")
+	FTweenSimpleDelegate OnPreStartDel;
+
+	/** Fired once the tween starts playing (after StartDelay). */
+	UPROPERTY(BlueprintAssignable, Category = "Tween|Events")
+	FTweenSimpleDelegate OnStartDel;
+
+	/** Fired at the start of each new cycle (after StartDelay or RepeatDelay). */
+	UPROPERTY(BlueprintAssignable, Category = "Tween|Events")
+	FTweenSimpleDelegate OnCycleBeginDel;
+	/** Fired at the end of the forward phase of each cycle (before ReverseDelay), when t == 1. */
+	UPROPERTY(BlueprintAssignable, Category = "Tween|Events")
+	FTweenSimpleDelegate OnForwardEndDel;
+
+	/** [Ping Pong Only] Fired at the start of the reverse phase of each cycle (after ReverseDelay). */
+	UPROPERTY(BlueprintAssignable, Category = "Tween|Events")
+	FTweenSimpleDelegate OnReverseBeginDel;
+	/** Fired at the end of each cycle (before EndDelay or RepeatDelay), when t == 0. */
+	UPROPERTY(BlueprintAssignable, Category = "Tween|Events")
+	FTweenSimpleDelegate OnCycleEndDel;
+
+	/** Fired at the end of each cycle except the last one. */
+	UPROPERTY(BlueprintAssignable, Category = "Tween|Events")
+	FTweenSimpleDelegate OnRepeatDel;
+	/** Fired once the tween finishes playing (after EndDelay + repeats). */
+	UPROPERTY(BlueprintAssignable, Category = "Tween|Events")
+	FTweenSimpleDelegate OnCompleteDel;
+
+	/** Fired every tick, including during delays. */
+	UPROPERTY(BlueprintAssignable, Category = "Tween|Events")
+	FTweenSimpleDelegate OnTickDel;
+	/** Fired during interpolation with the current alpha value [0..1]. Type-erased version. */
+	UPROPERTY(BlueprintAssignable, Category = "Tween|Events")
+	FTweenAlphaDelegate OnUpdateDel;
+
+	// ---- C++ callbacks (not exposed to Blueprint) ----
+	TFunction<void()> OnPreStartFn;
+	TFunction<void()> OnStartFn;
+	TFunction<void()> OnCycleBeginFn;
+	TFunction<void()> OnForwardEndFn;
+	TFunction<void()> OnReverseBeginFn;
+	TFunction<void()> OnCycleEndFn;
+	TFunction<void()> OnRepeatFn;
+	TFunction<void()> OnCompleteFn;
+	TFunction<void()> OnTickFn;
+	// Note: Typed OnUpdate with value stays in ITween<T>
+
+		// ---- Broadcast methods (fires both BP delegate and C++ TFunction) ----
+	void BroadcastOnPreStart() { OnPreStartDel.Broadcast();     if (OnPreStartFn) OnPreStartFn(); }
+	void BroadcastOnStart() { OnStartDel.Broadcast();        if (OnStartFn) OnStartFn(); }
+	void BroadcastOnCycleBegin() { OnCycleBeginDel.Broadcast();   if (OnCycleBeginFn) OnCycleBeginFn(); }
+	void BroadcastOnForwardEnd() { OnForwardEndDel.Broadcast();   if (OnForwardEndFn) OnForwardEndFn(); }
+	void BroadcastOnReverseBegin() { OnReverseBeginDel.Broadcast(); if (OnReverseBeginFn) OnReverseBeginFn(); }
+	void BroadcastOnCycleEnd() { OnCycleEndDel.Broadcast();     if (OnCycleEndFn) OnCycleEndFn(); }
+	void BroadcastOnRepeat() { OnRepeatDel.Broadcast();       if (OnRepeatFn) OnRepeatFn(); }
+	void BroadcastOnComplete() { OnCompleteDel.Broadcast();     if (OnCompleteFn) OnCompleteFn(); }
+	void BroadcastOnTick() { OnTickDel.Broadcast();         if (OnTickFn) OnTickFn(); }
+	void BroadcastOnUpdate(float Alpha) { OnUpdateDel.Broadcast(Alpha); }
+
 };
 
 /* Struct to specify which tween settings to override when using a preset. */
