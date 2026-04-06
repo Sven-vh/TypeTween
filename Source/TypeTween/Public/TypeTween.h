@@ -3,6 +3,7 @@
 #include "TweenEasing.h"
 #include "TweenBase.h"
 #include "ITween.h"
+#include "TweenHandle.h"
 #include "TweenSubsystem.h"
 
 namespace TypeTween {
@@ -11,7 +12,7 @@ namespace TypeTween {
 		requires (!TIsConst<T>::Value)
 	inline ITween<T>& Tween(T& Value, const UObject* WorldContext) {
 		UTweenSubsystem* Sub = UTweenSubsystem::Get(WorldContext);
-		checkf(Sub, TEXT("Tweening::tween — UTweenSubsystem not found. Is WorldContext valid?"));
+		checkf(Sub, TEXT("Tweening::tween - UTweenSubsystem not found. Is WorldContext valid?"));
 		return Sub->RegisterTween(MakeShared<ITween<T>>(&Value));
 	}
 

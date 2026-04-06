@@ -6,7 +6,7 @@
 #include "TweenSubsystem.generated.h"
 
 // Manages all active tweens for the current game instance.
-// Lives as long as the GameInstance — survives level transitions.
+// Lives as long as the GameInstance - survives level transitions.
 UCLASS()
 class TYPETWEEN_API UTweenSubsystem : public UGameInstanceSubsystem, public FTickableGameObject {
 	GENERATED_BODY()
@@ -14,14 +14,16 @@ class TYPETWEEN_API UTweenSubsystem : public UGameInstanceSubsystem, public FTic
 public:
 	static UTweenSubsystem* Get(const UObject* WorldContext);
 
-	// Called by Tweening::tween() — stores the tween and returns a stable ref.
+	// Called by Tweening::tween(), stores the tween and returns a stable ref.
 	template<typename T, typename... Args>
 	TypeTween::ITween<T, Args...>& RegisterTween(TSharedRef<TypeTween::ITween<T, Args...>> InTween) {
 		TypeTween::ITween<T, Args...>* Raw = &InTween.Get();
-		//InTween->SetSelfWeak(InTween); // enables ToHandle()
+
+		// Store weak self-reference for handle conversion
+		Raw->SetSelfWeak(InTween);
 
 		FActiveTween Entry;
-		Entry.Lifetime = InTween;                                    // keeps it alive
+		Entry.Lifetime = InTween; // keeps it alive
 		Entry.FnTick = [Raw](float Dt) { Raw->Tick(Dt); };
 		Entry.FnIsDone = [Raw]() { return Raw->IsDone(); };
 		ActiveTweens.Add(MoveTemp(Entry));

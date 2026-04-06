@@ -1,5 +1,7 @@
 #pragma once
 #include "TweenEasing.h"
+#include "TweenControl.h"
+#include "TweenHandle.h"
 
 namespace TypeTween::Detail {
 	struct FTweenFrame {
@@ -15,7 +17,7 @@ namespace TypeTween::Detail {
 	};
 
 	template<typename Derived>
-	class TweenBase {
+	class TweenBase : public ITweenControl {
 	public:
 		// ------------------------------------------------------------------ config
 		/* Delay before the tween starts after being interpolated */
@@ -68,9 +70,9 @@ namespace TypeTween::Detail {
 		/* [Note] OnUpdate callback is handled by ITween<T> specialization and gets called during the interpolation */
 
 		// --------------------------------------------------------------- control
-		void Pause() { bPaused = true; }
-		void Resume() { bPaused = false; }
-		void Restart() {
+		void Pause() override { bPaused = true; }
+		void Resume() override { bPaused = false; }
+		void Restart() override {
 			Elapsed = 0.f;
 			FrameCount = 0;
 			bStartFired = false;
@@ -80,10 +82,10 @@ namespace TypeTween::Detail {
 			LastPhase = ECyclePhase::Forward;
 			bPaused = false;
 		}
-		void Finish() { Elapsed = GetMaxElapsed(); }
+		void Finish() override { Elapsed = GetMaxElapsed(); }
 
-		bool IsPaused() const { return bPaused; }
-		bool IsDone()   const {
+		bool IsPaused() const override { return bPaused; }
+		bool IsDone()   const override {
 			if (RepeatCount < 0) return false;
 			return Elapsed >= GetMaxElapsed();
 		}
@@ -180,9 +182,25 @@ namespace TypeTween::Detail {
 
 		// -------------------------------------------------- self shared_ptr link
 		// Set by the subsystem after heap-allocating the tween.
-		// Enables conversion to FTweenHandle.
-		//void           SetSelfWeak(TSharedPtr<void> Ptr) { SelfWeak = Ptr; }
-		//TSharedPtr<void> GetSelfShared() const { return SelfWeak.Pin(); }
+		// Enables conversion to TTweenHandle / FTweenHandle.
+		void SetSelfWeak(TWeakPtr<Derived> Ptr) { SelfWeak = Ptr; }
+		TSharedPtr<Derived> GetSelfShared() const { return SelfWeak.Pin(); }
+
+		// -------------------------------------------------- handle conversion
+		/** Convert to a storable typed handle. Keeps the tween alive. */
+		TTweenHandle<Derived> ToHandle() {
+			return TTweenHandle<Derived>(GetSelfShared());
+		}
+
+		/** Implicit conversion to typed handle (enables assignment syntax). */
+		operator TTweenHandle<Derived>() {
+			return ToHandle();
+		}
+
+		/** Implicit conversion to type-erased handle. */
+		operator FTweenHandle() {
+			return FTweenHandle(StaticCastSharedPtr<ITweenControl>(GetSelfShared()));
+		}
 
 	protected:
 		float DurationValue = 1.f;
@@ -204,7 +222,7 @@ namespace TypeTween::Detail {
 		int32 LastCycleIndex = 0;
 		ECyclePhase LastPhase = ECyclePhase::Forward;
 
-		//TWeakPtr<void> SelfWeak;
+		TWeakPtr<Derived> SelfWeak;
 
 		/* Frame 0 */
 		TFunction<void()> OnPreStartCB;

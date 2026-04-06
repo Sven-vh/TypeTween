@@ -57,6 +57,16 @@ namespace TypeTween {
 			if (OnUpdateCB && Value) OnUpdateCB(Frame.Alpha, *Value);
 		}
 
+		/* Getters for handles */
+		T* GetValue() { return Value; }
+		const T* GetValue() const { return Value; }
+
+		TOptional<T>& GetStart() { return Start; }
+		const TOptional<T>& GetStart() const { return Start; }
+
+		TOptional<T>& GetEnd() { return End; }
+		const TOptional<T>& GetEnd() const { return End; }
+
 	private:
 		T* Value = nullptr;
 		TOptional<T> Start;
