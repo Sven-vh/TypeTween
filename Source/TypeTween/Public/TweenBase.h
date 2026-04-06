@@ -21,25 +21,28 @@ namespace TypeTween::Detail {
 	public:
 		// ------------------------------------------------------------------ config
 		/* Delay before the tween starts after being interpolated */
-		Derived& StartDelay(float Secs) { StartDelayValue = Secs; return Self(); }
+		Derived& StartDelay(float Secs) { Config.StartDelay = Secs; return Self(); }
 		/* Total time for one forward or reverse playthrough, not including delays. Required. */
-		Derived& Duration(float Secs) { DurationValue = Secs; return Self(); }
+		Derived& Duration(float Secs) { Config.Duration = Secs; return Self(); }
 		/* [Ping Pong Only] Delay between forward and reverse play */
-		Derived& ReverseDelay(float Secs) { ReverseDelayValue = Secs; return Self(); }
+		Derived& ReverseDelay(float Secs) { Config.ReverseDelay = Secs; return Self(); }
 		/* Delay between the end of one cycle and the start of the next */
-		Derived& RepeatDelay(float Secs) { RepeatDelayValue = Secs; return Self(); }
+		Derived& RepeatDelay(float Secs) { Config.RepeatDelay = Secs; return Self(); }
 		/* Delay after the tween finishes before firing OnComplete */
-		Derived& EndDelay(float Secs) { EndDelayValue = Secs;  return Self(); }
+		Derived& EndDelay(float Secs) { Config.EndDelay = Secs;  return Self(); }
 
 		/* 0 = play once, -1 = infinite, N = play N+1 times total */
-		Derived& Repeat(int32 Count) { RepeatCount = Count; return Self(); }
+		Derived& Repeat(int32 Count) { Config.RepeatCount = Count; return Self(); }
 		/* Easing function for the tween, see https://easings.net/ for visualization */
-		Derived& Ease(ETweenEase E) { EaseValue = E; return Self(); }
+		Derived& Ease(ETweenEase E) { Config.Ease = E; return Self(); }
 		/* Tween will reverse direction each cycle instead of jumping back to start */
-		Derived& PingPong(bool enable = true) {
-			LoopMode = enable ? ETweenLoopMode::PingPong : ETweenLoopMode::Loop;
+		Derived& PingPong(bool Enable = true) {
+			Config.LoopMode = Enable ? ETweenLoopMode::PingPong : ETweenLoopMode::Loop;
 			return Self();
 		}
+
+
+		Derived& Preset(FTweenConfig Preset) { Config = Preset.Resolve(); return Self(); }
 
 		// -------------------------------------------------- callbacks
 		/* Fired first frame when the tween is triggered, before StartDelay begins */
@@ -65,7 +68,7 @@ namespace TypeTween::Detail {
 		/* Fired once the tween finishes playing (after EndDelay + repeats) */
 		Derived& OnComplete(TFunction<void()> Fn) { OnCompleteCB = MoveTemp(Fn); return Self(); }
 
-		/* Fired every tick, including during delays. Unlike OnUpdate, always fires even when value is not changing */
+		/* Fired every tick, including during delays. Unlike OnUpdate, always fires even when  is not changing */
 		Derived& OnTick(TFunction<void()> Fn) { OnTickCB = MoveTemp(Fn); return Self(); }
 		/* [Note] OnUpdate callback is handled by ITween<T> specialization and gets called during the interpolation */
 
@@ -86,7 +89,7 @@ namespace TypeTween::Detail {
 
 		bool IsPaused() const override { return bPaused; }
 		bool IsDone()   const override {
-			if (RepeatCount < 0) return false;
+			if (Config.RepeatCount < 0) return false;
 			return Elapsed >= GetMaxElapsed();
 		}
 
@@ -97,13 +100,13 @@ namespace TypeTween::Detail {
 			if (Elapsed == 0.f && OnPreStartCB) OnPreStartCB();
 
 			Elapsed += DeltaTime;
-			if (RepeatCount >= 0)
+			if (Config.RepeatCount >= 0)
 				Elapsed = FMath::Min(Elapsed, GetMaxElapsed());
 
 			/* Fires every frame, even during delays */
 			if (OnTickCB) OnTickCB();
 
-			if (Elapsed < StartDelayValue) return;
+			if (Elapsed < Config.StartDelay) return;
 
 			if (!bStartFired) {
 				bStartFired = true;
@@ -111,15 +114,15 @@ namespace TypeTween::Detail {
 				if (OnCycleBeginCB) OnCycleBeginCB();
 			}
 
-			const float AnimElapsed = Elapsed - StartDelayValue;
+			const float AnimElapsed = Elapsed - Config.StartDelay;
 			const float TotalAnimTime = GetTotalAnimTime();
 
 			if (AnimElapsed >= TotalAnimTime) {
 				if (!bFinalized) {
 					bFinalized = true;
 
-					const float FinalRaw = (LoopMode == ETweenLoopMode::PingPong) ? 0.f : 1.f;
-					const float FinalAlpha = Detail::ApplyEase(FinalRaw, EaseValue);
+					const float FinalRaw = (Config.LoopMode == ETweenLoopMode::PingPong) ? 0.f : 1.f;
+					const float FinalAlpha = Detail::ApplyEase(FinalRaw, Config.Ease);
 					Self().Interpolate(FTweenFrame{ FinalAlpha, FrameCount });
 					FrameCount++;
 					if (LastPhase == ECyclePhase::Forward && OnForwardEndCB) OnForwardEndCB();
@@ -139,8 +142,8 @@ namespace TypeTween::Detail {
 			ECyclePhase Phase = ECyclePhase::Forward;
 			const float RawAlpha = ComputeProgress(AnimElapsed, bReversing, Phase);
 			const float Alpha = bReversing
-				? 1.f - Detail::ApplyEase(RawAlpha, EaseValue)
-				: Detail::ApplyEase(RawAlpha, EaseValue);
+				? 1.f - Detail::ApplyEase(RawAlpha, Config.Ease)
+				: Detail::ApplyEase(RawAlpha, Config.Ease);
 
 			const bool bActivePhase = (Phase == ECyclePhase::Forward || Phase == ECyclePhase::Reverse);
 			if (bActivePhase) {
@@ -168,7 +171,7 @@ namespace TypeTween::Detail {
 
 			if (bNewCycle) {
 				if (LastPhase != ECyclePhase::RepeatDelay) {
-					if (LoopMode == ETweenLoopMode::Loop && OnForwardEndCB) OnForwardEndCB();
+					if (Config.LoopMode == ETweenLoopMode::Loop && OnForwardEndCB) OnForwardEndCB();
 					if (OnCycleEndCB) OnCycleEndCB();
 				}
 				if (OnRepeatCB)     OnRepeatCB();
@@ -203,14 +206,7 @@ namespace TypeTween::Detail {
 		}
 
 	protected:
-		float DurationValue = 1.f;
-		float StartDelayValue = 0.f;
-		float EndDelayValue = 0.f;
-		float ReverseDelayValue = 0.f;
-		float RepeatDelayValue = 0.f;
-		int32 RepeatCount = 0;
-		ETweenEase EaseValue = ETweenEase::Linear;
-		ETweenLoopMode LoopMode = ETweenLoopMode::Loop;
+		FTweenSettings Config;
 
 	private:
 		float Elapsed = 0.f;
@@ -245,18 +241,18 @@ namespace TypeTween::Detail {
 		Derived& Self() { return *static_cast<Derived*>(this); }
 
 		float GetCycleTime() const {
-			const float Base = (LoopMode == ETweenLoopMode::PingPong)
-				? 2.f * DurationValue + ReverseDelayValue : DurationValue;
-			return Base + RepeatDelayValue;
+			const float Base = (Config.LoopMode == ETweenLoopMode::PingPong)
+				? 2.f * Config.Duration + Config.ReverseDelay : Config.Duration;
+			return Base + Config.RepeatDelay;
 		}
 
 		float GetTotalAnimTime() const {
-			if (RepeatCount < 0) return TNumericLimits<float>::Max();
-			return GetCycleTime() * (RepeatCount + 1) - RepeatDelayValue;
+			if (Config.RepeatCount < 0) return TNumericLimits<float>::Max();
+			return GetCycleTime() * (Config.RepeatCount + 1) - Config.RepeatDelay;
 		}
 
 		float GetMaxElapsed() const {
-			return StartDelayValue + GetTotalAnimTime() + EndDelayValue;
+			return Config.StartDelay + GetTotalAnimTime() + Config.EndDelay;
 		}
 
 		float ComputeProgress(float AnimElapsed, bool& bOutReversing, ECyclePhase& OutPhase) const {
@@ -264,26 +260,26 @@ namespace TypeTween::Detail {
 			const float CycleTime = GetCycleTime();
 			const float CyclePos = CycleTime > 0.f ? FMath::Fmod(AnimElapsed, CycleTime) : 0.f;
 
-			if (LoopMode == ETweenLoopMode::Loop) {
-				if (CyclePos >= DurationValue) { OutPhase = ECyclePhase::RepeatDelay; return 1.f; }
+			if (Config.LoopMode == ETweenLoopMode::Loop) {
+				if (CyclePos >= Config.Duration) { OutPhase = ECyclePhase::RepeatDelay; return 1.f; }
 				OutPhase = ECyclePhase::Forward;
-				return DurationValue > 0.f ? CyclePos / DurationValue : 1.f;
+				return Config.Duration > 0.f ? CyclePos / Config.Duration : 1.f;
 			}
 
 			// PingPong
-			if (CyclePos <= DurationValue) {
+			if (CyclePos <= Config.Duration) {
 				OutPhase = ECyclePhase::Forward;
-				return DurationValue > 0.f ? CyclePos / DurationValue : 1.f;
+				return Config.Duration > 0.f ? CyclePos / Config.Duration : 1.f;
 			}
-			if (CyclePos <= DurationValue + ReverseDelayValue) {
+			if (CyclePos <= Config.Duration + Config.ReverseDelay) {
 				OutPhase = ECyclePhase::ReverseDelay;
 				return 1.f;
 			}
-			if (CyclePos <= 2.f * DurationValue + ReverseDelayValue) {
+			if (CyclePos <= 2.f * Config.Duration + Config.ReverseDelay) {
 				bOutReversing = true;
 				OutPhase = ECyclePhase::Reverse;
-				const float RevElapsed = CyclePos - DurationValue - ReverseDelayValue;
-				return DurationValue > 0.f ? RevElapsed / DurationValue : 1.f;
+				const float RevElapsed = CyclePos - Config.Duration - Config.ReverseDelay;
+				return Config.Duration > 0.f ? RevElapsed / Config.Duration : 1.f;
 			}
 			OutPhase = ECyclePhase::RepeatDelay;
 			return 0.f;

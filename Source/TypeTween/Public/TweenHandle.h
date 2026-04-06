@@ -7,9 +7,6 @@ namespace TypeTween {
 	template<typename T, typename... Args>
 	class ITween;
 
-	template<typename TweenT = ITween<void>>
-	class TweenHandle;
-
 	// -----------------------------------------------------------------------
 	// Type-erased handle - can control any tween but cannot access typed methods
 	// -----------------------------------------------------------------------
