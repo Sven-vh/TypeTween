@@ -73,7 +73,7 @@ namespace TypeTween {
 	// Used by Tween<T>(WorldContext) and Tween<T>(InitialValue, WorldContext).
 	// -----------------------------------------------------------------------
 	template<typename T>
-		requires Traits::THasLerper<T>
+		requires Traits::THasITween<T>
 	class ITweenOwned : public ITween<T> {
 	public:
 		// No initial value, T is default-constructed

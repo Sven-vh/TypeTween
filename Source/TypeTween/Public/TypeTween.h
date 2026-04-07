@@ -16,14 +16,14 @@ namespace TypeTween {
 		requires ((!TIsConst<T>::Value) && Traits::THasITween<T>)
 	inline ITween<T>& Tween(T& Value, const UObject* WorldContext) {
 		UTweenSubsystem* Sub = UTweenSubsystem::Get(WorldContext);
-		checkf(Sub, TEXT("Tweening::tween - UTweenSubsystem not found. Is WorldContext valid?"));
+		checkf(Sub, TEXT("UTweenSubsystem not found."));
 
 		return Sub->RegisterTween(MakeShared<ITween<T>>(&Value));
 	}
 
 	/* Tween an internal value owned by the tween, useful for fire-and-forget or when the value is only needed in the update callback. */
 	template <typename T>
-		requires Traits::THasITween<T>
+		requires (Traits::THasITween<T> && !std::is_void_v<T>)
 	inline ITween<T>& Tween(const UObject* WorldContext) {
 		UTweenSubsystem* Sub = UTweenSubsystem::Get(WorldContext);
 		checkf(Sub, TEXT("UTweenSubsystem not found."));
@@ -59,5 +59,22 @@ namespace TypeTween {
 		checkf(Sub, TEXT("UTweenSubsystem not found."));
 
 		return Sub->RegisterTween(MakeShared<ITween<void>>());
+	}
+
+	/* Void tween template overload - allows explicit Tween<void>(WorldContext) syntax */
+	template <typename T>
+		requires std::is_void_v<T>
+	inline ITween<void>& Tween(const UObject* WorldContext) {
+		return Tween(WorldContext);  // Delegate to non-template version
+	}
+
+	/* Tween an Actor (or any class derived from AActor). */
+	template <typename T>
+		requires std::is_base_of_v<AActor, T>
+	inline ITween<AActor>& Tween(T* Actor) {
+		UTweenSubsystem* Sub = UTweenSubsystem::Get(Actor);
+		checkf(Sub, TEXT("UTweenSubsystem not found."));
+
+		return Sub->RegisterTween(MakeShared<ITween<AActor>>(Actor));
 	}
 }
