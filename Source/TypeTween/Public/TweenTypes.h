@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreMinimal.h"
+#include "TweenTraits.h"
 #include "TweenTypes.generated.h"
 
 // -----------------------------------------------------------------------
@@ -74,12 +75,6 @@ struct TYPETWEEN_API FTweenSettings {
 		))
 	float EndDelay = 0.f;
 };
-
-/* Forward declare */
-namespace TypeTween::Detail {
-	template<typename T>
-	class TweenBase;
-}
 
 // -----------------------------------------------------------------------
 // Callback container - holds both Blueprint delegates and C++ TFunctions

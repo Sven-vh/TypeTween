@@ -1,15 +1,10 @@
 #pragma once
 #include "TweenControl.h"
+#include "TweenTraits.h"
 
 namespace TypeTween {
 
-	// Forward declarations
-	template<typename T, typename... Args>
-	class ITween;
-
-	// -----------------------------------------------------------------------
-	// Type-erased handle - can control any tween but cannot access typed methods
-	// -----------------------------------------------------------------------
+	/* Type-erased handle */
 	class FTweenHandle {
 	public:
 		FTweenHandle() = default;
@@ -31,10 +26,7 @@ namespace TypeTween {
 		TSharedPtr<ITweenControl> TweenPtr;
 	};
 
-	// -----------------------------------------------------------------------
-	// Typed handle - full access to all tween methods including type-specific
-	// (e.g., ITween<float>, ITween<FVector>)
-	// -----------------------------------------------------------------------
+	/* Typed handle */
 	template<typename TweenT>
 	class TTweenHandle : public FTweenHandle {
 	public:
@@ -66,10 +58,7 @@ namespace TypeTween {
 		TSharedPtr<TweenT> TypedPtr;
 	};
 
-	// -----------------------------------------------------------------------
-	// Convenience type alias for cleaner syntax:
-	// TweenHandle<float> instead of TTweenHandle<ITween<float>>
-	// -----------------------------------------------------------------------
+	/* Convenience alias */
 	template<typename T>
 	using TweenHandle = TTweenHandle<ITween<T>>;
 }

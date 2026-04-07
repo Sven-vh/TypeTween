@@ -2,7 +2,7 @@
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "Tickable.h"
-#include "ITween.h"
+#include "Specializations/ITween.h"
 #include "TweenSubsystem.generated.h"
 
 // Manages all active tweens for the current game instance.

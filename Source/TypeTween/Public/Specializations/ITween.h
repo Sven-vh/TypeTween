@@ -1,24 +1,15 @@
 #pragma once
 #include "TweenBase.h"
+#include "TweenTraits.h"
 
 namespace TypeTween {
-
-	// Concept: T supports  A + (B - A) * float
-	template<typename T>
-	concept IsLerpable = requires(T A, T B, float F) {
-		{ A + (B - A) * F } -> std::convertible_to<T>;
-	};
-
-	/* Forward Declaration */
-	template<typename T, typename... Args>
-	class ITween;
 
 	// -----------------------------------------------------------------------
 	// Default specialization - works for any IsLerpable type:
 	//   float, double, FVector, FVector2D, FRotator, FQuat, FColor, etc.
 	// -----------------------------------------------------------------------
 	template<typename T>
-		requires IsLerpable<T>
+		requires Traits::THasLerper<T>
 	class ITween<T> : public Detail::TweenBase<ITween<T>> {
 	public:
 		explicit ITween(T* InValue) : Value(InValue) {}
@@ -51,7 +42,8 @@ namespace TypeTween {
 				const T& A = Start.GetValue();
 				const T& B = End.GetValue();
 				/* Default interpolation */
-				*Value = A + (B - A) * Frame.Alpha;
+				//*Value = A + (B - A) * Frame.Alpha;
+				*Value = Lerp(A, B, Frame.Alpha);
 			}
 
 			// Fire typed OnUpdate callback with value
@@ -75,6 +67,27 @@ namespace TypeTween {
 		TFunction<void(float, const T&)> OnUpdateCB;
 	};
 
+
+	// -----------------------------------------------------------------------
+	// Owning variant, the tween stores its own T internally.
+	// Used by Tween<T>(WorldContext) and Tween<T>(InitialValue, WorldContext).
+	// -----------------------------------------------------------------------
+	template<typename T>
+		requires Traits::THasLerper<T>
+	class ITweenOwned : public ITween<T> {
+	public:
+		// No initial value, T is default-constructed
+		ITweenOwned() : ITween<T>(&InternalValue) {
+		}
+
+		// Optional starting value passed via the free-function overload
+		explicit ITweenOwned(T InitialValue) : ITween<T>(&InternalValue), InternalValue(MoveTemp(InitialValue)) {
+		}
+
+	private:
+		T InternalValue{};
+	};
+
 	template<>
 	class ITween<void> : public Detail::TweenBase<ITween<void>> {
 	public:
@@ -93,26 +106,5 @@ namespace TypeTween {
 
 	private:
 		TFunction<void(float)> OnUpdateCB;
-	};
-
-
-	// -----------------------------------------------------------------------
-	// Owning variant, the tween stores its own T internally.
-	// Used by Tween<T>(WorldContext) and Tween<T>(InitialValue, WorldContext).
-	// -----------------------------------------------------------------------
-	template<typename T>
-		requires IsLerpable<T>
-	class ITweenOwned : public ITween<T> {
-	public:
-		// No initial value, T is default-constructed
-		ITweenOwned() : ITween<T>(&InternalValue) {
-		}
-
-		// Optional starting value passed via the free-function overload
-		explicit ITweenOwned(T InitialValue) : ITween<T>(&InternalValue), InternalValue(MoveTemp(InitialValue)) {
-		}
-
-	private:
-		T InternalValue{};
 	};
 }
