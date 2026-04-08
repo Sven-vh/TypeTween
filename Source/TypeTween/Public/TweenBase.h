@@ -37,7 +37,7 @@ namespace TypeTween::Detail {
 		Derived& Ease(ETweenEase E) { Settings.Ease = E; return Self(); }
 		/* Tween will reverse direction each cycle instead of jumping back to start */
 		Derived& PingPong(bool Enable = true) {
-			Settings.LoopMode = Enable ? ETweenLoopMode::PingPong : ETweenLoopMode::Loop;
+			Settings.LoopMode = Enable ? ETweenLoopMode::PingPong : ETweenLoopMode::Restart;
 			return Self();
 		}
 
@@ -177,7 +177,7 @@ namespace TypeTween::Detail {
 
 			if (bNewCycle) {
 				if (LastPhase != ECyclePhase::RepeatDelay) {
-					if (Settings.LoopMode == ETweenLoopMode::Loop) Callbacks.BroadcastOnForwardEnd();
+					if (Settings.LoopMode == ETweenLoopMode::Restart) Callbacks.BroadcastOnForwardEnd();
 					Callbacks.BroadcastOnCycleEnd();
 				}
 				Callbacks.BroadcastOnRepeat();
@@ -254,7 +254,7 @@ namespace TypeTween::Detail {
 			const float CycleTime = GetCycleTime();
 			const float CyclePos = CycleTime > 0.f ? FMath::Fmod(AnimElapsed, CycleTime) : 0.f;
 
-			if (Settings.LoopMode == ETweenLoopMode::Loop) {
+			if (Settings.LoopMode == ETweenLoopMode::Restart) {
 				if (CyclePos >= Settings.Duration) { OutPhase = ECyclePhase::RepeatDelay; return 1.f; }
 				OutPhase = ECyclePhase::Forward;
 				return Settings.Duration > 0.f ? CyclePos / Settings.Duration : 1.f;

@@ -26,7 +26,7 @@ enum class ETweenEase : uint8 {
 
 UENUM(BlueprintType)
 enum class ETweenLoopMode : uint8 {
-	Loop      UMETA(DisplayName = "Loop (0->1, 0->1...)"),
+	Restart   UMETA(DisplayName = "Restart (0->1, 0->1...)"),
 	PingPong  UMETA(DisplayName = "Ping-pong (0->1->0...)"),
 };
 
@@ -51,9 +51,9 @@ struct TYPETWEEN_API FTweenSettings {
 	int32 RepeatCount = 0;
 
 	UPROPERTY(EditAnywhere, Category = "Tween", meta = (
-		ToolTip = "How the tween loops back after reaching the end. Loop: jumps back to start. PingPong: reverses direction each cycle."
+		ToolTip = "How the tween loops back after reaching the end. Restart: jumps back to start. PingPong: reverses direction each cycle."
 		))
-	ETweenLoopMode LoopMode = ETweenLoopMode::Loop;
+	ETweenLoopMode LoopMode = ETweenLoopMode::Restart;
 
 	UPROPERTY(EditAnywhere, Category = "Timing", meta = (
 		ToolTip = "Delay before the tween starts playing."
@@ -189,7 +189,7 @@ struct TYPETWEEN_API FTweenOverrides {
 	bool bLoopMode = false;
 	UPROPERTY(EditAnywhere, Category = "Tween", meta = (EditCondition = "bLoopMode",
 		ToolTip = "How the tween loops back after reaching the end."))
-	ETweenLoopMode LoopMode = ETweenLoopMode::Loop;
+	ETweenLoopMode LoopMode = ETweenLoopMode::Restart;
 
 	UPROPERTY(EditAnywhere, meta = (InlineEditConditionToggle))
 	bool bStartDelay = false;
