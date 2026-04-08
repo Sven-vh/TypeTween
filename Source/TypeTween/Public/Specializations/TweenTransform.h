@@ -17,6 +17,7 @@ namespace TypeTween {
 	template<typename Derived>
 	class TTransformTweenMixin {
 	public:
+		/* Transform input */
 		Derived& From(FTransform InStart) {
 			Start = MoveTemp(InStart);
 			ComponentsToTween = EComponent::All;
@@ -27,7 +28,6 @@ namespace TypeTween {
 			ComponentsToTween = EComponent::All;
 			return static_cast<Derived&>(*this);
 		}
-
 		Derived& By(FTransform InDelta) {
 			DefaultStart();
 			End = Start.GetValue() + MoveTemp(InDelta);
@@ -48,6 +48,13 @@ namespace TypeTween {
 			ComponentsToTween |= EComponent::Translation;
 			return static_cast<Derived&>(*this);
 		}
+		Derived& MoveBy(const FVector& Offset) {
+			DefaultStart();
+			DefaultEnd();
+			End->SetTranslation(Start->GetTranslation() + Offset);
+			ComponentsToTween |= EComponent::Translation;
+			return static_cast<Derived&>(*this);
+		}
 
 		/* Quat */
 		Derived& RotateFrom(const FQuat& InStart) {
@@ -59,6 +66,13 @@ namespace TypeTween {
 		Derived& RotateTo(const FQuat& InEnd) {
 			DefaultEnd();
 			End->SetRotation(InEnd);
+			ComponentsToTween |= EComponent::Rotation;
+			return static_cast<Derived&>(*this);
+		}
+		Derived& RotateBy(const FQuat& Offset) {
+			DefaultStart();
+			DefaultEnd();
+			End->SetRotation(Offset * Start->GetRotation());
 			ComponentsToTween |= EComponent::Rotation;
 			return static_cast<Derived&>(*this);
 		}
@@ -76,6 +90,13 @@ namespace TypeTween {
 			ComponentsToTween |= EComponent::Rotation;
 			return static_cast<Derived&>(*this);
 		}
+		Derived& RotateBy(const FRotator& Offset) {
+			DefaultStart();
+			DefaultEnd();
+			End->SetRotation(FQuat(Offset) * Start->GetRotation());
+			ComponentsToTween |= EComponent::Rotation;
+			return static_cast<Derived&>(*this);
+		}
 
 		/* Scale */
 		Derived& ScaleFrom(const FVector& InStart) {
@@ -87,6 +108,13 @@ namespace TypeTween {
 		Derived& ScaleTo(const FVector& InEnd) {
 			DefaultEnd();
 			End->SetScale3D(InEnd);
+			ComponentsToTween |= EComponent::Scale;
+			return static_cast<Derived&>(*this);
+		}
+		Derived& ScaleBy(const FVector& Offset) {
+			DefaultStart();
+			DefaultEnd();
+			End->SetScale3D(Start->GetScale3D() + Offset);
 			ComponentsToTween |= EComponent::Scale;
 			return static_cast<Derived&>(*this);
 		}
