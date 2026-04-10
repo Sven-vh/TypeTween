@@ -17,6 +17,7 @@ namespace TypeTween {
 	template<typename Derived>
 	class TTransformTweenMixin {
 	public:
+		virtual ~TTransformTweenMixin() = default;
 		/* Transform input */
 		Derived& From(FTransform InStart) {
 			Start = MoveTemp(InStart);

@@ -98,39 +98,39 @@ private:
 	friend class TypeTween::Detail::TweenBase;
 	// ---- Blueprint-bindable delegates ----
 
-	/** Fired first frame when the tween is triggered, before StartDelay begins. */
+	/* Fired first frame when the tween is triggered, before StartDelay begins. */
 	UPROPERTY(BlueprintAssignable, Category = "Tween|Events")
 	FTweenSimpleDelegate OnPreStartDel;
 
-	/** Fired once the tween starts playing (after StartDelay). */
+	/* Fired once the tween starts playing (after StartDelay). */
 	UPROPERTY(BlueprintAssignable, Category = "Tween|Events")
 	FTweenSimpleDelegate OnStartDel;
 
-	/** Fired at the start of each new cycle (after StartDelay or RepeatDelay). */
+	/* Fired at the start of each new cycle (after StartDelay or RepeatDelay). */
 	UPROPERTY(BlueprintAssignable, Category = "Tween|Events")
 	FTweenSimpleDelegate OnCycleBeginDel;
-	/** Fired at the end of the forward phase of each cycle (before ReverseDelay), when t == 1. */
+	/* Fired at the end of the forward phase of each cycle (before ReverseDelay), when t == 1. */
 	UPROPERTY(BlueprintAssignable, Category = "Tween|Events")
 	FTweenSimpleDelegate OnForwardEndDel;
 
-	/** [Ping Pong Only] Fired at the start of the reverse phase of each cycle (after ReverseDelay). */
+	/* [Ping Pong Only] Fired at the start of the reverse phase of each cycle (after ReverseDelay). */
 	UPROPERTY(BlueprintAssignable, Category = "Tween|Events")
 	FTweenSimpleDelegate OnReverseBeginDel;
-	/** Fired at the end of each cycle (before EndDelay or RepeatDelay), when t == 0. */
+	/* Fired at the end of each cycle (before EndDelay or RepeatDelay), when t == 0. */
 	UPROPERTY(BlueprintAssignable, Category = "Tween|Events")
 	FTweenSimpleDelegate OnCycleEndDel;
 
-	/** Fired at the end of each cycle except the last one. */
+	/* Fired at the end of each cycle except the last one. */
 	UPROPERTY(BlueprintAssignable, Category = "Tween|Events")
 	FTweenSimpleDelegate OnRepeatDel;
-	/** Fired once the tween finishes playing (after EndDelay + repeats). */
+	/* Fired once the tween finishes playing (after EndDelay + repeats). */
 	UPROPERTY(BlueprintAssignable, Category = "Tween|Events")
 	FTweenSimpleDelegate OnCompleteDel;
 
-	/** Fired every tick, including during delays. */
+	/* Fired every tick, including during delays. */
 	UPROPERTY(BlueprintAssignable, Category = "Tween|Events")
 	FTweenSimpleDelegate OnTickDel;
-	/** Fired during interpolation with the current alpha value [0..1]. Type-erased version. */
+	/* Fired during interpolation with the current alpha value [0..1]. Type-erased version. */
 	UPROPERTY(BlueprintAssignable, Category = "Tween|Events")
 	FTweenAlphaDelegate OnUpdateDel;
 
@@ -146,7 +146,7 @@ private:
 	TFunction<void()> OnTickFn;
 	// Note: Typed OnUpdate with value stays in ITween<T>
 
-		// ---- Broadcast methods (fires both BP delegate and C++ TFunction) ----
+	// ---- Broadcast methods (fires both BP delegate and C++ TFunction) ----
 	void BroadcastOnPreStart() { OnPreStartDel.Broadcast();     if (OnPreStartFn) OnPreStartFn(); }
 	void BroadcastOnStart() { OnStartDel.Broadcast();        if (OnStartFn) OnStartFn(); }
 	void BroadcastOnCycleBegin() { OnCycleBeginDel.Broadcast();   if (OnCycleBeginFn) OnCycleBeginFn(); }

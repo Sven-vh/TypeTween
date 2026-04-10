@@ -49,5 +49,6 @@ private:
 		TFunction<bool()>      FnIsDone;
 	};
 
+	//TODO: Maybve linked list is better?
 	TArray<FActiveTween> ActiveTweens;
 };
