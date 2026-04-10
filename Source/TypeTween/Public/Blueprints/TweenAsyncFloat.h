@@ -25,7 +25,7 @@ public:
 		UObject* InWorldContextObject,
 		float From,
 		float To,
-		const FTweenConfig& Config
+		const FTweenSettings& Config
 	) {
 		UTweenAsyncFloat* Node = NewObject<UTweenAsyncFloat>();
 		Node->WorldContextObject = InWorldContextObject;

@@ -31,46 +31,46 @@ enum class ETweenLoopMode : uint8 {
 };
 
 /* Struct to hold all tween settings, used for presets and inline configuration. */
-USTRUCT()
+USTRUCT(BlueprintType)
 struct TYPETWEEN_API FTweenSettings {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, Category = "Tween", meta = (
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tween", meta = (
 		ToolTip = "Total time for one forward or reverse playthrough, not including delays. Required."
 		))
 	float Duration = 1.f;
 
-	UPROPERTY(EditAnywhere, Category = "Tween", meta = (
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tween", meta = (
 		ToolTip = "Easing function for the tween, see https://easings.net/ for visualization"
 		))
 	ETweenEase Ease = ETweenEase::Linear;
 
-	UPROPERTY(EditAnywhere, Category = "Tween", meta = (
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tween", meta = (
 		ToolTip = "0 = play once, -1 = infinite, N = play N+1 times total"
 		))
 	int32 RepeatCount = 0;
 
-	UPROPERTY(EditAnywhere, Category = "Tween", meta = (
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tween", meta = (
 		ToolTip = "How the tween loops back after reaching the end. Restart: jumps back to start. PingPong: reverses direction each cycle."
 		))
 	ETweenLoopMode LoopMode = ETweenLoopMode::Restart;
 
-	UPROPERTY(EditAnywhere, Category = "Timing", meta = (
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timing", meta = (
 		ToolTip = "Delay before the tween starts playing."
 		))
 	float StartDelay = 0.f;
 
-	UPROPERTY(EditAnywhere, Category = "Timing", meta = (
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timing", meta = (
 		ToolTip = "Delay before the tween starts playing in reverse."
 		))
 	float ReverseDelay = 0.f;
 
-	UPROPERTY(EditAnywhere, Category = "Timing", meta = (
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timing", meta = (
 		ToolTip = "Delay before the tween repeats."
 		))
 	float RepeatDelay = 0.f;
 
-	UPROPERTY(EditAnywhere, Category = "Timing", meta = (
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timing", meta = (
 		ToolTip = "Delay after the tween finishes playing before firing OnComplete."
 		))
 	float EndDelay = 0.f;
@@ -260,5 +260,17 @@ struct TYPETWEEN_API FTweenConfig {
 		if (Overrides.bRepeatDelay)  Out.RepeatDelay = Overrides.RepeatDelay;
 		if (Overrides.bEndDelay)     Out.EndDelay = Overrides.EndDelay;
 		return Out;
+	}
+
+	operator FTweenSettings() const { return Resolve(); }
+};
+
+UCLASS()
+class TYPETWEEN_API UTweenConfigLibrary : public UBlueprintFunctionLibrary {
+	GENERATED_BODY()
+
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "To Settings", CompactNodeTitle = "->", BlueprintAutocast))
+	static FTweenSettings Conv_ConfigToSettings(FTweenConfig InConfig) {
+		return InConfig;
 	}
 };

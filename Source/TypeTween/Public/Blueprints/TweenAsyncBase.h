@@ -41,5 +41,5 @@ protected:
 	UObject* WorldContextObject = nullptr;
 
 	UPROPERTY()
-	FTweenConfig TweenConfig;
+	FTweenSettings TweenConfig;
 };

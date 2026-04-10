@@ -42,6 +42,7 @@ namespace TypeTween::Detail {
 		}
 
 		Derived& Preset(FTweenConfig Preset) { Settings = Preset.Resolve(); return Self(); }
+		Derived& Preset(FTweenSettings Preset) { Settings = MoveTemp(Preset); return Self(); }
 
 		// -------------------------------------------------- callbacks (C++ TFunction setters)
 		/* Fired first frame when the tween is triggered, before StartDelay begins */
