@@ -38,7 +38,7 @@ struct TYPETWEEN_API FTweenSettings {
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tween", meta = (
 		ToolTip = "Total time for one forward or reverse playthrough, not including delays. Required."
 		))
-	float Duration = 1.f;
+	float Duration = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tween", meta = (
 		ToolTip = "Easing function for the tween, see https://easings.net/ for visualization"
@@ -74,6 +74,12 @@ struct TYPETWEEN_API FTweenSettings {
 		ToolTip = "Delay after the tween finishes playing before firing OnComplete."
 		))
 	float EndDelay = 0.f;
+
+	bool IsSet() const {
+		return *this != FTweenSettings();
+	}
+
+	bool operator==(const FTweenSettings& Other) const = default;
 };
 
 // -----------------------------------------------------------------------

@@ -1,18 +1,24 @@
 #include "Blueprints/TweenAsyncBase.h"
 
-void UTweenAsyncBase::ActivateCommon(TypeTween::ITweenControl& Tween) {
-	//TODO: maybe set the settings?
-
+void UTweenAsyncBaseSimple::ActivateSimple(TypeTween::ITweenControl& Tween) {
 	auto& CB = Tween.GetCallbacks();
 
-	TWeakObjectPtr<UTweenAsyncBase> WeakThis(this);
+	/* Only connect OnComplete */
+	TWeakObjectPtr<UTweenAsyncBaseSimple> WeakThis(this);
+	CB.OnComplete([WeakThis]() { if (auto* P = WeakThis.Get()) P->OnComplete.Broadcast();     });
+}
+
+void UTweenAsyncBaseAdvanced::ActivateAdvanced(TypeTween::ITweenControl& Tween) {
+	auto& CB = Tween.GetCallbacks();
+
+	/* Connect all callbacks */
+	TWeakObjectPtr<UTweenAsyncBaseAdvanced> WeakThis(this);
 	CB.OnStart([WeakThis]() { if (auto* P = WeakThis.Get()) P->OnStart.Broadcast();        });
 	CB.OnCycleBegin([WeakThis]() { if (auto* P = WeakThis.Get()) P->OnCycleBegin.Broadcast();   });
 	CB.OnForwardEnd([WeakThis]() { if (auto* P = WeakThis.Get()) P->OnForwardEnd.Broadcast();   });
 	CB.OnReverseBegin([WeakThis]() { if (auto* P = WeakThis.Get()) P->OnReverseBegin.Broadcast(); });
 	CB.OnCycleEnd([WeakThis]() { if (auto* P = WeakThis.Get()) P->OnCycleEnd.Broadcast();     });
 	CB.OnRepeat([WeakThis]() { if (auto* P = WeakThis.Get()) P->OnRepeat.Broadcast();       });
-	CB.OnComplete([WeakThis]() { if (auto* P = WeakThis.Get()) P->OnComplete.Broadcast();     });
 
-	OnCreated.Broadcast();
+	ActivateSimple(Tween);
 }

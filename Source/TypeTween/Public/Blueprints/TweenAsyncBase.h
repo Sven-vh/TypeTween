@@ -8,10 +8,36 @@
 UCLASS(Abstract, BlueprintType)
 class TYPETWEEN_API UTweenAsyncBase : public UBlueprintAsyncActionBase {
 	GENERATED_BODY()
-
 public:
+	UPROPERTY()
+	UObject* WorldContextObject = nullptr;
+};
+
+/*
+Only include OnComplete for simplicity
+*/
+UCLASS(Abstract, BlueprintType)
+class TYPETWEEN_API UTweenAsyncBaseSimple : public UTweenAsyncBase {
+	GENERATED_BODY()
+public:
+
 	UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
-	FTweenSimpleDelegate OnCreated;
+	FTweenSimpleDelegate OnComplete;
+
+protected:
+	void ActivateSimple(TypeTween::ITweenControl& Tween);
+};
+
+/*
+All other events
+*/
+UCLASS(Abstract, BlueprintType)
+class TYPETWEEN_API UTweenAsyncBaseAdvanced : public UTweenAsyncBaseSimple {
+	GENERATED_BODY()
+public:
+	// TODO: for handles
+	//UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
+	//FTweenSimpleDelegate OnCreated;
 
 	UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
 	FTweenSimpleDelegate OnStart;
@@ -31,15 +57,6 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
 	FTweenSimpleDelegate OnRepeat;
 
-	UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
-	FTweenSimpleDelegate OnComplete;
-
 protected:
-	void ActivateCommon(TypeTween::ITweenControl& Tween);
-
-	UPROPERTY()
-	UObject* WorldContextObject = nullptr;
-
-	UPROPERTY()
-	FTweenSettings TweenConfig;
+	void ActivateAdvanced(TypeTween::ITweenControl& Tween);
 };
