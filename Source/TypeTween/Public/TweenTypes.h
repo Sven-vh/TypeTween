@@ -30,6 +30,29 @@ enum class ETweenLoopMode : uint8 {
 	PingPong  UMETA(DisplayName = "Ping-pong (0->1->0...)"),
 };
 
+USTRUCT(BlueprintType)
+struct TYPETWEEN_API FTweenDelays {
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timing", meta = (
+		ToolTip = "Delay before the tween starts playing."
+		))
+	float Start = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timing", meta = (
+		ToolTip = "Delay before the tween starts playing in reverse."
+		))
+	float Reverse = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timing", meta = (
+		ToolTip = "Delay before the tween repeats."
+		))
+	float Repeat = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timing", meta = (
+		ToolTip = "Delay after the tween finishes playing before firing OnComplete."
+		))
+	float End = 0.f;
+
+	bool operator==(const FTweenDelays& Other) const = default;
+};
+
 /* Struct to hold all tween settings, used for presets and inline configuration. */
 USTRUCT(BlueprintType)
 struct TYPETWEEN_API FTweenSettings {
@@ -55,25 +78,8 @@ struct TYPETWEEN_API FTweenSettings {
 		))
 	ETweenLoopMode LoopMode = ETweenLoopMode::Restart;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timing", meta = (
-		ToolTip = "Delay before the tween starts playing."
-		))
-	float StartDelay = 0.f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timing", meta = (
-		ToolTip = "Delay before the tween starts playing in reverse."
-		))
-	float ReverseDelay = 0.f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timing", meta = (
-		ToolTip = "Delay before the tween repeats."
-		))
-	float RepeatDelay = 0.f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timing", meta = (
-		ToolTip = "Delay after the tween finishes playing before firing OnComplete."
-		))
-	float EndDelay = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timing")
+	FTweenDelays Delays;
 
 	bool IsSet() const {
 		return *this != FTweenSettings();
@@ -198,24 +204,9 @@ struct TYPETWEEN_API FTweenOverrides {
 	ETweenLoopMode LoopMode = ETweenLoopMode::Restart;
 
 	UPROPERTY(EditAnywhere, meta = (InlineEditConditionToggle))
-	bool bStartDelay = false;
-	UPROPERTY(EditAnywhere, Category = "Timing", meta = (EditCondition = "bStartDelay"))
-	float StartDelay = 0.f;
-
-	UPROPERTY(EditAnywhere, meta = (InlineEditConditionToggle))
-	bool bReverseDelay = false;
-	UPROPERTY(EditAnywhere, Category = "Timing", meta = (EditCondition = "bReverseDelay"))
-	float ReverseDelay = 0.f;
-
-	UPROPERTY(EditAnywhere, meta = (InlineEditConditionToggle))
-	bool bRepeatDelay = false;
-	UPROPERTY(EditAnywhere, Category = "Timing", meta = (EditCondition = "bRepeatDelay"))
-	float RepeatDelay = 0.f;
-
-	UPROPERTY(EditAnywhere, meta = (InlineEditConditionToggle))
-	bool bEndDelay = false;
-	UPROPERTY(EditAnywhere, Category = "Timing", meta = (EditCondition = "bEndDelay"))
-	float EndDelay = 0.f;
+	bool bDelays = false;
+	UPROPERTY(EditAnywhere, Category = "Timing", meta = (EditCondition = "bDelays"))
+	FTweenDelays Delays;
 };
 
 /* Data asset class to hold tween presets. */
@@ -257,14 +248,11 @@ struct TYPETWEEN_API FTweenConfig {
 		/* Code duplication necessary due to Unreal's property system */
 		/* If you have any suggestions on how to make this cleaner, please make an issue/PR! */
 		FTweenSettings Out = Preset->Settings;
-		if (Overrides.bDuration)     Out.Duration = Overrides.Duration;
-		if (Overrides.bEase)         Out.Ease = Overrides.Ease;
-		if (Overrides.bRepeatCount)  Out.RepeatCount = Overrides.RepeatCount;
-		if (Overrides.bLoopMode)     Out.LoopMode = Overrides.LoopMode;
-		if (Overrides.bStartDelay)   Out.StartDelay = Overrides.StartDelay;
-		if (Overrides.bReverseDelay) Out.ReverseDelay = Overrides.ReverseDelay;
-		if (Overrides.bRepeatDelay)  Out.RepeatDelay = Overrides.RepeatDelay;
-		if (Overrides.bEndDelay)     Out.EndDelay = Overrides.EndDelay;
+		if (Overrides.bDuration) Out.Duration = Overrides.Duration;
+		if (Overrides.bEase) Out.Ease = Overrides.Ease;
+		if (Overrides.bRepeatCount) Out.RepeatCount = Overrides.RepeatCount;
+		if (Overrides.bLoopMode) Out.LoopMode = Overrides.LoopMode;
+		if (Overrides.bDelays) Out.Delays = Overrides.Delays;
 		return Out;
 	}
 

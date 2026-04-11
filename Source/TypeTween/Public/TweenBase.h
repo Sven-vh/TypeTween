@@ -21,15 +21,15 @@ namespace TypeTween::Detail {
 	public:
 		// ------------------------------------------------------------------ config
 		/* Delay before the tween starts after being interpolated */
-		Derived& StartDelay(float Secs) { Settings.StartDelay = Secs; return Self(); }
+		Derived& StartDelay(float Secs) { Settings.Delays.Start = Secs; return Self(); }
 		/* Total time for one forward or reverse playthrough, not including delays. Required. */
 		Derived& Duration(float Secs) { Settings.Duration = Secs; return Self(); }
 		/* [Ping Pong Only] Delay between forward and reverse play */
-		Derived& ReverseDelay(float Secs) { Settings.ReverseDelay = Secs; return Self(); }
+		Derived& ReverseDelay(float Secs) { Settings.Delays.Reverse = Secs; return Self(); }
 		/* Delay between the end of one cycle and the start of the next */
-		Derived& RepeatDelay(float Secs) { Settings.RepeatDelay = Secs; return Self(); }
+		Derived& RepeatDelay(float Secs) { Settings.Delays.Repeat = Secs; return Self(); }
 		/* Delay after the tween finishes before firing OnComplete */
-		Derived& EndDelay(float Secs) { Settings.EndDelay = Secs;  return Self(); }
+		Derived& EndDelay(float Secs) { Settings.Delays.End = Secs;  return Self(); }
 
 		/* 0 = play once, -1 = infinite, N = play N+1 times total */
 		Derived& Repeat(int32 Count) { Settings.RepeatCount = Count; return Self(); }
@@ -113,7 +113,7 @@ namespace TypeTween::Detail {
 			/* Fires every frame, even during delays */
 			Callbacks.BroadcastOnTick();
 
-			if (Elapsed < Settings.StartDelay) return;
+			if (Elapsed < Settings.Delays.Start) return;
 
 			if (!bStartFired) {
 				bStartFired = true;
@@ -121,7 +121,7 @@ namespace TypeTween::Detail {
 				Callbacks.BroadcastOnCycleBegin();
 			}
 
-			const float AnimElapsed = Elapsed - Settings.StartDelay;
+			const float AnimElapsed = Elapsed - Settings.Delays.Start;
 			const float TotalAnimTime = GetTotalAnimTime();
 
 			if (AnimElapsed >= TotalAnimTime) {
@@ -237,17 +237,17 @@ namespace TypeTween::Detail {
 
 		float GetCycleTime() const {
 			const float Base = (Settings.LoopMode == ETweenLoopMode::PingPong)
-				? 2.f * Settings.Duration + Settings.ReverseDelay : Settings.Duration;
-			return Base + Settings.RepeatDelay;
+				? 2.f * Settings.Duration + Settings.Delays.Reverse : Settings.Duration;
+			return Base + Settings.Delays.Repeat;
 		}
 
 		float GetTotalAnimTime() const {
 			if (Settings.RepeatCount < 0) return TNumericLimits<float>::Max();
-			return GetCycleTime() * (Settings.RepeatCount + 1) - Settings.RepeatDelay;
+			return GetCycleTime() * (Settings.Delays.Repeat + 1) - Settings.Delays.Repeat;
 		}
 
 		float GetMaxElapsed() const {
-			return Settings.StartDelay + GetTotalAnimTime() + Settings.EndDelay;
+			return Settings.Delays.Start + GetTotalAnimTime() + Settings.Delays.End;
 		}
 
 		float ComputeProgress(float AnimElapsed, bool& bOutReversing, ECyclePhase& OutPhase) const {
@@ -266,14 +266,14 @@ namespace TypeTween::Detail {
 				OutPhase = ECyclePhase::Forward;
 				return Settings.Duration > 0.f ? CyclePos / Settings.Duration : 1.f;
 			}
-			if (CyclePos <= Settings.Duration + Settings.ReverseDelay) {
+			if (CyclePos <= Settings.Duration + Settings.Delays.Reverse) {
 				OutPhase = ECyclePhase::ReverseDelay;
 				return 1.f;
 			}
-			if (CyclePos <= 2.f * Settings.Duration + Settings.ReverseDelay) {
+			if (CyclePos <= 2.f * Settings.Duration + Settings.Delays.Reverse) {
 				bOutReversing = true;
 				OutPhase = ECyclePhase::Reverse;
-				const float RevElapsed = CyclePos - Settings.Duration - Settings.ReverseDelay;
+				const float RevElapsed = CyclePos - Settings.Duration - Settings.Delays.Reverse;
 				return Settings.Duration > 0.f ? RevElapsed / Settings.Duration : 1.f;
 			}
 			OutPhase = ECyclePhase::RepeatDelay;
