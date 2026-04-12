@@ -22,3 +22,7 @@ void UTweenAsyncBaseAdvanced::ActivateAdvanced(TypeTween::ITweenControl& Tween) 
 
 	ActivateSimple(Tween);
 }
+
+void UTweenAsyncBaseSimple::OnTweenComplete() {
+	SetReadyToDestroy();
+}

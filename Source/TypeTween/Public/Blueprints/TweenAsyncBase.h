@@ -5,19 +5,28 @@
 #include "TweenControl.h"
 #include "TweenAsyncBase.generated.h"
 
-UCLASS(Abstract, BlueprintType)
-class TYPETWEEN_API UTweenAsyncBase : public UBlueprintAsyncActionBase {
+USTRUCT(BlueprintType)
+struct TYPETWEEN_API FTweenSettingsConfig {
 	GENERATED_BODY()
-public:
-	UPROPERTY()
-	UObject* WorldContextObject = nullptr;
+
+	/* Wire a runtime FTweenSettings directly (takes priority over Config below) */
+	UPROPERTY(BlueprintReadWrite, meta = (HideInDetailPanel))
+	FTweenSettings Settings;
+
+	/* Preset + overrides — visible in the Details panel */
+	UPROPERTY(EditAnywhere, meta = (DisplayName = "Settings"))
+	FTweenConfig Config;
+
+	FTweenSettings Resolve() const {
+		return Settings.IsSet() ? Settings : Config.Resolve();
+	}
 };
 
 /*
 Only include OnComplete for simplicity
 */
 UCLASS(Abstract, BlueprintType)
-class TYPETWEEN_API UTweenAsyncBaseSimple : public UTweenAsyncBase {
+class TYPETWEEN_API UTweenAsyncBaseSimple : public UBlueprintAsyncActionBase {
 	GENERATED_BODY()
 public:
 
@@ -26,6 +35,11 @@ public:
 
 protected:
 	void ActivateSimple(TypeTween::ITweenControl& Tween);
+
+	void OnTweenComplete();
+
+	UPROPERTY()
+	UObject* WorldContextObject = nullptr;
 };
 
 /*

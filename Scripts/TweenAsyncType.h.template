@@ -1,0 +1,107 @@
+// ============================================================
+// GENERATED FILE — do not edit by hand.
+// To modify all types: edit Scripts/TweenAsyncType.h.template
+// To add/remove types:  edit Scripts/generate_tween_types.py
+// To regenerate:        run  Scripts/generate_tween_types.py
+// ============================================================
+#pragma once
+#include "CoreMinimal.h"
+#include "Blueprints/TweenAsyncBase.h"
+#include "TypeTween.h"
+#include "TweenAsync${TYPE_NAME}.generated.h"
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOn${TYPE_NAME}TweenUpdate, ${CPP_TYPE}, CurrentValue);
+
+// ─────────────────────────────────────────────────────────────
+// Config struct — exposed to Blueprint details panel
+// ─────────────────────────────────────────────────────────────
+
+USTRUCT(BlueprintType)
+struct FTween${TYPE_NAME}Config : public FTweenSettingsConfig {
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	${CPP_TYPE} From${DEFAULT_FROM};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	${CPP_TYPE} To${DEFAULT_TO};
+};
+
+// ─────────────────────────────────────────────────────────────
+// Abstract base — owns the delegate and shared helpers
+// ─────────────────────────────────────────────────────────────
+
+UCLASS(Abstract, BlueprintType)
+class TYPETWEEN_API UTweenAsync${TYPE_NAME}Base : public UTweenAsyncBaseAdvanced {
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
+	FOn${TYPE_NAME}TweenUpdate OnUpdate;
+
+protected:
+	UPROPERTY()
+	FTween${TYPE_NAME}Config TweenConfig;
+
+	FORCEINLINE void CallOnUpdate(const ${CPP_TYPE}& CurrentValue) {
+		if (OnUpdate.IsBound()) {
+			OnUpdate.Broadcast(CurrentValue);
+		}
+	}
+};
+
+// ─────────────────────────────────────────────────────────────
+// Concrete async node — exposed as a Blueprint latent action
+// ─────────────────────────────────────────────────────────────
+
+UCLASS(meta = (HideCategories = Object))
+class TYPETWEEN_API UTweenAsync${TYPE_NAME}Simple : public UTweenAsync${TYPE_NAME}Base {
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable, Category = "${CATEGORY}",
+		meta = (
+			BlueprintInternalUseOnly = "true",
+			WorldContext = "InWorldContextObject",
+			DefaultToSelf = "InWorldContextObject",
+			DisplayName = "${DISPLAY_NAME}",
+			ToolTip = "${TOOLTIP}"
+			))
+	static UTweenAsync${TYPE_NAME}Simple* Tween${TYPE_NAME}(
+		UObject* InWorldContextObject,
+		FTween${TYPE_NAME}Config Tween
+	) {
+		UTweenAsync${TYPE_NAME}Simple* Node = NewObject<UTweenAsync${TYPE_NAME}Simple>();
+		Node->WorldContextObject = InWorldContextObject;
+		Node->TweenConfig = Tween;
+		Node->RegisterWithGameInstance(InWorldContextObject);
+		return Node;
+	}
+
+protected:
+	virtual void Activate() override {
+		if (!WorldContextObject) {
+			SetReadyToDestroy();
+			return;
+		}
+
+		const FTweenSettings Settings = TweenConfig.Resolve();
+
+		auto& Tween = TypeTween::Tween<${CPP_TYPE}>(WorldContextObject)
+			.From(TweenConfig.From)
+			.To(TweenConfig.To)
+			.Preset(Settings)
+			.OnUpdate(
+				[this](float /*Alpha*/, const ${CPP_TYPE}& CurrentValue) {
+					CallOnUpdate(CurrentValue);
+				}
+			)
+			.OnComplete(
+				[this]() {
+					OnTweenComplete();
+				}
+			);
+
+		ActivateSimple(Tween);
+	}
+};
