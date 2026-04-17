@@ -21,6 +21,15 @@ namespace TypeTween {
 		return Sub->RegisterTween(MakeShared<ITween<T>>(&Value));
 	}
 
+	template <typename T>
+		requires ((!TIsConst<T>::Value) && Traits::THasITween<T>)
+	inline ITween<T>& Tween(T* Value, const UObject* WorldContext) {
+		UTweenSubsystem* Sub = UTweenSubsystem::Get(WorldContext);
+		checkf(Sub, TEXT("UTweenSubsystem not found."));
+
+		return Sub->RegisterTween(MakeShared<ITween<T>>(Value));
+	}
+
 	/* Tween an internal value owned by the tween, useful for fire-and-forget or when the value is only needed in the update callback. */
 	template <typename T>
 		requires (Traits::THasITween<T> && !std::is_void_v<T>)

@@ -28,11 +28,11 @@ struct FTweenTransformConfig : public FTweenSettingsConfig {
 };
 
 // ─────────────────────────────────────────────────────────────
-// Abstract base — owns the delegate and shared helpers
+// Abstract base (Simple) — OnUpdate + config only
 // ─────────────────────────────────────────────────────────────
 
 UCLASS(Abstract, BlueprintType)
-class TYPETWEEN_API UTweenAsyncTransformBase : public UTweenAsyncBaseAdvanced {
+class TYPETWEEN_API UTweenAsyncTransformBase : public UTweenAsyncBaseSimple {
 	GENERATED_BODY()
 
 public:
@@ -51,7 +51,30 @@ protected:
 };
 
 // ─────────────────────────────────────────────────────────────
-// Concrete async node — exposed as a Blueprint latent action
+// Abstract base (Advanced) — OnUpdate + config + all events
+// ─────────────────────────────────────────────────────────────
+
+UCLASS(Abstract, BlueprintType)
+class TYPETWEEN_API UTweenAsyncTransformBaseAdvanced : public UTweenAsyncBaseAdvanced {
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
+	FOnTransformTweenUpdate OnUpdate;
+
+protected:
+	UPROPERTY()
+	FTweenTransformConfig TweenConfig;
+
+	FORCEINLINE void CallOnUpdate(const FTransform& CurrentValue) {
+		if (OnUpdate.IsBound()) {
+			OnUpdate.Broadcast(CurrentValue);
+		}
+	}
+};
+
+// ─────────────────────────────────────────────────────────────
+// Concrete async node (Simple) — OnUpdate + OnComplete only
 // ─────────────────────────────────────────────────────────────
 
 UCLASS(meta = (HideCategories = Object))
@@ -103,5 +126,61 @@ protected:
 			);
 
 		ActivateSimple(Tween);
+	}
+};
+
+// ─────────────────────────────────────────────────────────────
+// Concrete async node (Advanced) — all events
+// ─────────────────────────────────────────────────────────────
+
+UCLASS(meta = (HideCategories = Object))
+class TYPETWEEN_API UTweenAsyncTransformAdvanced : public UTweenAsyncTransformBaseAdvanced {
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable, Category = "TypeTween",
+		meta = (
+			BlueprintInternalUseOnly = "true",
+			WorldContext = "InWorldContextObject",
+			DefaultToSelf = "InWorldContextObject",
+			DisplayName = "Tween Transform (Advanced)",
+			ToolTip = "Tweens an FTransform from [From] to [To]."
+			))
+	static UTweenAsyncTransformAdvanced* TweenTransformAdvanced(
+		UObject* InWorldContextObject,
+		FTweenTransformConfig Tween
+	) {
+		UTweenAsyncTransformAdvanced* Node = NewObject<UTweenAsyncTransformAdvanced>();
+		Node->WorldContextObject = InWorldContextObject;
+		Node->TweenConfig = Tween;
+		Node->RegisterWithGameInstance(InWorldContextObject);
+		return Node;
+	}
+
+protected:
+	virtual void Activate() override {
+		if (!WorldContextObject) {
+			SetReadyToDestroy();
+			return;
+		}
+
+		const FTweenSettings Settings = TweenConfig.Resolve();
+
+		auto& Tween = TypeTween::Tween<FTransform>(WorldContextObject)
+			.From(TweenConfig.From)
+			.To(TweenConfig.To)
+			.Preset(Settings)
+			.OnUpdate(
+				[this](float /*Alpha*/, const FTransform& CurrentValue) {
+					CallOnUpdate(CurrentValue);
+				}
+			)
+			.OnComplete(
+				[this]() {
+					OnTweenComplete();
+				}
+			);
+
+		ActivateAdvanced(Tween);
 	}
 };

@@ -28,11 +28,11 @@ struct FTweenDoubleConfig : public FTweenSettingsConfig {
 };
 
 // ─────────────────────────────────────────────────────────────
-// Abstract base — owns the delegate and shared helpers
+// Abstract base (Simple) — OnUpdate + config only
 // ─────────────────────────────────────────────────────────────
 
 UCLASS(Abstract, BlueprintType)
-class TYPETWEEN_API UTweenAsyncDoubleBase : public UTweenAsyncBaseAdvanced {
+class TYPETWEEN_API UTweenAsyncDoubleBase : public UTweenAsyncBaseSimple {
 	GENERATED_BODY()
 
 public:
@@ -51,7 +51,30 @@ protected:
 };
 
 // ─────────────────────────────────────────────────────────────
-// Concrete async node — exposed as a Blueprint latent action
+// Abstract base (Advanced) — OnUpdate + config + all events
+// ─────────────────────────────────────────────────────────────
+
+UCLASS(Abstract, BlueprintType)
+class TYPETWEEN_API UTweenAsyncDoubleBaseAdvanced : public UTweenAsyncBaseAdvanced {
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
+	FOnDoubleTweenUpdate OnUpdate;
+
+protected:
+	UPROPERTY()
+	FTweenDoubleConfig TweenConfig;
+
+	FORCEINLINE void CallOnUpdate(const double& CurrentValue) {
+		if (OnUpdate.IsBound()) {
+			OnUpdate.Broadcast(CurrentValue);
+		}
+	}
+};
+
+// ─────────────────────────────────────────────────────────────
+// Concrete async node (Simple) — OnUpdate + OnComplete only
 // ─────────────────────────────────────────────────────────────
 
 UCLASS(meta = (HideCategories = Object))
@@ -103,5 +126,61 @@ protected:
 			);
 
 		ActivateSimple(Tween);
+	}
+};
+
+// ─────────────────────────────────────────────────────────────
+// Concrete async node (Advanced) — all events
+// ─────────────────────────────────────────────────────────────
+
+UCLASS(meta = (HideCategories = Object))
+class TYPETWEEN_API UTweenAsyncDoubleAdvanced : public UTweenAsyncDoubleBaseAdvanced {
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable, Category = "TypeTween",
+		meta = (
+			BlueprintInternalUseOnly = "true",
+			WorldContext = "InWorldContextObject",
+			DefaultToSelf = "InWorldContextObject",
+			DisplayName = "Tween Double (Advanced)",
+			ToolTip = "Tweens a double from [From] to [To]."
+			))
+	static UTweenAsyncDoubleAdvanced* TweenDoubleAdvanced(
+		UObject* InWorldContextObject,
+		FTweenDoubleConfig Tween
+	) {
+		UTweenAsyncDoubleAdvanced* Node = NewObject<UTweenAsyncDoubleAdvanced>();
+		Node->WorldContextObject = InWorldContextObject;
+		Node->TweenConfig = Tween;
+		Node->RegisterWithGameInstance(InWorldContextObject);
+		return Node;
+	}
+
+protected:
+	virtual void Activate() override {
+		if (!WorldContextObject) {
+			SetReadyToDestroy();
+			return;
+		}
+
+		const FTweenSettings Settings = TweenConfig.Resolve();
+
+		auto& Tween = TypeTween::Tween<double>(WorldContextObject)
+			.From(TweenConfig.From)
+			.To(TweenConfig.To)
+			.Preset(Settings)
+			.OnUpdate(
+				[this](float /*Alpha*/, const double& CurrentValue) {
+					CallOnUpdate(CurrentValue);
+				}
+			)
+			.OnComplete(
+				[this]() {
+					OnTweenComplete();
+				}
+			);
+
+		ActivateAdvanced(Tween);
 	}
 };

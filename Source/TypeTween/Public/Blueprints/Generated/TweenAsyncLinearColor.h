@@ -28,11 +28,11 @@ struct FTweenLinearColorConfig : public FTweenSettingsConfig {
 };
 
 // ─────────────────────────────────────────────────────────────
-// Abstract base — owns the delegate and shared helpers
+// Abstract base (Simple) — OnUpdate + config only
 // ─────────────────────────────────────────────────────────────
 
 UCLASS(Abstract, BlueprintType)
-class TYPETWEEN_API UTweenAsyncLinearColorBase : public UTweenAsyncBaseAdvanced {
+class TYPETWEEN_API UTweenAsyncLinearColorBase : public UTweenAsyncBaseSimple {
 	GENERATED_BODY()
 
 public:
@@ -51,7 +51,30 @@ protected:
 };
 
 // ─────────────────────────────────────────────────────────────
-// Concrete async node — exposed as a Blueprint latent action
+// Abstract base (Advanced) — OnUpdate + config + all events
+// ─────────────────────────────────────────────────────────────
+
+UCLASS(Abstract, BlueprintType)
+class TYPETWEEN_API UTweenAsyncLinearColorBaseAdvanced : public UTweenAsyncBaseAdvanced {
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
+	FOnLinearColorTweenUpdate OnUpdate;
+
+protected:
+	UPROPERTY()
+	FTweenLinearColorConfig TweenConfig;
+
+	FORCEINLINE void CallOnUpdate(const FLinearColor& CurrentValue) {
+		if (OnUpdate.IsBound()) {
+			OnUpdate.Broadcast(CurrentValue);
+		}
+	}
+};
+
+// ─────────────────────────────────────────────────────────────
+// Concrete async node (Simple) — OnUpdate + OnComplete only
 // ─────────────────────────────────────────────────────────────
 
 UCLASS(meta = (HideCategories = Object))
@@ -103,5 +126,61 @@ protected:
 			);
 
 		ActivateSimple(Tween);
+	}
+};
+
+// ─────────────────────────────────────────────────────────────
+// Concrete async node (Advanced) — all events
+// ─────────────────────────────────────────────────────────────
+
+UCLASS(meta = (HideCategories = Object))
+class TYPETWEEN_API UTweenAsyncLinearColorAdvanced : public UTweenAsyncLinearColorBaseAdvanced {
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable, Category = "TypeTween",
+		meta = (
+			BlueprintInternalUseOnly = "true",
+			WorldContext = "InWorldContextObject",
+			DefaultToSelf = "InWorldContextObject",
+			DisplayName = "Tween Linear Color (Advanced)",
+			ToolTip = "Tweens an FLinearColor from [From] to [To]."
+			))
+	static UTweenAsyncLinearColorAdvanced* TweenLinearColorAdvanced(
+		UObject* InWorldContextObject,
+		FTweenLinearColorConfig Tween
+	) {
+		UTweenAsyncLinearColorAdvanced* Node = NewObject<UTweenAsyncLinearColorAdvanced>();
+		Node->WorldContextObject = InWorldContextObject;
+		Node->TweenConfig = Tween;
+		Node->RegisterWithGameInstance(InWorldContextObject);
+		return Node;
+	}
+
+protected:
+	virtual void Activate() override {
+		if (!WorldContextObject) {
+			SetReadyToDestroy();
+			return;
+		}
+
+		const FTweenSettings Settings = TweenConfig.Resolve();
+
+		auto& Tween = TypeTween::Tween<FLinearColor>(WorldContextObject)
+			.From(TweenConfig.From)
+			.To(TweenConfig.To)
+			.Preset(Settings)
+			.OnUpdate(
+				[this](float /*Alpha*/, const FLinearColor& CurrentValue) {
+					CallOnUpdate(CurrentValue);
+				}
+			)
+			.OnComplete(
+				[this]() {
+					OnTweenComplete();
+				}
+			);
+
+		ActivateAdvanced(Tween);
 	}
 };

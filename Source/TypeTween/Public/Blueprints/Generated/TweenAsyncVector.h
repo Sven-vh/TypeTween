@@ -28,11 +28,11 @@ struct FTweenVectorConfig : public FTweenSettingsConfig {
 };
 
 // ─────────────────────────────────────────────────────────────
-// Abstract base — owns the delegate and shared helpers
+// Abstract base (Simple) — OnUpdate + config only
 // ─────────────────────────────────────────────────────────────
 
 UCLASS(Abstract, BlueprintType)
-class TYPETWEEN_API UTweenAsyncVectorBase : public UTweenAsyncBaseAdvanced {
+class TYPETWEEN_API UTweenAsyncVectorBase : public UTweenAsyncBaseSimple {
 	GENERATED_BODY()
 
 public:
@@ -51,7 +51,30 @@ protected:
 };
 
 // ─────────────────────────────────────────────────────────────
-// Concrete async node — exposed as a Blueprint latent action
+// Abstract base (Advanced) — OnUpdate + config + all events
+// ─────────────────────────────────────────────────────────────
+
+UCLASS(Abstract, BlueprintType)
+class TYPETWEEN_API UTweenAsyncVectorBaseAdvanced : public UTweenAsyncBaseAdvanced {
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
+	FOnVectorTweenUpdate OnUpdate;
+
+protected:
+	UPROPERTY()
+	FTweenVectorConfig TweenConfig;
+
+	FORCEINLINE void CallOnUpdate(const FVector& CurrentValue) {
+		if (OnUpdate.IsBound()) {
+			OnUpdate.Broadcast(CurrentValue);
+		}
+	}
+};
+
+// ─────────────────────────────────────────────────────────────
+// Concrete async node (Simple) — OnUpdate + OnComplete only
 // ─────────────────────────────────────────────────────────────
 
 UCLASS(meta = (HideCategories = Object))
@@ -103,5 +126,61 @@ protected:
 			);
 
 		ActivateSimple(Tween);
+	}
+};
+
+// ─────────────────────────────────────────────────────────────
+// Concrete async node (Advanced) — all events
+// ─────────────────────────────────────────────────────────────
+
+UCLASS(meta = (HideCategories = Object))
+class TYPETWEEN_API UTweenAsyncVectorAdvanced : public UTweenAsyncVectorBaseAdvanced {
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable, Category = "TypeTween",
+		meta = (
+			BlueprintInternalUseOnly = "true",
+			WorldContext = "InWorldContextObject",
+			DefaultToSelf = "InWorldContextObject",
+			DisplayName = "Tween Vector (Advanced)",
+			ToolTip = "Tweens an FVector from [From] to [To]."
+			))
+	static UTweenAsyncVectorAdvanced* TweenVectorAdvanced(
+		UObject* InWorldContextObject,
+		FTweenVectorConfig Tween
+	) {
+		UTweenAsyncVectorAdvanced* Node = NewObject<UTweenAsyncVectorAdvanced>();
+		Node->WorldContextObject = InWorldContextObject;
+		Node->TweenConfig = Tween;
+		Node->RegisterWithGameInstance(InWorldContextObject);
+		return Node;
+	}
+
+protected:
+	virtual void Activate() override {
+		if (!WorldContextObject) {
+			SetReadyToDestroy();
+			return;
+		}
+
+		const FTweenSettings Settings = TweenConfig.Resolve();
+
+		auto& Tween = TypeTween::Tween<FVector>(WorldContextObject)
+			.From(TweenConfig.From)
+			.To(TweenConfig.To)
+			.Preset(Settings)
+			.OnUpdate(
+				[this](float /*Alpha*/, const FVector& CurrentValue) {
+					CallOnUpdate(CurrentValue);
+				}
+			)
+			.OnComplete(
+				[this]() {
+					OnTweenComplete();
+				}
+			);
+
+		ActivateAdvanced(Tween);
 	}
 };
