@@ -46,7 +46,7 @@ protected:
 All other events
 */
 UCLASS(Abstract, BlueprintType)
-class TYPETWEEN_API UTweenAsyncBaseAdvanced : public UTweenAsyncBaseSimple {
+class TYPETWEEN_API UTweenAsyncBase : public UTweenAsyncBaseSimple {
 	GENERATED_BODY()
 public:
 	// TODO: for handles

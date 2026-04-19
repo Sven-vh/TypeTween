@@ -31,31 +31,31 @@ struct FTweenRotatorConfig : public FTweenSettingsConfig {
 // Abstract base (Simple) — OnUpdate + config only
 // ─────────────────────────────────────────────────────────────
 
-UCLASS(Abstract, BlueprintType)
-class TYPETWEEN_API UTweenAsyncRotatorBase : public UTweenAsyncBaseSimple {
-	GENERATED_BODY()
+// UCLASS(Abstract, BlueprintType)
+// class TYPETWEEN_API UTweenAsyncRotatorBase : public UTweenAsyncBaseSimple {
+// 	GENERATED_BODY()
 
-public:
-	UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
-	FOnRotatorTweenUpdate OnUpdate;
+// public:
+// 	UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
+// 	FOnRotatorTweenUpdate OnUpdate;
 
-protected:
-	UPROPERTY()
-	FTweenRotatorConfig TweenConfig;
+// protected:
+// 	UPROPERTY()
+// 	FTweenRotatorConfig TweenConfig;
 
-	FORCEINLINE void CallOnUpdate(const FRotator& CurrentValue) {
-		if (OnUpdate.IsBound()) {
-			OnUpdate.Broadcast(CurrentValue);
-		}
-	}
-};
+// 	FORCEINLINE void CallOnUpdate(const FRotator& CurrentValue) {
+// 		if (OnUpdate.IsBound()) {
+// 			OnUpdate.Broadcast(CurrentValue);
+// 		}
+// 	}
+// };
 
 // ─────────────────────────────────────────────────────────────
-// Abstract base (Advanced) — OnUpdate + config + all events
+// Abstract base — OnUpdate + config + all events
 // ─────────────────────────────────────────────────────────────
 
 UCLASS(Abstract, BlueprintType)
-class TYPETWEEN_API UTweenAsyncRotatorBaseAdvanced : public UTweenAsyncBaseAdvanced {
+class TYPETWEEN_API UTweenAsyncRotatorBase : public UTweenAsyncBase {
 	GENERATED_BODY()
 
 public:
@@ -77,8 +77,64 @@ protected:
 // Concrete async node (Simple) — OnUpdate + OnComplete only
 // ─────────────────────────────────────────────────────────────
 
+// UCLASS(meta = (HideCategories = Object))
+// class TYPETWEEN_API UTweenAsyncRotatorSimple : public UTweenAsyncRotatorBase {
+// 	GENERATED_BODY()
+
+// public:
+// 	UFUNCTION(BlueprintCallable, Category = "TypeTween",
+// 		meta = (
+// 			BlueprintInternalUseOnly = "true",
+// 			WorldContext = "InWorldContextObject",
+// 			DefaultToSelf = "InWorldContextObject",
+// 			DisplayName = "Tween Rotator",
+// 			ToolTip = "Tweens an FRotator from [From] to [To]."
+// 			))
+// 	static UTweenAsyncRotatorSimple* TweenRotator(
+// 		UObject* InWorldContextObject,
+// 		FTweenRotatorConfig Tween
+// 	) {
+// 		UTweenAsyncRotatorSimple* Node = NewObject<UTweenAsyncRotatorSimple>();
+// 		Node->WorldContextObject = InWorldContextObject;
+// 		Node->TweenConfig = Tween;
+// 		Node->RegisterWithGameInstance(InWorldContextObject);
+// 		return Node;
+// 	}
+
+// protected:
+// 	virtual void Activate() override {
+// 		if (!WorldContextObject) {
+// 			SetReadyToDestroy();
+// 			return;
+// 		}
+
+// 		const FTweenSettings Settings = TweenConfig.Resolve();
+
+// 		auto& Tween = TypeTween::Tween<FRotator>(WorldContextObject)
+// 			.From(TweenConfig.From)
+// 			.To(TweenConfig.To)
+// 			.Preset(Settings)
+// 			.OnUpdate(
+// 				[this](float /*Alpha*/, const FRotator& CurrentValue) {
+// 					CallOnUpdate(CurrentValue);
+// 				}
+// 			)
+// 			.OnComplete(
+// 				[this]() {
+// 					OnTweenComplete();
+// 				}
+// 			);
+
+// 		ActivateSimple(Tween);
+// 	}
+// };
+
+// ─────────────────────────────────────────────────────────────
+// Concrete async node — all events
+// ─────────────────────────────────────────────────────────────
+
 UCLASS(meta = (HideCategories = Object))
-class TYPETWEEN_API UTweenAsyncRotatorSimple : public UTweenAsyncRotatorBase {
+class TYPETWEEN_API UTweenAsyncRotator : public UTweenAsyncRotatorBase {
 	GENERATED_BODY()
 
 public:
@@ -90,67 +146,11 @@ public:
 			DisplayName = "Tween Rotator",
 			ToolTip = "Tweens an FRotator from [From] to [To]."
 			))
-	static UTweenAsyncRotatorSimple* TweenRotator(
+	static UTweenAsyncRotator* TweenRotator(
 		UObject* InWorldContextObject,
 		FTweenRotatorConfig Tween
 	) {
-		UTweenAsyncRotatorSimple* Node = NewObject<UTweenAsyncRotatorSimple>();
-		Node->WorldContextObject = InWorldContextObject;
-		Node->TweenConfig = Tween;
-		Node->RegisterWithGameInstance(InWorldContextObject);
-		return Node;
-	}
-
-protected:
-	virtual void Activate() override {
-		if (!WorldContextObject) {
-			SetReadyToDestroy();
-			return;
-		}
-
-		const FTweenSettings Settings = TweenConfig.Resolve();
-
-		auto& Tween = TypeTween::Tween<FRotator>(WorldContextObject)
-			.From(TweenConfig.From)
-			.To(TweenConfig.To)
-			.Preset(Settings)
-			.OnUpdate(
-				[this](float /*Alpha*/, const FRotator& CurrentValue) {
-					CallOnUpdate(CurrentValue);
-				}
-			)
-			.OnComplete(
-				[this]() {
-					OnTweenComplete();
-				}
-			);
-
-		ActivateSimple(Tween);
-	}
-};
-
-// ─────────────────────────────────────────────────────────────
-// Concrete async node (Advanced) — all events
-// ─────────────────────────────────────────────────────────────
-
-UCLASS(meta = (HideCategories = Object))
-class TYPETWEEN_API UTweenAsyncRotatorAdvanced : public UTweenAsyncRotatorBaseAdvanced {
-	GENERATED_BODY()
-
-public:
-	UFUNCTION(BlueprintCallable, Category = "TypeTween",
-		meta = (
-			BlueprintInternalUseOnly = "true",
-			WorldContext = "InWorldContextObject",
-			DefaultToSelf = "InWorldContextObject",
-			DisplayName = "Tween Rotator (Advanced)",
-			ToolTip = "Tweens an FRotator from [From] to [To]."
-			))
-	static UTweenAsyncRotatorAdvanced* TweenRotatorAdvanced(
-		UObject* InWorldContextObject,
-		FTweenRotatorConfig Tween
-	) {
-		UTweenAsyncRotatorAdvanced* Node = NewObject<UTweenAsyncRotatorAdvanced>();
+		UTweenAsyncRotator* Node = NewObject<UTweenAsyncRotator>();
 		Node->WorldContextObject = InWorldContextObject;
 		Node->TweenConfig = Tween;
 		Node->RegisterWithGameInstance(InWorldContextObject);

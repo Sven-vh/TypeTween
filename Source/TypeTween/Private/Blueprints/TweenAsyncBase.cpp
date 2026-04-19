@@ -8,11 +8,11 @@ void UTweenAsyncBaseSimple::ActivateSimple(TypeTween::ITweenControl& Tween) {
 	CB.OnComplete([WeakThis]() { if (auto* P = WeakThis.Get()) P->OnComplete.Broadcast();     });
 }
 
-void UTweenAsyncBaseAdvanced::ActivateAdvanced(TypeTween::ITweenControl& Tween) {
+void UTweenAsyncBase::ActivateAdvanced(TypeTween::ITweenControl& Tween) {
 	auto& CB = Tween.GetCallbacks();
 
 	/* Connect all callbacks */
-	TWeakObjectPtr<UTweenAsyncBaseAdvanced> WeakThis(this);
+	TWeakObjectPtr<UTweenAsyncBase> WeakThis(this);
 	CB.OnStart([WeakThis]() { if (auto* P = WeakThis.Get()) P->OnStart.Broadcast();        });
 	CB.OnCycleBegin([WeakThis]() { if (auto* P = WeakThis.Get()) P->OnCycleBegin.Broadcast();   });
 	CB.OnForwardEnd([WeakThis]() { if (auto* P = WeakThis.Get()) P->OnForwardEnd.Broadcast();   });
