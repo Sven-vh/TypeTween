@@ -32,7 +32,7 @@ public class TypeTween : ModuleRules {
         PrivateDependencyModuleNames.AddRange(
             new string[]
             {
-                "Core", "CoreUObject", "Engine"
+                "Core", "CoreUObject", "Engine", "BlueprintGraph", "KismetCompiler", "UnrealEd"
 				// ... add private dependencies that you statically link with here ...	
 			}
             );
