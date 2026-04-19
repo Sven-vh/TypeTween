@@ -1,25 +1,30 @@
 {
-	"FileVersion": 3,
-	"Version": 1,
-	"VersionName": "1.0",
-	"FriendlyName": "TypeTween",
-	"Description": ".",
-	"Category": "",
-	"CreatedBy": "Sven van Huessen",
-	"CreatedByURL": "https://www.svenvh.nl/",
-	"DocsURL": "",
-	"MarketplaceURL": "",
-	"SupportURL": "",
-	"CanContainContent": false,
-	"IsBetaVersion": true,
-	"Installed": false,
-	"Modules": [
-	{
-		"Name": "TypeTween",
-		"Type": "Runtime",
-		"LoadingPhase": "Default"
-	}],
-	"Plugins": [
-	]
+  "FileVersion": 3,
+  "Version": 1,
+  "VersionName": "1.0",
+  "Modules": [
+    {
+      "Name": "TypeTween",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    },
+    {
+      "Name": "TypeTweenEditor",
+      "Type": "Editor",
+      "LoadingPhase": "Default"
+    }
+  ],
+  "FriendlyName": "TypeTween",
+  "Description": ".",
+  "Category": "",
+  "CreatedBy": "Sven van Huessen",
+  "CreatedByURL": "https://www.svenvh.nl/",
+  "DocsURL": "",
+  "MarketplaceURL": "",
+  "SupportURL": "",
+  "CanContainContent": "false",
+  "Installed": false,
+  "IsBetaVersion": true,
+  "Plugins": [],
+  "SupportedTargetPlatforms": null
 }
-
