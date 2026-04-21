@@ -10,7 +10,7 @@
     },
     {
       "Name": "TypeTweenEditor",
-      "Type": "Editor",
+      "Type": "UncookedOnly",
       "LoadingPhase": "Default"
     }
   ],
