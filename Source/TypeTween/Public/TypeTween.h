@@ -8,6 +8,7 @@
 #include "TweenTraits.h"
 #include "Specializations/TweenLerps.h"
 #include "Specializations/TweenTransform.h"
+#include "Specializations/TweenColor.h"
 
 namespace TypeTween {
 

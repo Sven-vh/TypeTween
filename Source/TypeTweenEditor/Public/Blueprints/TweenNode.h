@@ -6,10 +6,12 @@
 #include "EdGraphSchema_K2.h"
 
 #include "Blueprints/Generated/TweenAsyncFloat.h"
+#include "Blueprints/Specializations/TweenAsyncColor.h"
 
 #include "TweenNode.generated.h"
 
-UCLASS(Abstract)
+/* Abstract only but can't be marked as abstract due to Unreal's UCLASS limitations */
+UCLASS()
 class TYPETWEENEDITOR_API UK2Node_Tween : public UK2Node_AsyncAction {
 	GENERATED_BODY()
 
@@ -31,19 +33,12 @@ class TYPETWEENEDITOR_API UK2Node_Tween : public UK2Node_AsyncAction {
 public:
 	// ── Display ───────────────────────────────────────────────────────────────
 
-	virtual FText GetNodeTitle(ENodeTitleType::Type /*TitleType*/) const override {
-		return NSLOCTEXT("TypeTween", "TweenFloat_Title", "Tween Float");
-	}
-
+	/* https://www.alt-codes.net/triangle-symbols */
 	virtual FText GetTooltipText() const override {
 		return NSLOCTEXT("TypeTween", "TweenFloat_Tooltip",
-			"Tweens a float from [From] to [To].\n"
-			"Expand \\/ for loop, delay, and lifecycle event pins.\n"
+			"Tweens a value from [From] to [To].\n"
+			"Expand ▼ for loop, delay, and lifecycle event pins.\n"
 			"Right-click any input pin to Recombine or Promote to Variable.");
-	}
-
-	virtual FText GetMenuCategory() const override {
-		return NSLOCTEXT("TypeTween", "TweenFloat_Category", "TypeTween");
 	}
 
 	// ── Pin allocation ────────────────────────────────────────────────────────
@@ -73,6 +68,8 @@ public:
 
 	virtual void GetMenuActions(FBlueprintActionDatabaseRegistrar& Reg) const override {
 		UClass* Cls = GetClass();
+		/* Only register concrete subclasses, never the base itself */
+		if (Cls == UK2Node_Tween::StaticClass()) { return; }
 		if (Reg.IsOpenForRegistration(Cls))
 			Reg.AddBlueprintAction(Cls, UBlueprintNodeSpawner::Create(Cls));
 	}
@@ -118,10 +115,39 @@ class TYPETWEENEDITOR_API UK2Node_TweenFloat : public UK2Node_Tween {
 
 public:
 
+	virtual FText GetNodeTitle(ENodeTitleType::Type /*TitleType*/) const override {
+		return NSLOCTEXT("TypeTween", "TweenFloat_Title", "Tween Float");
+	}
+
+	virtual FText GetMenuCategory() const override {
+		return NSLOCTEXT("TypeTween", "TweenFloat_Category", "TypeTween");
+	}
+
 	UK2Node_TweenFloat() {
 		ProxyFactoryFunctionName = GET_FUNCTION_NAME_CHECKED(UTweenAsyncFloat, TweenFloat);
 		ProxyFactoryClass = UTweenAsyncFloat::StaticClass();
 		ProxyClass = UTweenAsyncFloat::StaticClass();
+	}
+};
+
+UCLASS()
+class TYPETWEENEDITOR_API UK2Node_TweenColor : public UK2Node_Tween {
+	GENERATED_BODY()
+
+public:
+
+	virtual FText GetNodeTitle(ENodeTitleType::Type /*TitleType*/) const override {
+		return NSLOCTEXT("TypeTween", "TweenColor_Title", "Tween Color");
+	}
+
+	virtual FText GetMenuCategory() const override {
+		return NSLOCTEXT("TypeTween", "TweenColor_Category", "TypeTween");
+	}
+
+	UK2Node_TweenColor() {
+		ProxyFactoryFunctionName = GET_FUNCTION_NAME_CHECKED(UTweenAsyncLinearColor, TweenLinearColor);
+		ProxyFactoryClass = UTweenAsyncLinearColor::StaticClass();
+		ProxyClass = UTweenAsyncLinearColor::StaticClass();
 	}
 };
 
