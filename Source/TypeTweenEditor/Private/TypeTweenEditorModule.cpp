@@ -1,6 +1,7 @@
 #include "TypeTweenEditorModule.h"
 #include "Modules/ModuleManager.h"
-#include "Blueprints/TweenNode.h"
+#include "Blueprints/TweenNodeBase.h"
+#include "Blueprints/TweenNodeTypes.h"
 
 IMPLEMENT_MODULE(FTypeTweenEditor, TypeTweenEditor);
 

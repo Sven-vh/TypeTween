@@ -22,7 +22,7 @@ namespace TypeTween {
 			return *this;
 		}
 
-		ITween& ColorMode(EColorLerpMode InMode) { LerpMode = InMode;   return *this; }
+		ITween& LerpMode(EColorLerpMode InMode) { Mode = InMode;   return *this; }
 
 		/* Typed update callback, Receives Alpha [0..1] and current Value */
 		ITween& OnUpdate(TFunction<void(float Alpha, const FLinearColor& Value)> Fn) {
@@ -42,7 +42,7 @@ namespace TypeTween {
 					Start.GetValue(),
 					End.GetValue(),
 					Frame.Alpha,
-					LerpMode);
+					Mode);
 			}
 
 			// Fire typed OnUpdate callback with value
@@ -59,13 +59,13 @@ namespace TypeTween {
 		TOptional<FLinearColor>& GetEnd() { return End; }
 		const TOptional<FLinearColor>& GetEnd() const { return End; }
 
-		EColorLerpMode GetColorMode() const { return LerpMode; }
+		EColorLerpMode GetColorMode() const { return Mode; }
 
 	private:
 		FLinearColor* Value = nullptr;
 		TOptional<FLinearColor> Start;
 		TOptional<FLinearColor> End;
-		EColorLerpMode LerpMode = EColorLerpMode::Linear;
+		EColorLerpMode Mode = EColorLerpMode::Linear;
 		TFunction<void(float, const FLinearColor&)> OnUpdateCB;
 	};
 }

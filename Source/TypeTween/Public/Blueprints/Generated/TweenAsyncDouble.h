@@ -28,29 +28,6 @@ struct FTweenDoubleConfig : public FTweenSettingsConfig {
 };
 
 // ─────────────────────────────────────────────────────────────
-// Abstract base (Simple) — OnUpdate + config only
-// ─────────────────────────────────────────────────────────────
-
-// UCLASS(Abstract, BlueprintType)
-// class TYPETWEEN_API UTweenAsyncDoubleBase : public UTweenAsyncBaseSimple {
-// 	GENERATED_BODY()
-
-// public:
-// 	UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
-// 	FOnDoubleTweenUpdate OnUpdate;
-
-// protected:
-// 	UPROPERTY()
-// 	FTweenDoubleConfig TweenConfig;
-
-// 	FORCEINLINE void CallOnUpdate(const double& CurrentValue) {
-// 		if (OnUpdate.IsBound()) {
-// 			OnUpdate.Broadcast(CurrentValue);
-// 		}
-// 	}
-// };
-
-// ─────────────────────────────────────────────────────────────
 // Abstract base — OnUpdate + config + all events
 // ─────────────────────────────────────────────────────────────
 
@@ -74,88 +51,14 @@ protected:
 };
 
 // ─────────────────────────────────────────────────────────────
-// Concrete async node (Simple) — OnUpdate + OnComplete only
-// ─────────────────────────────────────────────────────────────
-
-// UCLASS(meta = (HideCategories = Object))
-// class TYPETWEEN_API UTweenAsyncDoubleSimple : public UTweenAsyncDoubleBase {
-// 	GENERATED_BODY()
-
-// public:
-// 	UFUNCTION(BlueprintCallable, Category = "TypeTween",
-// 		meta = (
-// 			BlueprintInternalUseOnly = "true",
-// 			WorldContext = "InWorldContextObject",
-// 			DefaultToSelf = "InWorldContextObject",
-// 			DisplayName = "Tween Double",
-// 			ToolTip = "Tweens a double from [From] to [To]."
-// 			))
-// 	static UTweenAsyncDoubleSimple* TweenDouble(
-// 		UObject* InWorldContextObject,
-// 		FTweenDoubleConfig Tween
-// 	) {
-// 		UTweenAsyncDoubleSimple* Node = NewObject<UTweenAsyncDoubleSimple>();
-// 		Node->WorldContextObject = InWorldContextObject;
-// 		Node->TweenConfig = Tween;
-// 		Node->RegisterWithGameInstance(InWorldContextObject);
-// 		return Node;
-// 	}
-
-// protected:
-// 	virtual void Activate() override {
-// 		if (!WorldContextObject) {
-// 			SetReadyToDestroy();
-// 			return;
-// 		}
-
-// 		const FTweenSettings Settings = TweenConfig.Resolve();
-
-// 		auto& Tween = TypeTween::Tween<double>(WorldContextObject)
-// 			.From(TweenConfig.From)
-// 			.To(TweenConfig.To)
-// 			.Preset(Settings)
-// 			.OnUpdate(
-// 				[this](float /*Alpha*/, const double& CurrentValue) {
-// 					CallOnUpdate(CurrentValue);
-// 				}
-// 			)
-// 			.OnComplete(
-// 				[this]() {
-// 					OnTweenComplete();
-// 				}
-// 			);
-
-// 		ActivateSimple(Tween);
-// 	}
-// };
-
-// ─────────────────────────────────────────────────────────────
-// Concrete async node — all events
+// Concrete async node — delegates + Activate, no factory fn
 // ─────────────────────────────────────────────────────────────
 
 UCLASS(meta = (HideCategories = Object))
 class TYPETWEEN_API UTweenAsyncDouble : public UTweenAsyncDoubleBase {
 	GENERATED_BODY()
 
-public:
-	UFUNCTION(BlueprintCallable, Category = "TypeTween",
-		meta = (
-			BlueprintInternalUseOnly = "true",
-			WorldContext = "InWorldContextObject",
-			DefaultToSelf = "InWorldContextObject",
-			DisplayName = "Tween Double",
-			ToolTip = "Tweens a double from [From] to [To]."
-			))
-	static UTweenAsyncDouble* TweenDouble(
-		UObject* InWorldContextObject,
-		FTweenDoubleConfig Tween
-	) {
-		UTweenAsyncDouble* Node = NewObject<UTweenAsyncDouble>();
-		Node->WorldContextObject = InWorldContextObject;
-		Node->TweenConfig = Tween;
-		Node->RegisterWithGameInstance(InWorldContextObject);
-		return Node;
-	}
+	friend class UTweenAsyncDoubleFactory;
 
 protected:
 	virtual void Activate() override {
@@ -182,5 +85,36 @@ protected:
 			);
 
 		ActivateAdvanced(Tween);
+	}
+};
+
+// ─────────────────────────────────────────────────────────────
+// Factory — NOT BlueprintType, invisible to UK2Node_AsyncAction
+// auto-scanner. K2Node sets ProxyFactoryClass to this and
+// ProxyClass to UTweenAsyncDouble (which keeps BlueprintType
+// for delegate pin generation).
+// ─────────────────────────────────────────────────────────────
+
+UCLASS()
+class TYPETWEEN_API UTweenAsyncDoubleFactory : public UObject {
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(Category = "TypeTween",
+		meta = (
+			BlueprintInternalUseOnly = "true",
+			WorldContext = "InWorldContextObject",
+			DefaultToSelf = "InWorldContextObject",
+			DisplayName = "Tween Double"
+			))
+	static UTweenAsyncDouble* TweenDouble(
+		UObject* InWorldContextObject,
+		FTweenDoubleConfig Tween
+	) {
+		UTweenAsyncDouble* Node = NewObject<UTweenAsyncDouble>();
+		Node->WorldContextObject = InWorldContextObject;
+		Node->TweenConfig = Tween;
+		Node->RegisterWithGameInstance(InWorldContextObject);
+		return Node;
 	}
 };

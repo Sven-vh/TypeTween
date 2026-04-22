@@ -8,7 +8,7 @@
 #include "Blueprints/Generated/TweenAsyncFloat.h"
 #include "Blueprints/Specializations/TweenAsyncColor.h"
 
-#include "TweenNode.generated.h"
+#include "TweenNodeBase.generated.h"
 
 /* Abstract only but can't be marked as abstract due to Unreal's UCLASS limitations */
 UCLASS()
@@ -35,7 +35,7 @@ public:
 
 	/* https://www.alt-codes.net/triangle-symbols */
 	virtual FText GetTooltipText() const override {
-		return NSLOCTEXT("TypeTween", "TweenFloat_Tooltip",
+		return NSLOCTEXT("TypeTween", "Tween_Tooltip",
 			"Tweens a value from [From] to [To].\n"
 			"Expand ▼ for loop, delay, and lifecycle event pins.\n"
 			"Right-click any input pin to Recombine or Promote to Variable.");
@@ -108,58 +108,3 @@ private:
 		}
 	}
 };
-
-UCLASS()
-class TYPETWEENEDITOR_API UK2Node_TweenFloat : public UK2Node_Tween {
-	GENERATED_BODY()
-
-public:
-
-	virtual FText GetNodeTitle(ENodeTitleType::Type /*TitleType*/) const override {
-		return NSLOCTEXT("TypeTween", "TweenFloat_Title", "Tween Float");
-	}
-
-	virtual FText GetMenuCategory() const override {
-		return NSLOCTEXT("TypeTween", "TweenFloat_Category", "TypeTween");
-	}
-
-	UK2Node_TweenFloat() {
-		ProxyFactoryFunctionName = GET_FUNCTION_NAME_CHECKED(UTweenAsyncFloat, TweenFloat);
-		ProxyFactoryClass = UTweenAsyncFloat::StaticClass();
-		ProxyClass = UTweenAsyncFloat::StaticClass();
-	}
-};
-
-UCLASS()
-class TYPETWEENEDITOR_API UK2Node_TweenColor : public UK2Node_Tween {
-	GENERATED_BODY()
-
-public:
-
-	virtual FText GetNodeTitle(ENodeTitleType::Type /*TitleType*/) const override {
-		return NSLOCTEXT("TypeTween", "TweenColor_Title", "Tween Color");
-	}
-
-	virtual FText GetMenuCategory() const override {
-		return NSLOCTEXT("TypeTween", "TweenColor_Category", "TypeTween");
-	}
-
-	UK2Node_TweenColor() {
-		ProxyFactoryFunctionName = GET_FUNCTION_NAME_CHECKED(UTweenAsyncLinearColor, TweenLinearColor);
-		ProxyFactoryClass = UTweenAsyncLinearColor::StaticClass();
-		ProxyClass = UTweenAsyncLinearColor::StaticClass();
-	}
-};
-
-//UCLASS()
-//class TYPETWEENEDITOR_API UK2Node_TweenDouble : public UK2Node_Tween {
-//	GENERATED_BODY()
-//
-//public:
-//
-//	UK2Node_TweenDouble() {
-//		ProxyFactoryFunctionName = GET_FUNCTION_NAME_CHECKED(UTweenAsyncDoubleAdvanced, TweenDoubleAdvanced);
-//		ProxyFactoryClass = UTweenAsyncDoubleAdvanced::StaticClass();
-//		ProxyClass = UTweenAsynDoubleAdvanced::StaticClass();
-//	}
-//};

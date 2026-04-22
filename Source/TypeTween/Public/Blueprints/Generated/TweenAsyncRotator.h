@@ -28,29 +28,6 @@ struct FTweenRotatorConfig : public FTweenSettingsConfig {
 };
 
 // ─────────────────────────────────────────────────────────────
-// Abstract base (Simple) — OnUpdate + config only
-// ─────────────────────────────────────────────────────────────
-
-// UCLASS(Abstract, BlueprintType)
-// class TYPETWEEN_API UTweenAsyncRotatorBase : public UTweenAsyncBaseSimple {
-// 	GENERATED_BODY()
-
-// public:
-// 	UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
-// 	FOnRotatorTweenUpdate OnUpdate;
-
-// protected:
-// 	UPROPERTY()
-// 	FTweenRotatorConfig TweenConfig;
-
-// 	FORCEINLINE void CallOnUpdate(const FRotator& CurrentValue) {
-// 		if (OnUpdate.IsBound()) {
-// 			OnUpdate.Broadcast(CurrentValue);
-// 		}
-// 	}
-// };
-
-// ─────────────────────────────────────────────────────────────
 // Abstract base — OnUpdate + config + all events
 // ─────────────────────────────────────────────────────────────
 
@@ -74,88 +51,14 @@ protected:
 };
 
 // ─────────────────────────────────────────────────────────────
-// Concrete async node (Simple) — OnUpdate + OnComplete only
-// ─────────────────────────────────────────────────────────────
-
-// UCLASS(meta = (HideCategories = Object))
-// class TYPETWEEN_API UTweenAsyncRotatorSimple : public UTweenAsyncRotatorBase {
-// 	GENERATED_BODY()
-
-// public:
-// 	UFUNCTION(BlueprintCallable, Category = "TypeTween",
-// 		meta = (
-// 			BlueprintInternalUseOnly = "true",
-// 			WorldContext = "InWorldContextObject",
-// 			DefaultToSelf = "InWorldContextObject",
-// 			DisplayName = "Tween Rotator",
-// 			ToolTip = "Tweens an FRotator from [From] to [To]."
-// 			))
-// 	static UTweenAsyncRotatorSimple* TweenRotator(
-// 		UObject* InWorldContextObject,
-// 		FTweenRotatorConfig Tween
-// 	) {
-// 		UTweenAsyncRotatorSimple* Node = NewObject<UTweenAsyncRotatorSimple>();
-// 		Node->WorldContextObject = InWorldContextObject;
-// 		Node->TweenConfig = Tween;
-// 		Node->RegisterWithGameInstance(InWorldContextObject);
-// 		return Node;
-// 	}
-
-// protected:
-// 	virtual void Activate() override {
-// 		if (!WorldContextObject) {
-// 			SetReadyToDestroy();
-// 			return;
-// 		}
-
-// 		const FTweenSettings Settings = TweenConfig.Resolve();
-
-// 		auto& Tween = TypeTween::Tween<FRotator>(WorldContextObject)
-// 			.From(TweenConfig.From)
-// 			.To(TweenConfig.To)
-// 			.Preset(Settings)
-// 			.OnUpdate(
-// 				[this](float /*Alpha*/, const FRotator& CurrentValue) {
-// 					CallOnUpdate(CurrentValue);
-// 				}
-// 			)
-// 			.OnComplete(
-// 				[this]() {
-// 					OnTweenComplete();
-// 				}
-// 			);
-
-// 		ActivateSimple(Tween);
-// 	}
-// };
-
-// ─────────────────────────────────────────────────────────────
-// Concrete async node — all events
+// Concrete async node — delegates + Activate, no factory fn
 // ─────────────────────────────────────────────────────────────
 
 UCLASS(meta = (HideCategories = Object))
 class TYPETWEEN_API UTweenAsyncRotator : public UTweenAsyncRotatorBase {
 	GENERATED_BODY()
 
-public:
-	UFUNCTION(BlueprintCallable, Category = "TypeTween",
-		meta = (
-			BlueprintInternalUseOnly = "true",
-			WorldContext = "InWorldContextObject",
-			DefaultToSelf = "InWorldContextObject",
-			DisplayName = "Tween Rotator",
-			ToolTip = "Tweens an FRotator from [From] to [To]."
-			))
-	static UTweenAsyncRotator* TweenRotator(
-		UObject* InWorldContextObject,
-		FTweenRotatorConfig Tween
-	) {
-		UTweenAsyncRotator* Node = NewObject<UTweenAsyncRotator>();
-		Node->WorldContextObject = InWorldContextObject;
-		Node->TweenConfig = Tween;
-		Node->RegisterWithGameInstance(InWorldContextObject);
-		return Node;
-	}
+	friend class UTweenAsyncRotatorFactory;
 
 protected:
 	virtual void Activate() override {
@@ -182,5 +85,36 @@ protected:
 			);
 
 		ActivateAdvanced(Tween);
+	}
+};
+
+// ─────────────────────────────────────────────────────────────
+// Factory — NOT BlueprintType, invisible to UK2Node_AsyncAction
+// auto-scanner. K2Node sets ProxyFactoryClass to this and
+// ProxyClass to UTweenAsyncRotator (which keeps BlueprintType
+// for delegate pin generation).
+// ─────────────────────────────────────────────────────────────
+
+UCLASS()
+class TYPETWEEN_API UTweenAsyncRotatorFactory : public UObject {
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(Category = "TypeTween",
+		meta = (
+			BlueprintInternalUseOnly = "true",
+			WorldContext = "InWorldContextObject",
+			DefaultToSelf = "InWorldContextObject",
+			DisplayName = "Tween Rotator"
+			))
+	static UTweenAsyncRotator* TweenRotator(
+		UObject* InWorldContextObject,
+		FTweenRotatorConfig Tween
+	) {
+		UTweenAsyncRotator* Node = NewObject<UTweenAsyncRotator>();
+		Node->WorldContextObject = InWorldContextObject;
+		Node->TweenConfig = Tween;
+		Node->RegisterWithGameInstance(InWorldContextObject);
+		return Node;
 	}
 };

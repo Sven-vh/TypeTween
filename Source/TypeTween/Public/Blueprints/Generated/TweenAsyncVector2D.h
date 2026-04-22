@@ -28,29 +28,6 @@ struct FTweenVector2DConfig : public FTweenSettingsConfig {
 };
 
 // ─────────────────────────────────────────────────────────────
-// Abstract base (Simple) — OnUpdate + config only
-// ─────────────────────────────────────────────────────────────
-
-// UCLASS(Abstract, BlueprintType)
-// class TYPETWEEN_API UTweenAsyncVector2DBase : public UTweenAsyncBaseSimple {
-// 	GENERATED_BODY()
-
-// public:
-// 	UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
-// 	FOnVector2DTweenUpdate OnUpdate;
-
-// protected:
-// 	UPROPERTY()
-// 	FTweenVector2DConfig TweenConfig;
-
-// 	FORCEINLINE void CallOnUpdate(const FVector2D& CurrentValue) {
-// 		if (OnUpdate.IsBound()) {
-// 			OnUpdate.Broadcast(CurrentValue);
-// 		}
-// 	}
-// };
-
-// ─────────────────────────────────────────────────────────────
 // Abstract base — OnUpdate + config + all events
 // ─────────────────────────────────────────────────────────────
 
@@ -74,88 +51,14 @@ protected:
 };
 
 // ─────────────────────────────────────────────────────────────
-// Concrete async node (Simple) — OnUpdate + OnComplete only
-// ─────────────────────────────────────────────────────────────
-
-// UCLASS(meta = (HideCategories = Object))
-// class TYPETWEEN_API UTweenAsyncVector2DSimple : public UTweenAsyncVector2DBase {
-// 	GENERATED_BODY()
-
-// public:
-// 	UFUNCTION(BlueprintCallable, Category = "TypeTween",
-// 		meta = (
-// 			BlueprintInternalUseOnly = "true",
-// 			WorldContext = "InWorldContextObject",
-// 			DefaultToSelf = "InWorldContextObject",
-// 			DisplayName = "Tween Vector2D",
-// 			ToolTip = "Tweens an FVector2D from [From] to [To]."
-// 			))
-// 	static UTweenAsyncVector2DSimple* TweenVector2D(
-// 		UObject* InWorldContextObject,
-// 		FTweenVector2DConfig Tween
-// 	) {
-// 		UTweenAsyncVector2DSimple* Node = NewObject<UTweenAsyncVector2DSimple>();
-// 		Node->WorldContextObject = InWorldContextObject;
-// 		Node->TweenConfig = Tween;
-// 		Node->RegisterWithGameInstance(InWorldContextObject);
-// 		return Node;
-// 	}
-
-// protected:
-// 	virtual void Activate() override {
-// 		if (!WorldContextObject) {
-// 			SetReadyToDestroy();
-// 			return;
-// 		}
-
-// 		const FTweenSettings Settings = TweenConfig.Resolve();
-
-// 		auto& Tween = TypeTween::Tween<FVector2D>(WorldContextObject)
-// 			.From(TweenConfig.From)
-// 			.To(TweenConfig.To)
-// 			.Preset(Settings)
-// 			.OnUpdate(
-// 				[this](float /*Alpha*/, const FVector2D& CurrentValue) {
-// 					CallOnUpdate(CurrentValue);
-// 				}
-// 			)
-// 			.OnComplete(
-// 				[this]() {
-// 					OnTweenComplete();
-// 				}
-// 			);
-
-// 		ActivateSimple(Tween);
-// 	}
-// };
-
-// ─────────────────────────────────────────────────────────────
-// Concrete async node — all events
+// Concrete async node — delegates + Activate, no factory fn
 // ─────────────────────────────────────────────────────────────
 
 UCLASS(meta = (HideCategories = Object))
 class TYPETWEEN_API UTweenAsyncVector2D : public UTweenAsyncVector2DBase {
 	GENERATED_BODY()
 
-public:
-	UFUNCTION(BlueprintCallable, Category = "TypeTween",
-		meta = (
-			BlueprintInternalUseOnly = "true",
-			WorldContext = "InWorldContextObject",
-			DefaultToSelf = "InWorldContextObject",
-			DisplayName = "Tween Vector2D",
-			ToolTip = "Tweens an FVector2D from [From] to [To]."
-			))
-	static UTweenAsyncVector2D* TweenVector2D(
-		UObject* InWorldContextObject,
-		FTweenVector2DConfig Tween
-	) {
-		UTweenAsyncVector2D* Node = NewObject<UTweenAsyncVector2D>();
-		Node->WorldContextObject = InWorldContextObject;
-		Node->TweenConfig = Tween;
-		Node->RegisterWithGameInstance(InWorldContextObject);
-		return Node;
-	}
+	friend class UTweenAsyncVector2DFactory;
 
 protected:
 	virtual void Activate() override {
@@ -182,5 +85,36 @@ protected:
 			);
 
 		ActivateAdvanced(Tween);
+	}
+};
+
+// ─────────────────────────────────────────────────────────────
+// Factory — NOT BlueprintType, invisible to UK2Node_AsyncAction
+// auto-scanner. K2Node sets ProxyFactoryClass to this and
+// ProxyClass to UTweenAsyncVector2D (which keeps BlueprintType
+// for delegate pin generation).
+// ─────────────────────────────────────────────────────────────
+
+UCLASS()
+class TYPETWEEN_API UTweenAsyncVector2DFactory : public UObject {
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(Category = "TypeTween",
+		meta = (
+			BlueprintInternalUseOnly = "true",
+			WorldContext = "InWorldContextObject",
+			DefaultToSelf = "InWorldContextObject",
+			DisplayName = "Tween Vector2D"
+			))
+	static UTweenAsyncVector2D* TweenVector2D(
+		UObject* InWorldContextObject,
+		FTweenVector2DConfig Tween
+	) {
+		UTweenAsyncVector2D* Node = NewObject<UTweenAsyncVector2D>();
+		Node->WorldContextObject = InWorldContextObject;
+		Node->TweenConfig = Tween;
+		Node->RegisterWithGameInstance(InWorldContextObject);
+		return Node;
 	}
 };

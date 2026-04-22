@@ -28,29 +28,6 @@ struct FTweenFloatConfig : public FTweenSettingsConfig {
 };
 
 // ─────────────────────────────────────────────────────────────
-// Abstract base (Simple) — OnUpdate + config only
-// ─────────────────────────────────────────────────────────────
-
-// UCLASS(Abstract, BlueprintType)
-// class TYPETWEEN_API UTweenAsyncFloatBase : public UTweenAsyncBaseSimple {
-// 	GENERATED_BODY()
-
-// public:
-// 	UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
-// 	FOnFloatTweenUpdate OnUpdate;
-
-// protected:
-// 	UPROPERTY()
-// 	FTweenFloatConfig TweenConfig;
-
-// 	FORCEINLINE void CallOnUpdate(const float& CurrentValue) {
-// 		if (OnUpdate.IsBound()) {
-// 			OnUpdate.Broadcast(CurrentValue);
-// 		}
-// 	}
-// };
-
-// ─────────────────────────────────────────────────────────────
 // Abstract base — OnUpdate + config + all events
 // ─────────────────────────────────────────────────────────────
 
@@ -74,88 +51,14 @@ protected:
 };
 
 // ─────────────────────────────────────────────────────────────
-// Concrete async node (Simple) — OnUpdate + OnComplete only
-// ─────────────────────────────────────────────────────────────
-
-// UCLASS(meta = (HideCategories = Object))
-// class TYPETWEEN_API UTweenAsyncFloatSimple : public UTweenAsyncFloatBase {
-// 	GENERATED_BODY()
-
-// public:
-// 	UFUNCTION(BlueprintCallable, Category = "TypeTween",
-// 		meta = (
-// 			BlueprintInternalUseOnly = "true",
-// 			WorldContext = "InWorldContextObject",
-// 			DefaultToSelf = "InWorldContextObject",
-// 			DisplayName = "Tween Float",
-// 			ToolTip = "Tweens a float from [From] to [To]."
-// 			))
-// 	static UTweenAsyncFloatSimple* TweenFloat(
-// 		UObject* InWorldContextObject,
-// 		FTweenFloatConfig Tween
-// 	) {
-// 		UTweenAsyncFloatSimple* Node = NewObject<UTweenAsyncFloatSimple>();
-// 		Node->WorldContextObject = InWorldContextObject;
-// 		Node->TweenConfig = Tween;
-// 		Node->RegisterWithGameInstance(InWorldContextObject);
-// 		return Node;
-// 	}
-
-// protected:
-// 	virtual void Activate() override {
-// 		if (!WorldContextObject) {
-// 			SetReadyToDestroy();
-// 			return;
-// 		}
-
-// 		const FTweenSettings Settings = TweenConfig.Resolve();
-
-// 		auto& Tween = TypeTween::Tween<float>(WorldContextObject)
-// 			.From(TweenConfig.From)
-// 			.To(TweenConfig.To)
-// 			.Preset(Settings)
-// 			.OnUpdate(
-// 				[this](float /*Alpha*/, const float& CurrentValue) {
-// 					CallOnUpdate(CurrentValue);
-// 				}
-// 			)
-// 			.OnComplete(
-// 				[this]() {
-// 					OnTweenComplete();
-// 				}
-// 			);
-
-// 		ActivateSimple(Tween);
-// 	}
-// };
-
-// ─────────────────────────────────────────────────────────────
-// Concrete async node — all events
+// Concrete async node — delegates + Activate, no factory fn
 // ─────────────────────────────────────────────────────────────
 
 UCLASS(meta = (HideCategories = Object))
 class TYPETWEEN_API UTweenAsyncFloat : public UTweenAsyncFloatBase {
 	GENERATED_BODY()
 
-public:
-	UFUNCTION(BlueprintCallable, Category = "TypeTween",
-		meta = (
-			BlueprintInternalUseOnly = "true",
-			WorldContext = "InWorldContextObject",
-			DefaultToSelf = "InWorldContextObject",
-			DisplayName = "Tween Float",
-			ToolTip = "Tweens a float from [From] to [To]."
-			))
-	static UTweenAsyncFloat* TweenFloat(
-		UObject* InWorldContextObject,
-		FTweenFloatConfig Tween
-	) {
-		UTweenAsyncFloat* Node = NewObject<UTweenAsyncFloat>();
-		Node->WorldContextObject = InWorldContextObject;
-		Node->TweenConfig = Tween;
-		Node->RegisterWithGameInstance(InWorldContextObject);
-		return Node;
-	}
+	friend class UTweenAsyncFloatFactory;
 
 protected:
 	virtual void Activate() override {
@@ -182,5 +85,35 @@ protected:
 			);
 
 		ActivateAdvanced(Tween);
+	}
+};
+
+// ─────────────────────────────────────────────────────────────
+// Factory — NOT BlueprintType, invisible to UK2Node_AsyncAction
+// auto-scanner. K2Node sets ProxyFactoryClass to this and
+// ProxyClass to UTweenAsyncFloat (which keeps BlueprintType
+// for delegate pin generation).
+// ─────────────────────────────────────────────────────────────
+
+UCLASS()
+class TYPETWEEN_API UTweenAsyncFloatFactory : public UObject {
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(Category = "TypeTween",
+		meta = (
+			WorldContext = "InWorldContextObject",
+			DefaultToSelf = "InWorldContextObject",
+			DisplayName = "Tween Float"
+			))
+	static UTweenAsyncFloat* TweenFloat(
+		UObject* InWorldContextObject,
+		FTweenFloatConfig Tween
+	) {
+		UTweenAsyncFloat* Node = NewObject<UTweenAsyncFloat>();
+		Node->WorldContextObject = InWorldContextObject;
+		Node->TweenConfig = Tween;
+		Node->RegisterWithGameInstance(InWorldContextObject);
+		return Node;
 	}
 };

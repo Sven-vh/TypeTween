@@ -28,29 +28,6 @@ struct FTweenTransformConfig : public FTweenSettingsConfig {
 };
 
 // ─────────────────────────────────────────────────────────────
-// Abstract base (Simple) — OnUpdate + config only
-// ─────────────────────────────────────────────────────────────
-
-// UCLASS(Abstract, BlueprintType)
-// class TYPETWEEN_API UTweenAsyncTransformBase : public UTweenAsyncBaseSimple {
-// 	GENERATED_BODY()
-
-// public:
-// 	UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
-// 	FOnTransformTweenUpdate OnUpdate;
-
-// protected:
-// 	UPROPERTY()
-// 	FTweenTransformConfig TweenConfig;
-
-// 	FORCEINLINE void CallOnUpdate(const FTransform& CurrentValue) {
-// 		if (OnUpdate.IsBound()) {
-// 			OnUpdate.Broadcast(CurrentValue);
-// 		}
-// 	}
-// };
-
-// ─────────────────────────────────────────────────────────────
 // Abstract base — OnUpdate + config + all events
 // ─────────────────────────────────────────────────────────────
 
@@ -74,88 +51,14 @@ protected:
 };
 
 // ─────────────────────────────────────────────────────────────
-// Concrete async node (Simple) — OnUpdate + OnComplete only
-// ─────────────────────────────────────────────────────────────
-
-// UCLASS(meta = (HideCategories = Object))
-// class TYPETWEEN_API UTweenAsyncTransformSimple : public UTweenAsyncTransformBase {
-// 	GENERATED_BODY()
-
-// public:
-// 	UFUNCTION(BlueprintCallable, Category = "TypeTween",
-// 		meta = (
-// 			BlueprintInternalUseOnly = "true",
-// 			WorldContext = "InWorldContextObject",
-// 			DefaultToSelf = "InWorldContextObject",
-// 			DisplayName = "Tween Transform",
-// 			ToolTip = "Tweens an FTransform from [From] to [To]."
-// 			))
-// 	static UTweenAsyncTransformSimple* TweenTransform(
-// 		UObject* InWorldContextObject,
-// 		FTweenTransformConfig Tween
-// 	) {
-// 		UTweenAsyncTransformSimple* Node = NewObject<UTweenAsyncTransformSimple>();
-// 		Node->WorldContextObject = InWorldContextObject;
-// 		Node->TweenConfig = Tween;
-// 		Node->RegisterWithGameInstance(InWorldContextObject);
-// 		return Node;
-// 	}
-
-// protected:
-// 	virtual void Activate() override {
-// 		if (!WorldContextObject) {
-// 			SetReadyToDestroy();
-// 			return;
-// 		}
-
-// 		const FTweenSettings Settings = TweenConfig.Resolve();
-
-// 		auto& Tween = TypeTween::Tween<FTransform>(WorldContextObject)
-// 			.From(TweenConfig.From)
-// 			.To(TweenConfig.To)
-// 			.Preset(Settings)
-// 			.OnUpdate(
-// 				[this](float /*Alpha*/, const FTransform& CurrentValue) {
-// 					CallOnUpdate(CurrentValue);
-// 				}
-// 			)
-// 			.OnComplete(
-// 				[this]() {
-// 					OnTweenComplete();
-// 				}
-// 			);
-
-// 		ActivateSimple(Tween);
-// 	}
-// };
-
-// ─────────────────────────────────────────────────────────────
-// Concrete async node — all events
+// Concrete async node — delegates + Activate, no factory fn
 // ─────────────────────────────────────────────────────────────
 
 UCLASS(meta = (HideCategories = Object))
 class TYPETWEEN_API UTweenAsyncTransform : public UTweenAsyncTransformBase {
 	GENERATED_BODY()
 
-public:
-	UFUNCTION(BlueprintCallable, Category = "TypeTween",
-		meta = (
-			BlueprintInternalUseOnly = "true",
-			WorldContext = "InWorldContextObject",
-			DefaultToSelf = "InWorldContextObject",
-			DisplayName = "Tween Transform",
-			ToolTip = "Tweens an FTransform from [From] to [To]."
-			))
-	static UTweenAsyncTransform* TweenTransform(
-		UObject* InWorldContextObject,
-		FTweenTransformConfig Tween
-	) {
-		UTweenAsyncTransform* Node = NewObject<UTweenAsyncTransform>();
-		Node->WorldContextObject = InWorldContextObject;
-		Node->TweenConfig = Tween;
-		Node->RegisterWithGameInstance(InWorldContextObject);
-		return Node;
-	}
+	friend class UTweenAsyncTransformFactory;
 
 protected:
 	virtual void Activate() override {
@@ -182,5 +85,36 @@ protected:
 			);
 
 		ActivateAdvanced(Tween);
+	}
+};
+
+// ─────────────────────────────────────────────────────────────
+// Factory — NOT BlueprintType, invisible to UK2Node_AsyncAction
+// auto-scanner. K2Node sets ProxyFactoryClass to this and
+// ProxyClass to UTweenAsyncTransform (which keeps BlueprintType
+// for delegate pin generation).
+// ─────────────────────────────────────────────────────────────
+
+UCLASS()
+class TYPETWEEN_API UTweenAsyncTransformFactory : public UObject {
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(Category = "TypeTween",
+		meta = (
+			BlueprintInternalUseOnly = "true",
+			WorldContext = "InWorldContextObject",
+			DefaultToSelf = "InWorldContextObject",
+			DisplayName = "Tween Transform"
+			))
+	static UTweenAsyncTransform* TweenTransform(
+		UObject* InWorldContextObject,
+		FTweenTransformConfig Tween
+	) {
+		UTweenAsyncTransform* Node = NewObject<UTweenAsyncTransform>();
+		Node->WorldContextObject = InWorldContextObject;
+		Node->TweenConfig = Tween;
+		Node->RegisterWithGameInstance(InWorldContextObject);
+		return Node;
 	}
 };

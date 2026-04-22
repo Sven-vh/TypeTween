@@ -1,21 +1,23 @@
+// ============================================================
+// GENERATED FILE — do not edit by hand.
+// To modify all types: edit Scripts/TweenAsyncType.h.template
+// To add/remove types:  edit Scripts/generate_tween_types.py
+// To regenerate:        run  Scripts/generate_tween_types.py
+// ============================================================
 #pragma once
 #include "CoreMinimal.h"
 #include "Blueprints/TweenAsyncBase.h"
 #include "TypeTween.h"
-
-#include "Tools/ColorLerps.h"
-#include "Specializations/TweenColor.h"
-
 #include "TweenAsyncColor.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLinearColorTweenUpdate, FLinearColor, CurrentValue);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnColorTweenUpdate, FLinearColor, CurrentValue);
 
 // ─────────────────────────────────────────────────────────────
 // Config struct — exposed to Blueprint details panel
 // ─────────────────────────────────────────────────────────────
 
 USTRUCT(BlueprintType)
-struct FTweenLinearColorConfig : public FTweenSettingsConfig {
+struct FTweenColorConfig : public FTweenSettingsConfig {
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -25,7 +27,7 @@ struct FTweenLinearColorConfig : public FTweenSettingsConfig {
 	FLinearColor To = FLinearColor::White;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EColorLerpMode ColorMode = EColorLerpMode::HSV;
+	EColorLerpMode LerpMode = EColorLerpMode::Linear;
 };
 
 // ─────────────────────────────────────────────────────────────
@@ -33,16 +35,16 @@ struct FTweenLinearColorConfig : public FTweenSettingsConfig {
 // ─────────────────────────────────────────────────────────────
 
 UCLASS(Abstract, BlueprintType)
-class TYPETWEEN_API UTweenAsyncLinearColorBase : public UTweenAsyncBase {
+class TYPETWEEN_API UTweenAsyncColorBase : public UTweenAsyncBase {
 	GENERATED_BODY()
 
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
-	FOnLinearColorTweenUpdate OnUpdate;
+	FOnColorTweenUpdate OnUpdate;
 
 protected:
 	UPROPERTY()
-	FTweenLinearColorConfig TweenConfig;
+	FTweenColorConfig TweenConfig;
 
 	FORCEINLINE void CallOnUpdate(const FLinearColor& CurrentValue) {
 		if (OnUpdate.IsBound()) {
@@ -52,32 +54,14 @@ protected:
 };
 
 // ─────────────────────────────────────────────────────────────
-// Concrete async node — all events
+// Concrete async node — delegates + Activate, no factory fn
 // ─────────────────────────────────────────────────────────────
 
 UCLASS(meta = (HideCategories = Object))
-class TYPETWEEN_API UTweenAsyncLinearColor : public UTweenAsyncLinearColorBase {
+class TYPETWEEN_API UTweenAsyncColor : public UTweenAsyncColorBase {
 	GENERATED_BODY()
 
-public:
-	UFUNCTION(BlueprintCallable, Category = "TypeTween",
-		meta = (
-			BlueprintInternalUseOnly = "true",
-			WorldContext = "InWorldContextObject",
-			DefaultToSelf = "InWorldContextObject",
-			DisplayName = "Tween Linear Color",
-			ToolTip = "Tweens an FLinearColor from [From] to [To]."
-			))
-	static UTweenAsyncLinearColor* TweenLinearColor(
-		UObject* InWorldContextObject,
-		FTweenLinearColorConfig Tween
-	) {
-		UTweenAsyncLinearColor* Node = NewObject<UTweenAsyncLinearColor>();
-		Node->WorldContextObject = InWorldContextObject;
-		Node->TweenConfig = Tween;
-		Node->RegisterWithGameInstance(InWorldContextObject);
-		return Node;
-	}
+	friend class UTweenAsyncColorFactory;
 
 protected:
 	virtual void Activate() override {
@@ -91,7 +75,7 @@ protected:
 		auto& Tween = TypeTween::Tween<FLinearColor>(WorldContextObject)
 			.From(TweenConfig.From)
 			.To(TweenConfig.To)
-			.ColorMode(TweenConfig.ColorMode)
+			.LerpMode(TweenConfig.LerpMode)
 			.Preset(Settings)
 			.OnUpdate(
 				[this](float /*Alpha*/, const FLinearColor& CurrentValue) {
@@ -105,5 +89,36 @@ protected:
 			);
 
 		ActivateAdvanced(Tween);
+	}
+};
+
+// ─────────────────────────────────────────────────────────────
+// Factory — NOT BlueprintType, invisible to UK2Node_AsyncAction
+// auto-scanner. K2Node sets ProxyFactoryClass to this and
+// ProxyClass to UTweenAsyncLinearColor (which keeps BlueprintType
+// for delegate pin generation).
+// ─────────────────────────────────────────────────────────────
+
+UCLASS()
+class TYPETWEEN_API UTweenAsyncColorFactory : public UObject {
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(Category = "TypeTween",
+		meta = (
+			BlueprintInternalUseOnly = "true",
+			WorldContext = "InWorldContextObject",
+			DefaultToSelf = "InWorldContextObject",
+			DisplayName = "Tween Linear Color"
+			))
+	static UTweenAsyncColor* TweenColor(
+		UObject* InWorldContextObject,
+		FTweenColorConfig Tween
+	) {
+		UTweenAsyncColor* Node = NewObject<UTweenAsyncColor>();
+		Node->WorldContextObject = InWorldContextObject;
+		Node->TweenConfig = Tween;
+		Node->RegisterWithGameInstance(InWorldContextObject);
+		return Node;
 	}
 };
