@@ -12,10 +12,6 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRotatorTweenUpdate, FRotator, CurrentValue);
 
-// ─────────────────────────────────────────────────────────────
-// Config struct — exposed to Blueprint details panel
-// ─────────────────────────────────────────────────────────────
-
 USTRUCT(BlueprintType)
 struct FTweenRotatorConfig : public FTweenSettingsConfig {
 	GENERATED_BODY()
@@ -26,10 +22,6 @@ struct FTweenRotatorConfig : public FTweenSettingsConfig {
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FRotator To = FRotator::ZeroRotator;
 };
-
-// ─────────────────────────────────────────────────────────────
-// Abstract base — OnUpdate + config + all events
-// ─────────────────────────────────────────────────────────────
 
 UCLASS(Abstract, BlueprintType)
 class TYPETWEEN_API UTweenAsyncRotatorBase : public UTweenAsyncBase {
@@ -49,10 +41,6 @@ protected:
 		}
 	}
 };
-
-// ─────────────────────────────────────────────────────────────
-// Concrete async node — delegates + Activate, no factory fn
-// ─────────────────────────────────────────────────────────────
 
 UCLASS(meta = (HideCategories = Object))
 class TYPETWEEN_API UTweenAsyncRotator : public UTweenAsyncRotatorBase {
@@ -87,13 +75,6 @@ protected:
 		ActivateAdvanced(Tween);
 	}
 };
-
-// ─────────────────────────────────────────────────────────────
-// Factory — NOT BlueprintType, invisible to UK2Node_AsyncAction
-// auto-scanner. K2Node sets ProxyFactoryClass to this and
-// ProxyClass to UTweenAsyncRotator (which keeps BlueprintType
-// for delegate pin generation).
-// ─────────────────────────────────────────────────────────────
 
 UCLASS()
 class TYPETWEEN_API UTweenAsyncRotatorFactory : public UObject {

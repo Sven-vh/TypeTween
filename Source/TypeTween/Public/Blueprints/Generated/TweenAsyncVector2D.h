@@ -12,10 +12,6 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnVector2DTweenUpdate, FVector2D, CurrentValue);
 
-// ─────────────────────────────────────────────────────────────
-// Config struct — exposed to Blueprint details panel
-// ─────────────────────────────────────────────────────────────
-
 USTRUCT(BlueprintType)
 struct FTweenVector2DConfig : public FTweenSettingsConfig {
 	GENERATED_BODY()
@@ -26,10 +22,6 @@ struct FTweenVector2DConfig : public FTweenSettingsConfig {
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector2D To = FVector2D::UnitVector;
 };
-
-// ─────────────────────────────────────────────────────────────
-// Abstract base — OnUpdate + config + all events
-// ─────────────────────────────────────────────────────────────
 
 UCLASS(Abstract, BlueprintType)
 class TYPETWEEN_API UTweenAsyncVector2DBase : public UTweenAsyncBase {
@@ -49,10 +41,6 @@ protected:
 		}
 	}
 };
-
-// ─────────────────────────────────────────────────────────────
-// Concrete async node — delegates + Activate, no factory fn
-// ─────────────────────────────────────────────────────────────
 
 UCLASS(meta = (HideCategories = Object))
 class TYPETWEEN_API UTweenAsyncVector2D : public UTweenAsyncVector2DBase {
@@ -87,13 +75,6 @@ protected:
 		ActivateAdvanced(Tween);
 	}
 };
-
-// ─────────────────────────────────────────────────────────────
-// Factory — NOT BlueprintType, invisible to UK2Node_AsyncAction
-// auto-scanner. K2Node sets ProxyFactoryClass to this and
-// ProxyClass to UTweenAsyncVector2D (which keeps BlueprintType
-// for delegate pin generation).
-// ─────────────────────────────────────────────────────────────
 
 UCLASS()
 class TYPETWEEN_API UTweenAsyncVector2DFactory : public UObject {

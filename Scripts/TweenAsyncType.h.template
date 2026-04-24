@@ -12,10 +12,6 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOn${TYPE_NAME}TweenUpdate, ${CPP_TYPE}, CurrentValue);
 
-// ─────────────────────────────────────────────────────────────
-// Config struct — exposed to Blueprint details panel
-// ─────────────────────────────────────────────────────────────
-
 USTRUCT(BlueprintType)
 struct FTween${TYPE_NAME}Config : public FTweenSettingsConfig {
 	GENERATED_BODY()
@@ -26,10 +22,6 @@ struct FTween${TYPE_NAME}Config : public FTweenSettingsConfig {
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	${CPP_TYPE} To${DEFAULT_TO};
 };
-
-// ─────────────────────────────────────────────────────────────
-// Abstract base — OnUpdate + config + all events
-// ─────────────────────────────────────────────────────────────
 
 UCLASS(Abstract, BlueprintType)
 class TYPETWEEN_API UTweenAsync${TYPE_NAME}Base : public UTweenAsyncBase {
@@ -49,10 +41,6 @@ protected:
 		}
 	}
 };
-
-// ─────────────────────────────────────────────────────────────
-// Concrete async node — delegates + Activate, no factory fn
-// ─────────────────────────────────────────────────────────────
 
 UCLASS(meta = (HideCategories = Object))
 class TYPETWEEN_API UTweenAsync${TYPE_NAME} : public UTweenAsync${TYPE_NAME}Base {
@@ -87,13 +75,6 @@ protected:
 		ActivateAdvanced(Tween);
 	}
 };
-
-// ─────────────────────────────────────────────────────────────
-// Factory — NOT BlueprintType, invisible to UK2Node_AsyncAction
-// auto-scanner. K2Node sets ProxyFactoryClass to this and
-// ProxyClass to UTweenAsync${TYPE_NAME} (which keeps BlueprintType
-// for delegate pin generation).
-// ─────────────────────────────────────────────────────────────
 
 UCLASS()
 class TYPETWEEN_API UTweenAsync${TYPE_NAME}Factory : public UObject {

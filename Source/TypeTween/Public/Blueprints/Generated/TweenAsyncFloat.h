@@ -12,10 +12,6 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFloatTweenUpdate, float, CurrentValue);
 
-// ─────────────────────────────────────────────────────────────
-// Config struct — exposed to Blueprint details panel
-// ─────────────────────────────────────────────────────────────
-
 USTRUCT(BlueprintType)
 struct FTweenFloatConfig : public FTweenSettingsConfig {
 	GENERATED_BODY()
@@ -26,10 +22,6 @@ struct FTweenFloatConfig : public FTweenSettingsConfig {
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float To = 1.f;
 };
-
-// ─────────────────────────────────────────────────────────────
-// Abstract base — OnUpdate + config + all events
-// ─────────────────────────────────────────────────────────────
 
 UCLASS(Abstract, BlueprintType)
 class TYPETWEEN_API UTweenAsyncFloatBase : public UTweenAsyncBase {
@@ -49,10 +41,6 @@ protected:
 		}
 	}
 };
-
-// ─────────────────────────────────────────────────────────────
-// Concrete async node — delegates + Activate, no factory fn
-// ─────────────────────────────────────────────────────────────
 
 UCLASS(meta = (HideCategories = Object))
 class TYPETWEEN_API UTweenAsyncFloat : public UTweenAsyncFloatBase {
@@ -88,13 +76,6 @@ protected:
 	}
 };
 
-// ─────────────────────────────────────────────────────────────
-// Factory — NOT BlueprintType, invisible to UK2Node_AsyncAction
-// auto-scanner. K2Node sets ProxyFactoryClass to this and
-// ProxyClass to UTweenAsyncFloat (which keeps BlueprintType
-// for delegate pin generation).
-// ─────────────────────────────────────────────────────────────
-
 UCLASS()
 class TYPETWEEN_API UTweenAsyncFloatFactory : public UObject {
 	GENERATED_BODY()
@@ -102,6 +83,7 @@ class TYPETWEEN_API UTweenAsyncFloatFactory : public UObject {
 public:
 	UFUNCTION(Category = "TypeTween",
 		meta = (
+			BlueprintInternalUseOnly = "true",
 			WorldContext = "InWorldContextObject",
 			DefaultToSelf = "InWorldContextObject",
 			DisplayName = "Tween Float"
