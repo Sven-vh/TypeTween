@@ -103,6 +103,15 @@ TWEEN_TYPES: list[dict[str, str]] = [
         "DISPLAY_NAME": "Tween Transform",
         "TOOLTIP":      "Tweens an FTransform from [From] to [To].",
     },
+    {
+        "TYPE_NAME":    "Int32",
+        "CPP_TYPE":     "int32",
+        "DEFAULT_FROM": " = 0",
+        "DEFAULT_TO":   " = 1",
+        "CATEGORY":     "TypeTween",
+        "DISPLAY_NAME": "Tween Int32",
+        "TOOLTIP":      "Tweens an int32 from [From] to [To].",
+    }
 ]
 
 # ─── Generator ────────────────────────────────────────────────────────────────

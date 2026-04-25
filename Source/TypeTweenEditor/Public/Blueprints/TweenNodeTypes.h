@@ -8,6 +8,7 @@
 /* Generated Types*/
 #include "Blueprints/Generated/TweenAsyncDouble.h"
 #include "Blueprints/Generated/TweenAsyncFloat.h"
+#include "Blueprints/Generated/TweenAsyncInt32.h"
 #include "Blueprints/Generated/TweenAsyncRotator.h"
 #include "Blueprints/Generated/TweenAsyncTransform.h"
 #include "Blueprints/Generated/TweenAsyncVector.h"
@@ -79,6 +80,25 @@ public:
 		ProxyFactoryFunctionName = GET_FUNCTION_NAME_CHECKED(UTweenAsyncFloatFactory, TweenFloat);
 		ProxyFactoryClass = UTweenAsyncFloatFactory::StaticClass();
 		ProxyClass = UTweenAsyncFloat::StaticClass();
+	}
+};
+
+/* Int32 */
+UCLASS()
+class TYPETWEENEDITOR_API UK2Node_TweenInt32 : public UK2Node_Tween {
+	GENERATED_BODY()
+
+public:
+	virtual FText GetNodeTitle(ENodeTitleType::Type /*TitleType*/) const override {
+		return NSLOCTEXT("TypeTween", "TweenInt32_Title", "Tween Int32");
+	}
+	virtual FText GetMenuCategory() const override {
+		return NSLOCTEXT("TypeTween", "TweenInt32_Category", "TypeTween");
+	}
+	UK2Node_TweenInt32() {
+		ProxyFactoryFunctionName = GET_FUNCTION_NAME_CHECKED(UTweenAsyncInt32Factory, TweenInt32);
+		ProxyFactoryClass = UTweenAsyncInt32Factory::StaticClass();
+		ProxyClass = UTweenAsyncInt32::StaticClass();
 	}
 };
 
