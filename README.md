@@ -23,7 +23,7 @@ TypeTween::Tween<float>(this)
 ### Blueprints
 
 <!-- <img alt="tween float blueprint" src="https://github.com/user-attachments/assets/2b2e3f5c-3d9a-4539-bfd6-979dd3874d5a" /> -->
-<img alt="tween float blueprint" src="https://github.com/user-attachments/assets/d3274d1c-2bee-4832-8922-b27997929a7f" />
+<img width="450px" alt="tween float blueprint" src="https://github.com/user-attachments/assets/d3274d1c-2bee-4832-8922-b27997929a7f" />
 
 
 
