@@ -9,6 +9,7 @@
 #include "Specializations/TweenLerps.h"
 #include "Specializations/TweenTransform.h"
 #include "Specializations/TweenColor.h"
+#include "Specializations/TweenText.h"
 
 namespace TypeTween {
 

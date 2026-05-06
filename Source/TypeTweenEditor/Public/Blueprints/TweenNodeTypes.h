@@ -4,6 +4,7 @@
 
 /* Custom Types */
 #include "Blueprints/Specializations/TweenAsyncColor.h"
+#include "Blueprints/Specializations/TweenAsyncText.h"
 
 /* Generated Types*/
 #include "Blueprints/Generated/TweenAsyncDouble.h"
@@ -17,6 +18,7 @@
 #include "TweenNodeTypes.generated.h"
 
 /* Custom Types */
+/* Color */
 UCLASS()
 class TYPETWEENEDITOR_API UK2Node_TweenColor : public UK2Node_Tween {
 	GENERATED_BODY()
@@ -35,6 +37,25 @@ public:
 		ProxyFactoryFunctionName = GET_FUNCTION_NAME_CHECKED(UTweenAsyncColorFactory, TweenColor);
 		ProxyFactoryClass = UTweenAsyncColorFactory::StaticClass();
 		ProxyClass = UTweenAsyncColor::StaticClass();
+	}
+};
+
+/* Text */
+UCLASS()
+class TYPETWEENEDITOR_API UK2Node_TweenText : public UK2Node_Tween {
+	GENERATED_BODY()
+
+public:
+	virtual FText GetNodeTitle(ENodeTitleType::Type /*TitleType*/) const override {
+		return NSLOCTEXT("TypeTween", "TweenText_Title", "Tween Text");
+	}
+	virtual FText GetMenuCategory() const override {
+		return NSLOCTEXT("TypeTween", "TweenText_Category", "TypeTween");
+	}
+	UK2Node_TweenText() {
+		ProxyFactoryFunctionName = GET_FUNCTION_NAME_CHECKED(UTweenAsyncTextFactory, TweenText);
+		ProxyFactoryClass = UTweenAsyncTextFactory::StaticClass();
+		ProxyClass = UTweenAsyncText::StaticClass();
 	}
 };
 
