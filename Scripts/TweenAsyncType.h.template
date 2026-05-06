@@ -81,7 +81,7 @@ class TYPETWEEN_API UTweenAsync${TYPE_NAME}Factory : public UObject {
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(Category = "${CATEGORY}",
+	UFUNCTION(BlueprintCallable, Category = "${CATEGORY}",
 		meta = (
 			BlueprintInternalUseOnly = "true",
 			WorldContext = "InWorldContextObject",
