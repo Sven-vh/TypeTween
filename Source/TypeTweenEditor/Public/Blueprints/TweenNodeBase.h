@@ -74,6 +74,10 @@ public:
 			Reg.AddBlueprintAction(Cls, UBlueprintNodeSpawner::Create(Cls));
 	}
 
+protected:
+	/* Optional customized pins for types */
+	virtual void CustomizedSplits() {};
+
 private:
 
 	void EnsureSplitState() {
@@ -106,5 +110,7 @@ private:
 			if (Name == TEXT("Tween_Settings_Ease")) { continue; }
 			P->bAdvancedView = true;
 		}
+
+		CustomizedSplits();
 	}
 };

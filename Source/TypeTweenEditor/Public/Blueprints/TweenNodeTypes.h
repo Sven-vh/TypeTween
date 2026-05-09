@@ -45,6 +45,13 @@ UCLASS()
 class TYPETWEENEDITOR_API UK2Node_TweenText : public UK2Node_Tween {
 	GENERATED_BODY()
 
+	virtual void CustomizedSplits() override {
+		if (UEdGraphPin* P = FindPin(TEXT("Tween_GlyphSet")))
+			P->bAdvancedView = true;
+		if (UEdGraphPin* P = FindPin(TEXT("Tween_CustomGlyphs")))
+			P->bAdvancedView = true;
+	}
+
 public:
 	virtual FText GetNodeTitle(ENodeTitleType::Type /*TitleType*/) const override {
 		return NSLOCTEXT("TypeTween", "TweenText_Title", "Tween Text");
