@@ -108,7 +108,8 @@ TypeTween::Tween(this)
 .OnRepeat([]() { })                            // each repeat except the last
 .OnComplete([]() { })                          // all cycles finished
 .OnTick([]() { })                              // every frame, including delays
-.OnUpdate([](float Alpha, const T& Value) { }) // typed, during interpolation
+.OnUpdate([](const T& Value) { })              // When value changes
+.OnUpdate([](float Alpha, const T& Value) { }) // When value changes with alpha (0-1)
 ```
 
 ### Advanced Settings
