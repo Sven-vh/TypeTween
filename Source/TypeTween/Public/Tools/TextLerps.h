@@ -72,7 +72,8 @@ namespace TypeTween::Detail::TextLerp {
 		if (To.IsEmpty()) return FString();
 
 		const int32 ToLen = To.Len();
-		const int32 Len = FMath::RoundToInt(FMath::Lerp((float)From.Len(), (float)ToLen, T));
+		const int32 FromLen = From.IsEmpty() ? To.Len() : From.Len();
+		const int32 Len = FMath::RoundToInt(FMath::Lerp((float)FromLen, (float)ToLen, T));
 
 		FString Result;
 		Result.Reserve(Len);
