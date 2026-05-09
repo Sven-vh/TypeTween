@@ -27,7 +27,7 @@ struct FTweenColorConfig : public FTweenSettingsConfig {
 	FLinearColor To = FLinearColor::White;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EColorLerpMode LerpMode = EColorLerpMode::Linear;
+	EColorLerpMode ColorSpace = EColorLerpMode::Linear;
 };
 
 // ─────────────────────────────────────────────────────────────
@@ -75,7 +75,7 @@ protected:
 		auto& Tween = TypeTween::Tween<FLinearColor>(WorldContextObject)
 			.From(TweenConfig.From)
 			.To(TweenConfig.To)
-			.LerpMode(TweenConfig.LerpMode)
+			.ColorSpace(TweenConfig.ColorSpace)
 			.Preset(Settings)
 			.OnUpdate(
 				[this](float /*Alpha*/, const FLinearColor& CurrentValue) {

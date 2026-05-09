@@ -22,7 +22,7 @@ namespace TypeTween {
 			return *this;
 		}
 
-		ITween& LerpMode(EColorLerpMode InMode) { Mode = InMode;   return *this; }
+		ITween& ColorSpace(EColorLerpMode InMode) { Mode = InMode;   return *this; }
 
 		/* Typed update callback, Receives Alpha [0..1] and current Value */
 		ITween& OnUpdate(TFunction<void(float Alpha, const FLinearColor& Value)> Fn) {
