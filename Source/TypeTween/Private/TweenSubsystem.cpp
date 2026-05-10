@@ -19,9 +19,6 @@ void UTweenSubsystem::Tick(float DeltaTime) {
     ActiveTweens.RemoveAll([](const FActiveTween& T) {
         return T.FnIsDone() && T.Lifetime.IsUnique();
         });
-
-    // print ActiveTweens size
-	UE_LOG(LogTemp, Log, TEXT("ActiveTweens: %d"), ActiveTweens.Num());
 }
 
 void UTweenSubsystem::StopAll() {
