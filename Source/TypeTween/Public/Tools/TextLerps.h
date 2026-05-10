@@ -70,6 +70,8 @@ namespace TypeTween::Detail::TextLerp {
 	 *  creating a natural left-to-right resolution without needing a stagger param. */
 	inline FString LerpScramble(const FString& From, const FString& To, float T, const FString& Glyphs) {
 		if (To.IsEmpty()) return FString();
+		if (T >= 1.0f) return To;
+		if (T <= 0.0f) return From.IsEmpty() ? FString() : From;
 
 		const int32 ToLen = To.Len();
 		const int32 FromLen = From.IsEmpty() ? To.Len() : From.Len();
@@ -80,7 +82,7 @@ namespace TypeTween::Detail::TextLerp {
 
 		for (int32 i = 0; i < Len; ++i) {
 			// Char i locks in once T has passed its proportional threshold
-			const float Threshold = (float)i / (float)ToLen;
+			const float Threshold = (float)(i + 1) / (float)ToLen;
 			if (T >= Threshold && i < ToLen)
 				Result.AppendChar(To[i]);
 			else
