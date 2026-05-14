@@ -203,7 +203,7 @@ namespace TypeTween::Detail::TextLerp {
 
 			case FEditOp::EType::Del:
 				if (Pos >= 0 && Pos < Result.Len())
-					Result.RemoveAt(Pos, 1, false);
+					Result.RemoveAt(Pos, 1, EAllowShrinking::No);
 				--Offset;
 				break;
 			}
