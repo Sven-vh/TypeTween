@@ -159,6 +159,7 @@ namespace TypeTween::Detail {
 
 			if (FrameCount > 0) {
 				if (LastPhase == ECyclePhase::Forward && Phase != ECyclePhase::Forward) {
+					Interpolate({ Detail::ApplyEase(1.f, Settings.Ease), FrameCount });
 					Callbacks.BroadcastOnForwardEnd();
 				}
 
@@ -167,6 +168,9 @@ namespace TypeTween::Detail {
 				}
 
 				if (Phase == ECyclePhase::RepeatDelay && LastPhase != ECyclePhase::RepeatDelay) {
+					if (Settings.LoopMode == ETweenLoopMode::PingPong && LastPhase == ECyclePhase::Reverse) {
+						Interpolate({ Detail::ApplyEase(0.f, Settings.Ease), FrameCount });
+					}
 					Callbacks.BroadcastOnCycleEnd();
 				}
 			}
@@ -178,6 +182,8 @@ namespace TypeTween::Detail {
 
 			if (bNewCycle) {
 				if (LastPhase != ECyclePhase::RepeatDelay) {
+					const float BoundaryRaw = (Settings.LoopMode == ETweenLoopMode::PingPong) ? 0.f : 1.f;
+					Interpolate({ Detail::ApplyEase(BoundaryRaw, Settings.Ease), FrameCount });
 					if (Settings.LoopMode == ETweenLoopMode::Restart) Callbacks.BroadcastOnForwardEnd();
 					Callbacks.BroadcastOnCycleEnd();
 				}
