@@ -45,7 +45,7 @@ UCLASS()
 class TYPETWEENEDITOR_API UK2Node_TweenText : public UK2Node_Tween {
 	GENERATED_BODY()
 
-	virtual void CustomizedSplits() override {
+	virtual void CustomizedAdvanced() override {
 		if (UEdGraphPin* P = FindPin(TEXT("Tween_GlyphSet")))
 			P->bAdvancedView = true;
 		if (UEdGraphPin* P = FindPin(TEXT("Tween_CustomGlyphs")))

@@ -59,11 +59,12 @@ public:
 	virtual void PostPlacedNewNode() override {
 		Super::PostPlacedNewNode();
 		EnsureSplitState();
+		EnsureAdvancedView();
 	}
 
 	virtual void PostReconstructNode() override {
 		Super::PostReconstructNode();
-		EnsureSplitState();
+		EnsureAdvancedView();
 	}
 
 	virtual void GetMenuActions(FBlueprintActionDatabaseRegistrar& Reg) const override {
@@ -75,8 +76,11 @@ public:
 	}
 
 protected:
-	/* Optional customized pins for types */
+	/* Optional splits pins for types */
 	virtual void CustomizedSplits() {};
+
+	/* Optional advanced for types */
+	virtual void CustomizedAdvanced() {};
 
 private:
 
@@ -100,17 +104,21 @@ private:
 			if (P->SubPins.Num() == 0)
 				Schema->SplitPin(P);
 
-		// Mark all Tween_Settings_* sub-pins as advanced except Duration and Ease.
-		// Prefix walk means Delays sub-pins (Tween_Settings_Delays_*) are caught
-		// automatically without maintaining an explicit list.
+		CustomizedSplits();
+	}
+
+	void EnsureAdvancedView() {
+		/* Hide all Tween settings except Duration and Ease by default */
 		for (UEdGraphPin* P : Pins) {
 			const FString Name = P->PinName.ToString();
-			if (!Name.StartsWith(TEXT("Tween_Settings_"))) { continue; }
+
+			if (!Name.StartsWith(FTweenSettings::StaticStruct()->GetName())) { continue; }
 			if (Name == TEXT("Tween_Settings_Duration")) { continue; }
 			if (Name == TEXT("Tween_Settings_Ease")) { continue; }
+
 			P->bAdvancedView = true;
 		}
 
-		CustomizedSplits();
+		CustomizedAdvanced();
 	}
 };
