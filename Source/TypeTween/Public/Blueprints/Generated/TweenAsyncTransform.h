@@ -16,10 +16,10 @@ USTRUCT(BlueprintType)
 struct FTweenTransformConfig : public FTweenSettingsConfig {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween")
 	FTransform From;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween")
 	FTransform To;
 };
 

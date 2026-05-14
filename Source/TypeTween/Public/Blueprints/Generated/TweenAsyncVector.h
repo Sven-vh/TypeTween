@@ -16,10 +16,10 @@ USTRUCT(BlueprintType)
 struct FTweenVectorConfig : public FTweenSettingsConfig {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween")
 	FVector From = FVector::ZeroVector;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween")
 	FVector To = FVector::OneVector;
 };
 

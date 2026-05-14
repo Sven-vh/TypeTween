@@ -1,9 +1,3 @@
-// ============================================================
-// GENERATED FILE - do not edit by hand.
-// To modify all types: edit Scripts/TweenAsyncType.h.template
-// To add/remove types:  edit Scripts/generate_tween_types.py
-// To regenerate:        run  Scripts/generate_tween_types.py
-// ============================================================
 #pragma once
 #include "CoreMinimal.h"
 #include "Blueprints/TweenAsyncBase.h"
@@ -21,20 +15,20 @@ USTRUCT(BlueprintType)
 struct FTweenTextConfig : public FTweenSettingsConfig {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween")
 	FText From = FText::GetEmpty();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween")
 	FText To = FText::GetEmpty();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween")
 	ETextLerpMode LerpMode = ETextLerpMode::Scramble;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween")
 	ETextGlyphSet GlyphSet = ETextGlyphSet::Alphanumeric;
 
 	/** Only used when GlyphSet is set to Custom. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite,
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween",
 		meta = (EditCondition = "GlyphSet == ETextGlyphSet::Custom", EditConditionHides))
 	FString CustomGlyphs;
 };

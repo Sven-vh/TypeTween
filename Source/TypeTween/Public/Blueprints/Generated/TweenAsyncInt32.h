@@ -16,10 +16,10 @@ USTRUCT(BlueprintType)
 struct FTweenInt32Config : public FTweenSettingsConfig {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween")
 	int32 From = 0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween")
 	int32 To = 1;
 };
 

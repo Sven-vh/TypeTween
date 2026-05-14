@@ -16,10 +16,10 @@ USTRUCT(BlueprintType)
 struct FTweenRotatorConfig : public FTweenSettingsConfig {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween")
 	FRotator From = FRotator::ZeroRotator;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween")
 	FRotator To = FRotator::ZeroRotator;
 };
 

@@ -1,9 +1,3 @@
-// ============================================================
-// GENERATED FILE — do not edit by hand.
-// To modify all types: edit Scripts/TweenAsyncType.h.template
-// To add/remove types:  edit Scripts/generate_tween_types.py
-// To regenerate:        run  Scripts/generate_tween_types.py
-// ============================================================
 #pragma once
 #include "CoreMinimal.h"
 #include "Blueprints/TweenAsyncBase.h"
@@ -20,13 +14,13 @@ USTRUCT(BlueprintType)
 struct FTweenColorConfig : public FTweenSettingsConfig {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween")
 	FLinearColor From = FLinearColor::Black;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween")
 	FLinearColor To = FLinearColor::White;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween")
 	EColorLerpMode ColorSpace = EColorLerpMode::Linear;
 };
 

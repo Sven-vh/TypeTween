@@ -58,22 +58,22 @@ USTRUCT(BlueprintType)
 struct TYPETWEEN_API FTweenSettings {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tween", meta = (
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween", meta = (
 		ToolTip = "Total time for one forward or reverse playthrough, not including delays. Required."
 		))
 	float Duration = 0.f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tween", meta = (
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween", meta = (
 		ToolTip = "Easing function for the tween, see https://easings.net/ for visualization"
 		))
 	ETweenEase Ease = ETweenEase::Linear;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tween", meta = (
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween", meta = (
 		ToolTip = "0 = play once, -1 = infinite, N = play N+1 times total"
 		))
 	int32 RepeatCount = 0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tween", meta = (
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween", meta = (
 		ToolTip = "How the tween loops back after reaching the end. Restart: jumps back to start. PingPong: reverses direction each cycle."
 		))
 	ETweenLoopMode LoopMode = ETweenLoopMode::Restart;
@@ -179,33 +179,33 @@ USTRUCT()
 struct TYPETWEEN_API FTweenOverrides {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, meta = (InlineEditConditionToggle))
+	UPROPERTY(EditAnywhere, meta = (InlineEditConditionToggle), Category = "TypeTween")
 	bool bDuration = false;
-	UPROPERTY(EditAnywhere, Category = "Tween", meta = (EditCondition = "bDuration",
+	UPROPERTY(EditAnywhere, Category = "TypeTween", meta = (EditCondition = "bDuration",
 		ToolTip = "Total time for one forward or reverse playthrough, not including delays."))
 	float Duration = 1.f;
 
-	UPROPERTY(EditAnywhere, meta = (InlineEditConditionToggle))
+	UPROPERTY(EditAnywhere, meta = (InlineEditConditionToggle), Category = "TypeTween")
 	bool bEase = false;
-	UPROPERTY(EditAnywhere, Category = "Tween", meta = (EditCondition = "bEase",
+	UPROPERTY(EditAnywhere, Category = "TypeTween", meta = (EditCondition = "bEase",
 		ToolTip = "Easing function for the tween, see https://easings.net/"))
 	ETweenEase Ease = ETweenEase::Linear;
 
-	UPROPERTY(EditAnywhere, meta = (InlineEditConditionToggle))
+	UPROPERTY(EditAnywhere, meta = (InlineEditConditionToggle), Category = "TypeTween")
 	bool bRepeatCount = false;
-	UPROPERTY(EditAnywhere, Category = "Tween", meta = (EditCondition = "bRepeatCount",
+	UPROPERTY(EditAnywhere, Category = "TypeTween", meta = (EditCondition = "bRepeatCount",
 		ToolTip = "0 = play once, -1 = infinite, N = play N+1 times total"))
 	int32 RepeatCount = 0;
 
-	UPROPERTY(EditAnywhere, meta = (InlineEditConditionToggle))
+	UPROPERTY(EditAnywhere, meta = (InlineEditConditionToggle), Category = "TypeTween")
 	bool bLoopMode = false;
-	UPROPERTY(EditAnywhere, Category = "Tween", meta = (EditCondition = "bLoopMode",
+	UPROPERTY(EditAnywhere, Category = "TypeTween", meta = (EditCondition = "bLoopMode",
 		ToolTip = "How the tween loops back after reaching the end."))
 	ETweenLoopMode LoopMode = ETweenLoopMode::Restart;
 
-	UPROPERTY(EditAnywhere, meta = (InlineEditConditionToggle))
+	UPROPERTY(EditAnywhere, meta = (InlineEditConditionToggle), Category = "TypeTween")
 	bool bDelays = false;
-	UPROPERTY(EditAnywhere, Category = "Timing", meta = (EditCondition = "bDelays"))
+	UPROPERTY(EditAnywhere, Category = "TypeTween", meta = (EditCondition = "bDelays"))
 	FTweenDelays Delays;
 };
 
@@ -214,7 +214,7 @@ UCLASS()
 class TYPETWEEN_API UTweenPreset : public UDataAsset {
 	GENERATED_BODY()
 public:
-	UPROPERTY(EditAnywhere, Category = "Tween")
+	UPROPERTY(EditAnywhere, Category = "TypeTween")
 	FTweenSettings Settings;
 };
 
@@ -222,19 +222,19 @@ USTRUCT(BlueprintType)
 struct TYPETWEEN_API FTweenConfig {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, Category = "Tween", meta = (
+	UPROPERTY(EditAnywhere, Category = "TypeTween", meta = (
 		DisplayName = "Preset (Optional)",
 		ToolTip = "Assign a shared preset asset to reuse settings across actors. Leave empty to configure inline below."
 		))
 	UTweenPreset* Preset = nullptr;
 
-	UPROPERTY(EditAnywhere, Category = "Tween", meta = (
+	UPROPERTY(EditAnywhere, Category = "TypeTween", meta = (
 		EditCondition = "Preset == nullptr",
 		EditConditionHides
 		))
 	FTweenSettings Settings;
 
-	UPROPERTY(EditAnywhere, Category = "Tween", meta = (
+	UPROPERTY(EditAnywhere, Category = "TypeTween", meta = (
 		DisplayName = "Overrides",
 		EditCondition = "Preset != nullptr", EditConditionHides,
 		ToolTip = "Check a field to override that value from the preset."

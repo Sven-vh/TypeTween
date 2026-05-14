@@ -10,11 +10,11 @@ struct TYPETWEEN_API FTweenSettingsConfig {
 	GENERATED_BODY()
 
 	/* Wire a runtime FTweenSettings directly (takes priority over Config below) */
-	UPROPERTY(BlueprintReadWrite, meta = (HideInDetailPanel))
+	UPROPERTY(BlueprintReadWrite, meta = (HideInDetailPanel), Category = "TypeTween")
 	FTweenSettings Settings;
 
 	/* Preset + overrides — visible in the Details panel */
-	UPROPERTY(EditAnywhere, meta = (DisplayName = "Settings"))
+	UPROPERTY(EditAnywhere, meta = (DisplayName = "Settings"), Category = "TypeTween")
 	FTweenConfig Config;
 
 	FTweenSettings Resolve() const {
