@@ -181,20 +181,41 @@ TypeTween::Tween<FTransform>(this)
 
 ### FLinearColor
 
-Colors can be interpolated/lerped in different ways.
+Specify in which color space the color needs to be tweened:
 
 ```
 TypeTween::Tween<FLinearColor>(this)
   .From(FLinearColor::Yellow)
   .To(FLinearColor::Blue)
   /* Specify color interpolation mode: */
-  .LerpMode(EColorLerpMode::sRGB)
-  .LerpMode(EColorLerpMode::Linear)
-  .LerpMode(EColorLerpMode::HSV)
-  .LerpMode(EColorLerpMode::Oklab)
+  .ColorSpace(EColorLerpMode::sRGB)
+  .ColorSpace(EColorLerpMode::Linear)
+  .ColorSpace(EColorLerpMode::HSV)
+  .ColorSpace(EColorLerpMode::Oklab)
 ```
 
 <picture>
   <source media="(prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/ab991e1f-e8e7-471d-80a3-c0ceb87af5b9" />
   <img alt="TypeTween-gradients" src="https://github.com/user-attachments/assets/a4e0dbc6-a86b-4b1d-9194-847bfb6271cf" />
+</picture>
+
+
+### FText / FString
+
+Tween 
+
+```cpp
+TypeTween::Tween<FText>(this)
+  .From(FText::FromString("Hello"))
+  .To(FText::FromString("World"))
+  /* Specify Lerp Mode */
+  .Mode(ETextLerpMode::Reveal)
+  .Mode(ETextLerpMode::Scramble)
+  .Mode(ETextLerpMode::DeleteAndType)
+  .Mode(ETextLerpMode::EditDistance)
+  .Mode(ETextLerpMode::CharCode)
+```
+
+<picture>
+  <img alt="TypeTween-text-tweening" src="https://github.com/user-attachments/assets/b180685f-8d1d-4bb2-948f-4caf7d4e352c" />
 </picture>
