@@ -251,6 +251,13 @@ namespace TypeTween {
 			return *this;
 		}
 
+		ITween& OnUpdate(TFunction<void(const FTransform& Transform)> Fn) {
+			OnTransformUpdateCB = [Fn = MoveTemp(Fn)](float, const FTransform& Transform) {
+				Fn(Transform);
+				};
+			return *this;
+		}
+
 		// ---- Only contract with TweenBase: called each tick ----
 		void Interpolate(const Detail::FTweenFrame& Frame) {
 			if (!Actor) return;

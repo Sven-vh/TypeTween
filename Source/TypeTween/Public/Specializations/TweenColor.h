@@ -29,6 +29,11 @@ namespace TypeTween {
 			OnUpdateCB = MoveTemp(Fn); return *this;
 		}
 
+		ITween& OnUpdate(TFunction<void(const FLinearColor& Value)> Fn) {
+			OnUpdateCB = [Fn = MoveTemp(Fn)](float, const FLinearColor& Value) { Fn(Value); };
+			return *this;
+		}
+
 		// ---- Only contract with TweenBase: called each tick ----
 		void Interpolate(const Detail::FTweenFrame& Frame) {
 			if (Frame.FrameCount == 0) {
