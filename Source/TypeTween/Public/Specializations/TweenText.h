@@ -48,7 +48,7 @@ namespace TypeTween {
 				if (!Start.IsSet() && Value) Start = Value->ToString();
 				if (!End.IsSet() && Value) End = Value->ToString();
 
-				// Pre-compute edit operations once — O(M*N), cached for all subsequent ticks
+				// Pre-compute edit operations once - O(M*N), cached for all subsequent ticks
 				if (LerpMode == ETextLerpMode::EditDistance && Start.IsSet() && End.IsSet())
 					CachedOps = Detail::TextLerp::ComputeEditOps(Start.GetValue(), End.GetValue());
 			}

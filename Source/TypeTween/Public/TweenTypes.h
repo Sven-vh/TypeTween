@@ -1,5 +1,7 @@
 #pragma once
 #include "CoreMinimal.h"
+#include "Engine/DataAsset.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
 #include "TweenTraits.h"
 #include "TweenTypes.generated.h"
 
@@ -263,7 +265,7 @@ UCLASS()
 class TYPETWEEN_API UTweenConfigLibrary : public UBlueprintFunctionLibrary {
 	GENERATED_BODY()
 
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "To Settings", CompactNodeTitle = "->", BlueprintAutocast))
+	UFUNCTION(BlueprintPure, Category = "TypeTween", meta = (DisplayName = "To Settings", CompactNodeTitle = "->", BlueprintAutocast))
 	static FTweenSettings Conv_ConfigToSettings(FTweenConfig InConfig) {
 		return InConfig;
 	}

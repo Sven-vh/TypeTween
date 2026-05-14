@@ -1,5 +1,5 @@
 // ============================================================
-// GENERATED FILE — do not edit by hand.
+// GENERATED FILE - do not edit by hand.
 // To modify all types: edit Scripts/TweenAsyncType.h.template
 // To add/remove types:  edit Scripts/generate_tween_types.py
 // To regenerate:        run  Scripts/generate_tween_types.py

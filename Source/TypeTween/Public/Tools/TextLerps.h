@@ -108,7 +108,7 @@ namespace TypeTween::Detail::TextLerp {
 			const int32 DstCode = (i < ToLen) ? (int32)To[i] : (int32)From[FMath::Min(i, FromLen - 1)];
 			const int32 Code = FMath::RoundToInt(FMath::Lerp((float)SrcCode, (float)DstCode, T));
 
-			// Clamp to printable ASCII — extend range if Unicode support is needed
+			// Clamp to printable ASCII - extend range if Unicode support is needed
 			Result.AppendChar((TCHAR)FMath::Clamp(Code, 32, 126));
 		}
 
@@ -126,7 +126,7 @@ namespace TypeTween::Detail::TextLerp {
 
 	/** Computes the minimum edit path from From to To.
 	 *  Returns only the non-keep operations in forward order.
-	 *  Should be called once on tween start and cached — O(M*N) time and space. */
+	 *  Should be called once on tween start and cached - O(M*N) time and space. */
 	inline TArray<FEditOp> ComputeEditOps(const FString& From, const FString& To) {
 		const int32 M = From.Len();
 		const int32 N = To.Len();
@@ -166,7 +166,7 @@ namespace TypeTween::Detail::TextLerp {
 		int32 i = M, j = N;
 		while (i > 0 || j > 0) {
 			switch (At(i, j).Op) {
-			case 1: --i; --j; break; // keep — no op recorded
+			case 1: --i; --j; break; // keep - no op recorded
 			case 2: { FEditOp Op; Op.Type = FEditOp::EType::Sub; Op.Pos = i - 1; Op.Ch = To[j - 1]; Ops.Add(Op); --i; --j; break; }
 			case 3: { FEditOp Op; Op.Type = FEditOp::EType::Del; Op.Pos = i - 1; Op.Ch = TEXT('\0'); Ops.Add(Op); --i;      break; }
 			case 4: { FEditOp Op; Op.Type = FEditOp::EType::Ins; Op.Pos = i;     Op.Ch = To[j - 1]; Ops.Add(Op);      --j; break; }

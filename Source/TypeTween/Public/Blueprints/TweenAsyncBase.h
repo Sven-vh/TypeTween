@@ -13,7 +13,7 @@ struct TYPETWEEN_API FTweenSettingsConfig {
 	UPROPERTY(BlueprintReadWrite, meta = (HideInDetailPanel), Category = "TypeTween")
 	FTweenSettings Settings;
 
-	/* Preset + overrides — visible in the Details panel */
+	/* Preset + overrides - visible in the Details panel */
 	UPROPERTY(EditAnywhere, meta = (DisplayName = "Settings"), Category = "TypeTween")
 	FTweenConfig Config;
 

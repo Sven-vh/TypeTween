@@ -23,7 +23,7 @@ public class TypeTween : ModuleRules {
         PublicDependencyModuleNames.AddRange(
             new string[]
             {
-                "Core",
+                "Core", "Engine"
 				// ... add other public dependencies that you statically link with here ...
 			}
             );
@@ -32,7 +32,7 @@ public class TypeTween : ModuleRules {
         PrivateDependencyModuleNames.AddRange(
             new string[]
             {
-                "Core", "CoreUObject", "Engine"
+                "Core", "CoreUObject"
 				// ... add private dependencies that you statically link with here ...	
 			}
             );
