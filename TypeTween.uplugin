@@ -15,16 +15,16 @@
     }
   ],
   "FriendlyName": "TypeTween",
-  "Description": ".",
-  "Category": "",
+  "Description": "TypeTween is a free and open-source Tweening Plugin for Unreal Engine with C++ and Blueprint Support.",
+  "Category": "Animations",
   "CreatedBy": "Sven van Huessen",
   "CreatedByURL": "https://www.svenvh.nl/",
-  "DocsURL": "",
-  "MarketplaceURL": "",
-  "SupportURL": "",
+  "DocsURL": "https://github.com/Sven-vh/TypeTween",
+  "MarketplaceURL": "https://www.fab.com/listings/f09a96e6-04e3-4aff-aa96-556774bbdad4",
+  "SupportURL": "https://github.com/Sven-vh/TypeTween/issues",
   "CanContainContent": "false",
   "Installed": false,
-  "IsBetaVersion": true,
+  "IsBetaVersion": false,
   "Plugins": [],
   "SupportedTargetPlatforms": null
 }
