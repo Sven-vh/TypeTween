@@ -219,3 +219,18 @@ TypeTween::Tween<FText>(this)
 <picture>
   <img alt="TypeTween-text-tweening" src="https://github.com/user-attachments/assets/b180685f-8d1d-4bb2-948f-4caf7d4e352c" />
 </picture>
+
+### Installation
+
+**[Option A] Prebuilt Binaries**
+1. Go to the [Releases](../../releases) page and download the "Binary" zip for your engine version.
+2. Extract the zip into your project's `Plugins/` directory.
+3. Restart the Unreal Editor, the plugin will be enabled automatically.
+
+> Prebuilt binaries are available for **UE 5.5**, **5.6**, and **5.7**.
+
+**[Option B] Building from Source**
+1. Clone or download this repository into your project's `Plugins/` directory.
+2. Restart the Unreal Editor. It will prompt you to compile the plugin automatically.
+
+> Requires Visual Studio Build Tools (Windows) or Xcode Command Line Tools (Mac) to be installed.
