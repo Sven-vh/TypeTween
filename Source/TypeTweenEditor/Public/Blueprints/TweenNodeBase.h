@@ -112,7 +112,7 @@ private:
 		for (UEdGraphPin* P : Pins) {
 			const FString Name = P->PinName.ToString();
 
-			if (!Name.StartsWith(FTweenSettings::StaticStruct()->GetName())) { continue; }
+			if (!Name.StartsWith(TEXT("Tween_Settings"))) { continue; }
 			if (Name == TEXT("Tween_Settings_Duration")) { continue; }
 			if (Name == TEXT("Tween_Settings_Ease")) { continue; }
 
