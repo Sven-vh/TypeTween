@@ -1,3 +1,6 @@
+// Copyright 2026 Sven van Huessen. All Rights Reserved.
+// TypeTween is released under the MIT License.
+// See LICENSE file or https://github.com/Sven-vh/TypeTween/blob/main/LICENSE
 #include "Blueprints/TweenAsyncBase.h"
 
 void UTweenAsyncBaseSimple::ActivateSimple(TypeTween::ITweenControl& Tween) {
@@ -26,3 +29,4 @@ void UTweenAsyncBase::ActivateAdvanced(TypeTween::ITweenControl& Tween) {
 void UTweenAsyncBaseSimple::OnTweenComplete() {
 	SetReadyToDestroy();
 }
+

@@ -1,4 +1,7 @@
-﻿#pragma once
+// Copyright 2026 Sven van Huessen. All Rights Reserved.
+// TypeTween is released under the MIT License.
+// See LICENSE file or https://github.com/Sven-vh/TypeTween/blob/main/LICENSE
+#pragma once
 #include "CoreMinimal.h"
 #include "K2Node_AsyncAction.h"
 #include "BlueprintNodeSpawner.h"
@@ -15,7 +18,7 @@ UCLASS()
 class TYPETWEENEDITOR_API UK2Node_Tween : public UK2Node_AsyncAction {
 	GENERATED_BODY()
 
-	// ── Advanced output delegate pins hidden behind \/ ────────────────────────
+	// -- Advanced output delegate pins hidden behind \/ ------------------------
 
 	static TArrayView<const FName> AdvancedDelegatePins() {
 		static const FName Names[] = {
@@ -31,17 +34,17 @@ class TYPETWEENEDITOR_API UK2Node_Tween : public UK2Node_AsyncAction {
 
 
 public:
-	// ── Display ───────────────────────────────────────────────────────────────
+	// -- Display ---------------------------------------------------------------
 
 	/* https://www.alt-codes.net/triangle-symbols */
 	virtual FText GetTooltipText() const override {
 		return NSLOCTEXT("TypeTween", "Tween_Tooltip",
 			"Tweens a value from [From] to [To].\n"
-			"Expand ▼ for loop, delay, and lifecycle event pins.\n"
+			"Expand ? for loop, delay, and lifecycle event pins.\n"
 			"Right-click any input pin to Recombine or Promote to Variable.");
 	}
 
-	// ── Pin allocation ────────────────────────────────────────────────────────
+	// -- Pin allocation --------------------------------------------------------
 
 	virtual void AllocateDefaultPins() override {
 		Super::AllocateDefaultPins();
