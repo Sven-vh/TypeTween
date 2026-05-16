@@ -1,48 +1,26 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
-
+// Copyright 2026 Sven van Huessen. All Rights Reserved.
+// TypeTween is released under the MIT License.
+// See LICENSE file or https://github.com/Sven-vh/TypeTween/blob/main/LICENSE
 using UnrealBuildTool;
 
 public class TypeTween : ModuleRules {
     public TypeTween(ReadOnlyTargetRules Target) : base(Target) {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-        PublicIncludePaths.AddRange(
-            new string[] {
-				// ... add public include paths required here ...
-			}
-            );
-
-
-        PrivateIncludePaths.AddRange(
-            new string[] {
-				// ... add other private include paths required here ...
-			}
-            );
-
 
         PublicDependencyModuleNames.AddRange(
             new string[]
             {
                 "Core", "Engine"
-				// ... add other public dependencies that you statically link with here ...
-			}
-            );
+            }
+        );
 
 
         PrivateDependencyModuleNames.AddRange(
             new string[]
             {
                 "Core", "CoreUObject"
-				// ... add private dependencies that you statically link with here ...	
-			}
-            );
-
-
-        DynamicallyLoadedModuleNames.AddRange(
-            new string[]
-            {
-				// ... add any modules that your module loads dynamically here ...
-			}
-            );
+            }
+        );
     }
 }
