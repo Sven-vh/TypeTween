@@ -34,7 +34,7 @@ namespace TypeTween {
 		}
 
 		ITween& OnUpdate(TFunction<void(const T& Value)> Fn) {
-			OnUpdateCB = [Fn = MoveTemp(Fn)](float, const T& Value) { Fn(Value); };
+			OnUpdateCB = [Fn = MoveTemp(Fn)](float, const T& NewValue) { Fn(NewValue); };
 			return *this;
 		}
 
@@ -103,6 +103,11 @@ namespace TypeTween {
 
 		ITween& OnUpdate(TFunction<void(float)> Fn) {
 			OnUpdateCB = MoveTemp(Fn);
+			return *this;
+		}
+
+		ITween& OnUpdate(TFunction<void()> Fn) {
+			OnUpdateCB = [Fn = MoveTemp(Fn)](float) { Fn(); };
 			return *this;
 		}
 

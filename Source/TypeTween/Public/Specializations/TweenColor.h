@@ -33,7 +33,7 @@ namespace TypeTween {
 		}
 
 		ITween& OnUpdate(TFunction<void(const FLinearColor& Value)> Fn) {
-			OnUpdateCB = [Fn = MoveTemp(Fn)](float, const FLinearColor& Value) { Fn(Value); };
+			OnUpdateCB = [Fn = MoveTemp(Fn)](float, const FLinearColor& NewValue) { Fn(NewValue); };
 			return *this;
 		}
 

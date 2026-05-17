@@ -48,9 +48,9 @@ namespace TypeTween {
 		bool IsValid() const { return TypedPtr.IsValid(); }
 		explicit operator bool() const { return IsValid(); }
 
-		operator FTweenHandle() const {
-			return FTweenHandle(TypedPtr);
-		}
+		//operator FTweenHandle() const {
+		//	return FTweenHandle(TypedPtr);
+		//}
 
 		void Reset() {
 			TypedPtr.Reset();
