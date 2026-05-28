@@ -14,11 +14,13 @@
 #include "Specializations/TweenColor.h"
 #include "Specializations/TweenText.h"
 
+#include <type_traits>
+
 namespace TypeTween {
 
 	/* Tween a user provided value, user must make sure value does not get invalidated during the tween's lifetime */
 	template <typename T>
-		requires ((!TIsConst<T>::Value) && Traits::THasITween<T>)
+		requires ((!std::is_const<T>::value) && Traits::THasITween<T>)
 	inline ITween<T>& Tween(T& Value, const UObject* WorldContext) {
 		UTweenSubsystem* Sub = UTweenSubsystem::Get(WorldContext);
 		checkf(Sub, TEXT("UTweenSubsystem not found."));
@@ -27,7 +29,7 @@ namespace TypeTween {
 	}
 
 	template <typename T>
-		requires ((!TIsConst<T>::Value) && Traits::THasITween<T>)
+		requires ((!std::is_const<T>::value) && Traits::THasITween<T>)
 	inline ITween<T>& Tween(T* Value, const UObject* WorldContext) {
 		UTweenSubsystem* Sub = UTweenSubsystem::Get(WorldContext);
 		checkf(Sub, TEXT("UTweenSubsystem not found."));
