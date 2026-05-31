@@ -7,7 +7,8 @@
   <span>TypeTween</span>
 </h1>
 <p align="center">
-  <span align="center"><b>Tweening library for Unreal Engine with a fluent C++ API and Blueprint nodes</b></span>
+  <span align="center"><b>Tweening library for Unreal Engine with a fluent C++ API and Blueprint nodes</b></span><br>
+  <span align="center"><b>Available on <a href="https://www.fab.com/listings/ef75203e-5571-4ecf-ab16-09fd1e3df0f6">FAB</b></span></a>
 </p>
 
 ### C++
