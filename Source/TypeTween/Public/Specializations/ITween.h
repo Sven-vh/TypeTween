@@ -22,12 +22,13 @@ namespace TypeTween {
 		/* End Value [T=1], if not provided, will use current value */
 		ITween& To(T InEnd) { End = MoveTemp(InEnd);   return *this; }
 		/* Relative Value, adds to Start. If Start not provided, uses current value as Start */
-		ITween& By(T InDelta) { 
-			if (!Start.IsSet() && Value){
+		ITween& By(T InDelta) {
+			if (!Start.IsSet() && Value) {
 				Start = *Value;
 			}
-
-			End = Start.GetValue() + MoveTemp(InDelta);
+			if (Start.IsSet()) {
+				End = Start.GetValue() + MoveTemp(InDelta);
+			}
 			return *this;
 		}
 
