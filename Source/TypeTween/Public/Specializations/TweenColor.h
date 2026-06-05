@@ -19,9 +19,11 @@ namespace TypeTween {
 		/* End Value [T=1], if not provided, will use current value */
 		ITween& To(FLinearColor InEnd) { End = MoveTemp(InEnd);   return *this; }
 		/* Relative Value, adds to Start. If Start not provided, uses current value as Start */
-		ITween& By(FLinearColor InDelta) {
-			if (!Start.IsSet() && Value)
-				Start = *Value; End = Start.GetValue() + MoveTemp(InDelta);
+		ITween& By(FLinearColor InDelta){
+			if (!Start.IsSet() && Value) {
+				Start = *Value;
+			}
+			End = Start.GetValue() + MoveTemp(InDelta);
 			return *this;
 		}
 
@@ -77,3 +79,4 @@ namespace TypeTween {
 		TFunction<void(float, const FLinearColor&)> OnUpdateCB;
 	};
 }
+
