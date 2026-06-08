@@ -42,9 +42,12 @@ namespace TypeTween {
 		}
 
 		/** Full typed access via arrow operator. */
-		TweenT* operator->() const { return TypedPtr.Get(); }
-		TweenT& operator*() const { return *TypedPtr; }
-		TweenT* Get() const { return TypedPtr.Get(); }
+		const TweenT* operator->() const { return TypedPtr.Get(); }
+		const TweenT& operator*() const { return *TypedPtr; }
+		const TweenT* Get() const { return TypedPtr.Get(); }
+		TweenT* operator->() { return TypedPtr.Get(); }
+		TweenT& operator*() { return *TypedPtr; }
+		TweenT* Get() { return TypedPtr.Get(); }
 		bool IsValid() const { return TypedPtr.IsValid(); }
 		explicit operator bool() const { return IsValid(); }
 

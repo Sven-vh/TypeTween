@@ -6,6 +6,7 @@
 #include "Kismet/BlueprintAsyncActionBase.h"
 #include "TweenTypes.h"
 #include "TweenControl.h"
+#include "TweenHandle.h"
 #include "TweenAsyncBase.generated.h"
 
 USTRUCT(BlueprintType)
@@ -23,6 +24,13 @@ struct TYPETWEEN_API FTweenSettingsConfig {
 	FTweenSettings Resolve() const {
 		return Settings.IsSet() ? Settings : Config.Resolve();
 	}
+};
+
+USTRUCT(BlueprintType)
+struct TYPETWEEN_API FTweenHandle {
+	GENERATED_BODY()
+
+	TypeTween::FTweenHandle Handle;
 };
 
 /*

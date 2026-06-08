@@ -268,8 +268,8 @@ UCLASS()
 class TYPETWEEN_API UTweenConfigLibrary : public UBlueprintFunctionLibrary {
 	GENERATED_BODY()
 
-	UFUNCTION(BlueprintPure, Category = "TypeTween", meta = (DisplayName = "To Settings", CompactNodeTitle = "->", BlueprintAutocast))
-	static FTweenSettings Conv_ConfigToSettings(FTweenConfig InConfig) {
+	UFUNCTION(BlueprintPure, Category = "TypeTween|Conversions", meta = (CompactNodeTitle = "->", BlueprintAutocast))
+	static FTweenSettings TweenConfigToTweenSettings(FTweenConfig InConfig) {
 		return InConfig;
 	}
 };
