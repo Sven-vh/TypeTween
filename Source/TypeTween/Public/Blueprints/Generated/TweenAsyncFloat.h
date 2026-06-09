@@ -30,7 +30,7 @@ USTRUCT(BlueprintType)
 struct FTweenFloatHandle {
 	GENERATED_BODY()
 
-	TypeTween::TweenHandle<float> Handle;
+	TypeTween::TTweenHandle<float> Handle;
 };
 
 UCLASS(Abstract, BlueprintType)
@@ -45,7 +45,7 @@ protected:
 	UPROPERTY()
 	FTweenFloatConfig TweenConfig;
 
-	FTweenFloatHandle TweenHandle;
+	TypeTween::TTweenWeakHandle<float> TweenHandle;
 
 	FORCEINLINE void CallOnUpdate(const float& CurrentValue) {
 		if (OnUpdate.IsBound()) {
@@ -69,22 +69,7 @@ protected:
 
 		const FTweenSettings Settings = TweenConfig.Resolve();
 
-		//auto& Tween = TypeTween::Tween<float>(WorldContextObject)
-		//	.From(TweenConfig.From)
-		//	.To(TweenConfig.To)
-		//	.Preset(Settings)
-		//	.OnUpdate(
-		//		[this](float /*Alpha*/, const float& CurrentValue) {
-		//			CallOnUpdate(CurrentValue);
-		//		}
-		//	)
-		//	.OnComplete(
-		//		[this]() {
-		//			OnTweenComplete();
-		//		}
-		//	);
-
-		TweenHandle.Handle->From(TweenConfig.From)
+		TweenHandle->From(TweenConfig.From)
 			.To(TweenConfig.To)
 			.Preset(Settings)
 			.OnUpdate(
@@ -98,7 +83,7 @@ protected:
 				}
 			);
 
-		ActivateAdvanced(*TweenHandle.Handle);
+		ActivateAdvanced(*TweenHandle.ToShared());
 	}
 };
 
@@ -117,16 +102,16 @@ public:
 	static UTweenAsyncFloat* TweenFloat(
 		UObject* InWorldContextObject,
 		FTweenFloatConfig Tween,
-		FTweenFloatHandle& test
+		FTweenFloatHandle& handle
 	) {
 		UTweenAsyncFloat* Node = NewObject<UTweenAsyncFloat>();
 		Node->WorldContextObject = InWorldContextObject;
 		Node->TweenConfig = Tween;
-		Node->TweenHandle.Handle = TypeTween::Tween<float>(InWorldContextObject);
+		Node->TweenHandle = TypeTween::Tween<float>(InWorldContextObject);
 		Node->RegisterWithGameInstance(InWorldContextObject);
 
 		/* output */
-		test = Node->TweenHandle;
+		handle.Handle = Node->TweenHandle.ToShared();
 
 		return Node;
 	}
@@ -144,7 +129,14 @@ public:
 			return {};
 		}
 
-		return FTweenHandle{ In.Handle };
+		TSharedPtr<TypeTween::ITweenControl, ESPMode::ThreadSafe> Pinned = In.Handle.GetTypedPtr();
+		if (!Pinned.IsValid()) {
+			return {};  // Tween was destroyed between the ensure and here
+		}
+
+		FTweenHandle Result;
+		Result.Handle = TypeTween::FTweenHandle(Pinned);
+		return Result;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "TypeTween|Config")

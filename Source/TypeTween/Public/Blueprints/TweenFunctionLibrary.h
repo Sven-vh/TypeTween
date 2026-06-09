@@ -15,19 +15,19 @@ public:
 
 	/* Controlling Tweens */
 	UFUNCTION(BlueprintCallable, Category = "TypeTween|Control")
-	static void PauseTween(const FTweenHandle& TweenHandle);
+	static void PauseTween(FTweenHandle TweenHandle);
 
 	UFUNCTION(BlueprintCallable, Category = "TypeTween|Control")
-	static void ResumeTween(const FTweenHandle& TweenHandle);
+	static void ResumeTween(FTweenHandle TweenHandle);
 
 	UFUNCTION(BlueprintCallable, Category = "TypeTween|Control")
-	static void RestartTween(const FTweenHandle& TweenHandle);
+	static void RestartTween(FTweenHandle TweenHandle);
 
 	UFUNCTION(BlueprintCallable, Category = "TypeTween|Control")
-	static void FinishTween(const FTweenHandle& TweenHandle);
+	static void FinishTween(FTweenHandle TweenHandle);
 
 	UFUNCTION(BlueprintCallable, Category = "TypeTween|Control")
-	static void KillTween(const FTweenHandle& TweenHandle);
+	static void KillTween(FTweenHandle TweenHandle);
 
 	/* Querying Tweens */
 	UFUNCTION(BlueprintPure, Category = "TypeTween|Control")

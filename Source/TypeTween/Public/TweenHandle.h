@@ -8,6 +8,17 @@
 namespace TypeTween {
 	namespace Detail {
 
+		template<typename T>
+		FORCEINLINE T* PtrGet(TSharedPtr<T>& Ptr) { return Ptr.Get(); }
+		template<typename T>
+		FORCEINLINE const T* PtrGet(const TSharedPtr<T>& Ptr) { return Ptr.Get(); }
+
+		template<typename T>
+		FORCEINLINE T* PtrGet(TWeakPtr<T>& Ptr) { return Ptr.Pin().Get(); }
+		template<typename T>
+		FORCEINLINE const T* PtrGet(const TWeakPtr<T>& Ptr) { return Ptr.Pin().Get(); }
+
+
 		/* Type-erased handle */
 		template<template<typename> typename PtrType>
 		class TweenHandle {
@@ -19,10 +30,18 @@ namespace TypeTween {
 			}
 
 			/** Access control methods via arrow operator. */
-			ITweenControl* operator->() const { return TweenPtr.Get(); }
-			ITweenControl& operator*() const { return *TweenPtr; }
+			const ITweenControl* operator->() const { return PtrGet(TweenPtr); }
+			const ITweenControl& operator*() const { return *PtrGet(TweenPtr); }
+			const ITweenControl* Get() const { return PtrGet(TweenPtr); }
+
+			ITweenControl* operator->() { return PtrGet(TweenPtr); }
+			ITweenControl& operator*() { return *PtrGet(TweenPtr); }
+			ITweenControl* Get() { return PtrGet(TweenPtr); }
+
 			bool IsValid() const { return TweenPtr.IsValid(); }
 			explicit operator bool() const { return IsValid(); }
+
+			const PtrType<ITweenControl> GetPtr() const { return TweenPtr; }
 
 			/** Release the handle, potentially allowing the tween to be destroyed. */
 			void Reset() { TweenPtr.Reset(); }
@@ -40,20 +59,27 @@ namespace TypeTween {
 
 			/* Construct from typed shared pointer. */
 			explicit TypedTweenHandle(PtrType<TweenT> InTween)
-				//: FTweenHandle(StaticCastSharedPtr<ITweenControl>(InTween))
 				: BaseType(PtrType<ITweenControl>(InTween))
 				, TypedPtr(MoveTemp(InTween)) {
 			}
 
 			/** Full typed access via arrow operator. */
-			const TweenT* operator->() const { return TypedPtr.Get(); }
-			const TweenT& operator*() const { return *TypedPtr; }
-			const TweenT* Get() const { return TypedPtr.Get(); }
-			TweenT* operator->() { return TypedPtr.Get(); }
-			TweenT& operator*() { return *TypedPtr; }
-			TweenT* Get() { return TypedPtr.Get(); }
+			const TweenT* operator->() const { return PtrGet(TypedPtr); }
+			const TweenT& operator*() const { return *PtrGet(TypedPtr); }
+			const TweenT* Get() const { return PtrGet(TypedPtr); }
+
+			TweenT* operator->() { return PtrGet(TypedPtr); }
+			TweenT& operator*() { return *PtrGet(TypedPtr); }
+			TweenT* Get() { return PtrGet(TypedPtr); }
+
+			const PtrType<TweenT>& GetTypedPtr() const { return TypedPtr; }
+
 			bool IsValid() const { return TypedPtr.IsValid(); }
 			explicit operator bool() const { return IsValid(); }
+
+			TypedTweenHandle<TweenT, TSharedPtr> ToShared() {
+				return TypedTweenHandle<TweenT, TSharedPtr>(TypedPtr.Pin());
+			}
 
 			void Reset() {
 				TypedPtr.Reset();

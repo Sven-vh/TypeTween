@@ -1,39 +1,39 @@
 #include "Blueprints/TweenFunctionLibrary.h"
 #include "TweenSubsystem.h"
 
-void UTypeTweenLibrary::PauseTween(const FTweenHandle& TweenHandle) {
+void UTypeTweenLibrary::PauseTween(FTweenHandle TweenHandle) {
 	if (!ensureMsgf(TweenHandle.Handle, TEXT("PauseTween: Tween handle has no tween (nullptr)!"))) {
 		return;
 	}
 	TweenHandle.Handle->Pause();
 }
 
-void UTypeTweenLibrary::ResumeTween(const FTweenHandle& TweenHandle) {
+void UTypeTweenLibrary::ResumeTween(FTweenHandle TweenHandle) {
 	if (!ensureMsgf(TweenHandle.Handle, TEXT("ResumeTween: Tween handle has no tween (nullptr)!"))) {
 		return;
 	}
 	TweenHandle.Handle->Resume();
 }
 
-void UTypeTweenLibrary::RestartTween(const FTweenHandle& TweenHandle) {
+void UTypeTweenLibrary::RestartTween(FTweenHandle TweenHandle) {
 	if (!ensureMsgf(TweenHandle.Handle, TEXT("RestartTween: Tween handle has no tween (nullptr)!"))) {
 		return;
 	}
 	TweenHandle.Handle->Restart();
 }
 
-void UTypeTweenLibrary::FinishTween(const FTweenHandle& TweenHandle) {
+void UTypeTweenLibrary::FinishTween(FTweenHandle TweenHandle) {
 	if (!ensureMsgf(TweenHandle.Handle, TEXT("FinishTween: Tween handle has no tween (nullptr)!"))) {
 		return;
 	}
 	TweenHandle.Handle->Finish();
 }
 
-void UTypeTweenLibrary::KillTween(const FTweenHandle& TweenHandle) {
+void UTypeTweenLibrary::KillTween(FTweenHandle TweenHandle) {
 	if (!ensureMsgf(TweenHandle.Handle, TEXT("KillTween: Tween handle has no tween (nullptr)!"))) {
 		return;
 	}
-	//TweenHandle.Handle->Kill();
+	//TODO:
 }
 
 bool UTypeTweenLibrary::IsDone(const FTweenHandle& TweenHandle) {

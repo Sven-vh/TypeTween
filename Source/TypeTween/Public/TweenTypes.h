@@ -111,7 +111,7 @@ struct TYPETWEEN_API FTweenCallbacks {
 	void OnTick(TFunction<void()> Callback) { OnTickFn = MoveTemp(Callback); }
 
 private:
-	template<typename T, typename Derived>
+	template<typename T>
 	friend class TypeTween::Detail::TweenBase;
 	// ---- Blueprint-bindable delegates ----
 

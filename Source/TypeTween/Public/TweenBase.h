@@ -207,13 +207,21 @@ namespace TypeTween::Detail {
 
 		// -------------------------------------------------- handle conversion
 		/** Convert to a storable typed handle. Keeps the tween alive. */
-		TTweenHandle<Derived> ToHandle() {
-			return TTweenHandle<Derived>(GetSelfShared());
+		Detail::TypedTweenHandle<Derived, TSharedPtr> ToHandle() {
+			return Detail::TypedTweenHandle<Derived, TSharedPtr>(GetSelfShared());
+		}
+
+		Detail::TypedTweenHandle<Derived, TWeakPtr> ToWeakHandle() {
+			return Detail::TypedTweenHandle<Derived, TWeakPtr>(TWeakPtr<Derived>(SelfWeak));
 		}
 
 		/** Implicit conversion to typed handle (enables assignment syntax). */
-		operator TTweenHandle<Derived>() {
+		operator Detail::TypedTweenHandle<Derived, TSharedPtr>() {
 			return ToHandle();
+		}
+
+		operator Detail::TypedTweenHandle<Derived, TWeakPtr>() {
+			return ToWeakHandle();
 		}
 
 		/** Implicit conversion to type-erased handle. */
