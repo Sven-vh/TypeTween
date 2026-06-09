@@ -22,12 +22,18 @@ void UTweenSubsystem::Tick(float DeltaTime) {
 	// Remove tweens that are done AND have no external handle keeping them alive.
 	// If a caller holds an FTweenHandle (shared_ptr), use_count > 1 - keep it.
 	ActiveTweens.RemoveAll([](const FActiveTween& T) {
-		return T.FnIsDone() && T.Lifetime.IsUnique();
+		return T.Control->IsDone() && T.Control.IsUnique();
 		});
 }
 
-void UTweenSubsystem::StopAll() {
+void UTweenSubsystem::KillAll() {
 	ActiveTweens.Empty();
+}
+
+void UTweenSubsystem::PauseTweens() {
+	for (FActiveTween& T : ActiveTweens) {
+		T.Control->Pause();
+	}
 }
 
 TStatId UTweenSubsystem::GetStatId() const {

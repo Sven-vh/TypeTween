@@ -1,7 +1,21 @@
 #include "Blueprints/TweenFunctionLibrary.h"
+#include "TweenSubsystem.h"
 
 void UTypeTweenLibrary::KillAllTweens(UObject* WorldContextObject) {
-	//TODO
+	UTweenSubsystem* Sub = UTweenSubsystem::Get(WorldContextObject);
+	if (!ensureMsgf(Sub, TEXT("KillAllTweens: UTweenSubsystem not found!"))) {
+		return;
+	}
+	//FIXME: this function CAN be called from within a loop over all tweens.
+	Sub->KillAll();
+}
+
+void UTypeTweenLibrary::PauseAllTweens(UObject* WorldContextObject) {
+	UTweenSubsystem* Sub = UTweenSubsystem::Get(WorldContextObject);
+	if (!ensureMsgf(Sub, TEXT("PauseAllTweens: UTweenSubsystem not found!"))) {
+		return;
+	}
+	Sub->PauseTweens();
 }
 
 void UTypeTweenLibrary::PauseTween(const FTweenHandle& TweenHandle) {
@@ -30,6 +44,13 @@ void UTypeTweenLibrary::FinishTween(const FTweenHandle& TweenHandle) {
 		return;
 	}
 	TweenHandle.Handle->Finish();
+}
+
+void UTypeTweenLibrary::KillTween(const FTweenHandle& TweenHandle) {
+	if (!ensureMsgf(TweenHandle.Handle, TEXT("KillTween: Tween handle has no tween (nullptr)!"))) {
+		return;
+	}
+	//TweenHandle.Handle->Kill();
 }
 
 bool UTypeTweenLibrary::IsDone(const FTweenHandle& TweenHandle) {

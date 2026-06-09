@@ -26,32 +26,36 @@ public:
 		Raw->SetSelfWeak(InTween);
 
 		FActiveTween Entry;
-		Entry.Lifetime = InTween; // keeps it alive
+		Entry.Control = InTween; // keeps it alive
 		Entry.FnTick = [Raw](float Dt) { Raw->Tick(Dt); };
-		Entry.FnIsDone = [Raw]() { return Raw->IsDone(); };
 		ActiveTweens.Add(MoveTemp(Entry));
 
 		return *Raw;
 	}
 
-	// Immediately cancel all active tweens.
-	UFUNCTION(BlueprintCallable, Category = "Tweening")
-	void StopAll();
+	/* Tweening control */
+	/* Immediately kill all active tweens.Including handles */
+	void KillAll();
+	/* Pause all active tweens, they can be resumed later */
+	void PauseTweens();
+
+	/* System Control */
+	void DisableTick() { SetTickableTickType(ETickableTickType::Never); }
+	void EnableTick() { SetTickableTickType(ETickableTickType::Conditional); }
 
 	// FTickableGameObject interface
 	void Tick(float DeltaTime) override;
 	TStatId GetStatId() const override;
-	bool IsTickable()         const override { return !ActiveTweens.IsEmpty(); }
+	bool IsTickable() const override { return !ActiveTweens.IsEmpty(); }
 	bool IsTickableWhenPaused() const override { return false; }
-	bool IsTickableInEditor()   const override { return false; }
+	bool IsTickableInEditor() const override { return false; }
 
 private:
 	struct FActiveTween {
-		TSharedPtr<void>       Lifetime; // type-erased shared ownership
+		TSharedPtr<TypeTween::ITweenControl> Control; // type-erased shared ownership
 		TFunction<void(float)> FnTick;
-		TFunction<bool()>      FnIsDone;
 	};
 
-	//TODO: Maybve linked list is better?
+	//TODO: Maybe linked list is better?
 	TArray<FActiveTween> ActiveTweens;
 };
