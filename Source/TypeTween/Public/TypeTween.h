@@ -22,8 +22,8 @@ namespace TypeTween {
 	template <typename T>
 		requires ((!std::is_const<T>::value) && Traits::THasITween<T>)
 	inline ITween<T>& Tween(T& Value, const UObject* WorldContext) {
-		UTweenSubsystem* Sub = UTweenSubsystem::Get(WorldContext);
-		checkf(Sub, TEXT("UTweenSubsystem not found."));
+		UTypeTweenSubsystem* Sub = UTypeTweenSubsystem::Get(WorldContext);
+		checkf(Sub, TEXT("UTypeTweenSubsystem not found."));
 
 		return Sub->RegisterTween(MakeShared<ITween<T>>(&Value));
 	}
@@ -31,8 +31,8 @@ namespace TypeTween {
 	template <typename T>
 		requires ((!std::is_const<T>::value) && Traits::THasITween<T>)
 	inline ITween<T>& Tween(T* Value, const UObject* WorldContext) {
-		UTweenSubsystem* Sub = UTweenSubsystem::Get(WorldContext);
-		checkf(Sub, TEXT("UTweenSubsystem not found."));
+		UTypeTweenSubsystem* Sub = UTypeTweenSubsystem::Get(WorldContext);
+		checkf(Sub, TEXT("UTypeTweenSubsystem not found."));
 
 		return Sub->RegisterTween(MakeShared<ITween<T>>(Value));
 	}
@@ -41,8 +41,8 @@ namespace TypeTween {
 	template <typename T>
 		requires (Traits::THasITween<T> && !std::is_void_v<T>)
 	inline ITween<T>& Tween(const UObject* WorldContext) {
-		UTweenSubsystem* Sub = UTweenSubsystem::Get(WorldContext);
-		checkf(Sub, TEXT("UTweenSubsystem not found."));
+		UTypeTweenSubsystem* Sub = UTypeTweenSubsystem::Get(WorldContext);
+		checkf(Sub, TEXT("UTypeTweenSubsystem not found."));
 
 		return Sub->RegisterTween(
 			StaticCastSharedRef<ITween<T>>(
@@ -57,8 +57,8 @@ namespace TypeTween {
 	inline ITween<Decayed>& Tween(T&& InitialValue, const UObject* WorldContext) {
 		static_assert(std::is_same_v<Decayed, typename TDecay<T>::Type>, "Do not specify Decayed manually.");
 
-		UTweenSubsystem* Sub = UTweenSubsystem::Get(WorldContext);
-		checkf(Sub, TEXT("UTweenSubsystem not found."));
+		UTypeTweenSubsystem* Sub = UTypeTweenSubsystem::Get(WorldContext);
+		checkf(Sub, TEXT("UTypeTweenSubsystem not found."));
 
 		return Sub->RegisterTween(
 			StaticCastSharedRef<ITween<Decayed>>(
@@ -71,8 +71,8 @@ namespace TypeTween {
 
 	/* Tween with no value, useful for just using the timing and callbacks. */
 	inline ITween<void>& Tween(const UObject* WorldContext) {
-		UTweenSubsystem* Sub = UTweenSubsystem::Get(WorldContext);
-		checkf(Sub, TEXT("UTweenSubsystem not found."));
+		UTypeTweenSubsystem* Sub = UTypeTweenSubsystem::Get(WorldContext);
+		checkf(Sub, TEXT("UTypeTweenSubsystem not found."));
 
 		return Sub->RegisterTween(MakeShared<ITween<void>>());
 	}
@@ -88,8 +88,8 @@ namespace TypeTween {
 	template <typename T>
 		requires std::is_base_of_v<AActor, T>
 	inline ITween<AActor>& Tween(T* Actor) {
-		UTweenSubsystem* Sub = UTweenSubsystem::Get(Actor);
-		checkf(Sub, TEXT("UTweenSubsystem not found."));
+		UTypeTweenSubsystem* Sub = UTypeTweenSubsystem::Get(Actor);
+		checkf(Sub, TEXT("UTypeTweenSubsystem not found."));
 
 		return Sub->RegisterTween(MakeShared<ITween<AActor>>(Actor));
 	}

@@ -11,11 +11,11 @@
 // Manages all active tweens for the current game instance.
 // Lives as long as the GameInstance - survives level transitions.
 UCLASS()
-class TYPETWEEN_API UTweenSubsystem : public UGameInstanceSubsystem, public FTickableGameObject {
+class TYPETWEEN_API UTypeTweenSubsystem : public UGameInstanceSubsystem, public FTickableGameObject {
 	GENERATED_BODY()
 
 public:
-	static UTweenSubsystem* Get(const UObject* WorldContext);
+	static UTypeTweenSubsystem* Get(const UObject* WorldContext);
 
 	// Called by Tweening::tween(), stores the tween and returns a stable ref.
 	template<typename T, typename... Args>
@@ -34,13 +34,46 @@ public:
 	}
 
 	/* Tweening control */
-	/* Immediately kill all active tweens.Including handles */
-	void KillAll();
+	/*
+	* Immediately kills all active tweens. Does not trigger callbacks.
+	* @param IncludeHandles If true, also kills tweens held by a handle. If false, only anonymous tweens are affected.
+	*/
+	UFUNCTION(BlueprintCallable, Category = "TypeTween|General",
+		meta = (
+			WorldContext = "WorldContextObject",
+			DefaultToSelf = "WorldContextObject",
+			DisplayName = "Kill All Tweens",
+			ToolTip = "Immediately kills all active tweens. Does not trigger callbacks."
+			))
+	void KillAll(const bool IncludeHandles = false);
+
 	/* Pause all active tweens, they can be resumed later */
+	UFUNCTION(BlueprintCallable, Category = "TypeTween|General",
+		meta = (
+			WorldContext = "WorldContextObject",
+			DefaultToSelf = "WorldContextObject",
+			DisplayName = "Pause All Tweens",
+			ToolTip = "Pauses all currently active tweens, can be resumed individually later. Does NOT pause newly created tweens."
+			))
 	void PauseTweens();
 
 	/* System Control */
+	UFUNCTION(BlueprintCallable, Category = "TypeTween|General",
+		meta = (
+			WorldContext = "WorldContextObject",
+			DefaultToSelf = "WorldContextObject",
+			DisplayName = "Disable Tween Subsystem Tick",
+			ToolTip = "Disables ticking of the tween subsystem. Active and new tweens will not update until tick is enabled again."
+			))
 	void DisableTick() { SetTickableTickType(ETickableTickType::Never); }
+
+	UFUNCTION(BlueprintCallable, Category = "TypeTween|General",
+		meta = (
+			WorldContext = "WorldContextObject",
+			DefaultToSelf = "WorldContextObject",
+			DisplayName = "Enable Tween Subsystem Tick",
+			ToolTip = "Enables ticking of the tween subsystem. Active and new tweens will update as normal."
+			))
 	void EnableTick() { SetTickableTickType(ETickableTickType::Conditional); }
 
 	// FTickableGameObject interface

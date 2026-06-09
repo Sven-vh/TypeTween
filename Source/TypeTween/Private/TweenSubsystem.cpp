@@ -6,16 +6,16 @@
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 
-UTweenSubsystem* UTweenSubsystem::Get(const UObject* WorldContext) {
+UTypeTweenSubsystem* UTypeTweenSubsystem::Get(const UObject* WorldContext) {
 	if (!WorldContext) return nullptr;
 	const UWorld* World = GEngine->GetWorldFromContextObject(
 		WorldContext, EGetWorldErrorMode::LogAndReturnNull);
 	if (!World) return nullptr;
 	const UGameInstance* GI = World->GetGameInstance();
-	return GI ? GI->GetSubsystem<UTweenSubsystem>() : nullptr;
+	return GI ? GI->GetSubsystem<UTypeTweenSubsystem>() : nullptr;
 }
 
-void UTweenSubsystem::Tick(float DeltaTime) {
+void UTypeTweenSubsystem::Tick(float DeltaTime) {
 	for (FActiveTween& T : ActiveTweens)
 		T.FnTick(DeltaTime);
 
@@ -26,16 +26,23 @@ void UTweenSubsystem::Tick(float DeltaTime) {
 		});
 }
 
-void UTweenSubsystem::KillAll() {
-	ActiveTweens.Empty();
+void UTypeTweenSubsystem::KillAll(const bool IncludeHandles) {
+	if (IncludeHandles) {
+		ActiveTweens.Empty();
+	} else {
+		// Don't remove tweens that have external handles.
+		ActiveTweens.RemoveAll([](const FActiveTween& T) {
+			return T.Control.IsUnique();
+			});
+	}
 }
 
-void UTweenSubsystem::PauseTweens() {
+void UTypeTweenSubsystem::PauseTweens() {
 	for (FActiveTween& T : ActiveTweens) {
 		T.Control->Pause();
 	}
 }
 
-TStatId UTweenSubsystem::GetStatId() const {
-	RETURN_QUICK_DECLARE_CYCLE_STAT(UTweenSubsystem, STATGROUP_Tickables);
+TStatId UTypeTweenSubsystem::GetStatId() const {
+	RETURN_QUICK_DECLARE_CYCLE_STAT(UTypeTweenSubsystem, STATGROUP_Tickables);
 }
