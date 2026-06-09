@@ -6,66 +6,74 @@
 #include "TweenTraits.h"
 
 namespace TypeTween {
+	namespace Detail {
 
-	/* Type-erased handle */
-	class FTweenHandle {
-	public:
-		FTweenHandle() = default;
+		/* Type-erased handle */
+		template<template<typename> typename PtrType>
+		class TweenHandle {
+		public:
+			TweenHandle() = default;
 
-		explicit FTweenHandle(TSharedPtr<ITweenControl> InTween)
-			: TweenPtr(MoveTemp(InTween)) {
-		}
+			explicit TweenHandle(PtrType<ITweenControl> InTween)
+				: TweenPtr(MoveTemp(InTween)) {
+			}
 
-		/** Access control methods via arrow operator. */
-		ITweenControl* operator->() const { return TweenPtr.Get(); }
-		ITweenControl& operator*() const { return *TweenPtr; }
-		bool IsValid() const { return TweenPtr.IsValid(); }
-		explicit operator bool() const { return IsValid(); }
+			/** Access control methods via arrow operator. */
+			ITweenControl* operator->() const { return TweenPtr.Get(); }
+			ITweenControl& operator*() const { return *TweenPtr; }
+			bool IsValid() const { return TweenPtr.IsValid(); }
+			explicit operator bool() const { return IsValid(); }
 
-		/** Release the handle, potentially allowing the tween to be destroyed. */
-		void Reset() { TweenPtr.Reset(); }
+			/** Release the handle, potentially allowing the tween to be destroyed. */
+			void Reset() { TweenPtr.Reset(); }
 
-	protected:
-		TSharedPtr<ITweenControl> TweenPtr;
-	};
+		protected:
+			PtrType<ITweenControl> TweenPtr;
+		};
 
-	/* Typed handle */
-	template<typename TweenT>
-	class TTweenHandle : public FTweenHandle {
-	public:
-		TTweenHandle() = default;
+		/* Typed handle */
+		template<typename TweenT, template<typename> typename PtrType>
+		class TypedTweenHandle : public TweenHandle<PtrType> {
+			using BaseType = TweenHandle<PtrType>;
+		public:
+			TypedTweenHandle() = default;
 
-		/** Construct from typed shared pointer. */
-		explicit TTweenHandle(TSharedPtr<TweenT> InTween)
-			: FTweenHandle(StaticCastSharedPtr<ITweenControl>(InTween))
-			, TypedPtr(MoveTemp(InTween)) {
-		}
+			/* Construct from typed shared pointer. */
+			explicit TypedTweenHandle(PtrType<TweenT> InTween)
+				//: FTweenHandle(StaticCastSharedPtr<ITweenControl>(InTween))
+				: BaseType(PtrType<ITweenControl>(InTween))
+				, TypedPtr(MoveTemp(InTween)) {
+			}
 
-		/** Full typed access via arrow operator. */
-		const TweenT* operator->() const { return TypedPtr.Get(); }
-		const TweenT& operator*() const { return *TypedPtr; }
-		const TweenT* Get() const { return TypedPtr.Get(); }
-		TweenT* operator->() { return TypedPtr.Get(); }
-		TweenT& operator*() { return *TypedPtr; }
-		TweenT* Get() { return TypedPtr.Get(); }
-		bool IsValid() const { return TypedPtr.IsValid(); }
-		explicit operator bool() const { return IsValid(); }
+			/** Full typed access via arrow operator. */
+			const TweenT* operator->() const { return TypedPtr.Get(); }
+			const TweenT& operator*() const { return *TypedPtr; }
+			const TweenT* Get() const { return TypedPtr.Get(); }
+			TweenT* operator->() { return TypedPtr.Get(); }
+			TweenT& operator*() { return *TypedPtr; }
+			TweenT* Get() { return TypedPtr.Get(); }
+			bool IsValid() const { return TypedPtr.IsValid(); }
+			explicit operator bool() const { return IsValid(); }
 
-		//operator FTweenHandle() const {
-		//	return FTweenHandle(TypedPtr);
-		//}
+			void Reset() {
+				TypedPtr.Reset();
+				BaseType::Reset();
+			}
 
-		void Reset() {
-			TypedPtr.Reset();
-			FTweenHandle::Reset();
-		}
+		private:
+			PtrType<TweenT> TypedPtr;
+		};
+	}
 
-	private:
-		TSharedPtr<TweenT> TypedPtr;
-	};
 
-	/* Convenience alias */
+	/* aliases */
+	using FTweenHandle = Detail::TweenHandle<TSharedPtr>;
+	using FTweenWeakHandle = Detail::TweenHandle<TWeakPtr>;
+
 	template<typename T>
-	using TweenHandle = TTweenHandle<ITween<T>>;
+	using TTweenHandle = Detail::TypedTweenHandle<ITween<T>, TSharedPtr>;
+	template<typename T>
+	using TTweenWeakHandle = Detail::TypedTweenHandle<ITween<T>, TWeakPtr>;
+
 }
 

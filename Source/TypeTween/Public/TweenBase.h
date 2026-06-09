@@ -252,7 +252,7 @@ namespace TypeTween::Detail {
 
 		float GetTotalAnimTime() const {
 			if (Settings.RepeatCount < 0) return TNumericLimits<float>::Max();
-			return GetCycleTime() * (Settings.Delays.Repeat + 1) - Settings.Delays.Repeat;
+			return GetCycleTime() * (Settings.RepeatCount + 1) - Settings.Delays.Repeat;
 		}
 
 		float GetMaxElapsed() const {
