@@ -36,6 +36,13 @@ void UTypeTweenLibrary::KillTween(FTweenHandle TweenHandle) {
 	//TODO:
 }
 
+bool UTypeTweenLibrary::IsValid(const FTweenHandle& TweenHandle) {
+	if (!TweenHandle.Handle) {
+		return false;
+	}
+	return true;
+}
+
 bool UTypeTweenLibrary::IsDone(const FTweenHandle& TweenHandle) {
 	if (!ensureMsgf(TweenHandle.Handle, TEXT("IsDone: Tween handle has no tween (nullptr)!"))) {
 		return true;
@@ -65,7 +72,7 @@ const FTweenSettings& UTypeTweenLibrary::GetSettings(const FTweenHandle& TweenHa
 	return TweenHandle.Handle->GetSettings();
 }
 
-void UTypeTweenLibrary::SetSettings(UPARAM(ref)FTweenHandle& TweenHandle, const FTweenSettings& Settings) {
+void UTypeTweenLibrary::SetSettings(FTweenHandle TweenHandle, const FTweenSettings& Settings) {
 	if (!ensureMsgf(TweenHandle.Handle, TEXT("SetSettings: Tween handle has no tween (nullptr)!"))) {
 		return;
 	}

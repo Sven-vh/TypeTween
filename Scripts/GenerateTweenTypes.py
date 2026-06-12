@@ -16,6 +16,8 @@ MODIFYING THE TEMPLATE
     ${CPP_TYPE}     — e.g.  float | FVector | FTransform
     ${DEFAULT_FROM} — e.g.  " = 0.f"  (include leading space, or leave empty "")
     ${DEFAULT_TO}   — e.g.  " = 1.f"
+    ${DEFAULT_FROM_VALUE} — e.g.  "0.f" (same as DEFAULT_FROM but without the " = " prefix)
+    ${DEFAULT_TO_VALUE}   — e.g.  "1.f" (same as DEFAULT_TO but without the " = " prefix)
     ${CATEGORY}     — e.g.  "Tweening|Float"
     ${DISPLAY_NAME} — e.g.  "Tween Float"
     ${TOOLTIP}      — tooltip shown in Blueprint
@@ -45,6 +47,8 @@ TWEEN_TYPES: list[dict[str, str]] = [
         "CPP_TYPE":     "float",
         "DEFAULT_FROM": " = 0.f",
         "DEFAULT_TO":   " = 1.f",
+        "DEFAULT_FROM_VALUE": "0.f",
+        "DEFAULT_TO_VALUE":   "1.f",
         "CATEGORY":     "TypeTween",
         "DISPLAY_NAME": "Tween Float",
         "TOOLTIP":      "Tweens a float from [From] to [To].",
@@ -54,6 +58,8 @@ TWEEN_TYPES: list[dict[str, str]] = [
         "CPP_TYPE":     "double",
         "DEFAULT_FROM": " = 0.0",
         "DEFAULT_TO":   " = 1.0",
+        "DEFAULT_FROM_VALUE": "0.0",
+        "DEFAULT_TO_VALUE":   "1.0",
         "CATEGORY":     "TypeTween",
         "DISPLAY_NAME": "Tween Double",
         "TOOLTIP":      "Tweens a double from [From] to [To].",
@@ -63,6 +69,8 @@ TWEEN_TYPES: list[dict[str, str]] = [
         "CPP_TYPE":     "FVector",
         "DEFAULT_FROM": " = FVector::ZeroVector",
         "DEFAULT_TO":   " = FVector::OneVector",
+        "DEFAULT_FROM_VALUE": "FVector::ZeroVector",
+        "DEFAULT_TO_VALUE":   "FVector::OneVector",
         "CATEGORY":     "TypeTween",
         "DISPLAY_NAME": "Tween Vector",
         "TOOLTIP":      "Tweens an FVector from [From] to [To].",
@@ -72,6 +80,8 @@ TWEEN_TYPES: list[dict[str, str]] = [
         "CPP_TYPE":     "FVector2D",
         "DEFAULT_FROM": " = FVector2D::ZeroVector",
         "DEFAULT_TO":   " = FVector2D::UnitVector",
+        "DEFAULT_FROM_VALUE": "FVector2D::ZeroVector",
+        "DEFAULT_TO_VALUE":   "FVector2D::UnitVector",
         "CATEGORY":     "TypeTween",
         "DISPLAY_NAME": "Tween Vector2D",
         "TOOLTIP":      "Tweens an FVector2D from [From] to [To].",
@@ -81,6 +91,8 @@ TWEEN_TYPES: list[dict[str, str]] = [
         "CPP_TYPE":     "FRotator",
         "DEFAULT_FROM": " = FRotator::ZeroRotator",
         "DEFAULT_TO":   " = FRotator::ZeroRotator",
+        "DEFAULT_FROM_VALUE": "FRotator::ZeroRotator",
+        "DEFAULT_TO_VALUE":   "FRotator::ZeroRotator",
         "CATEGORY":     "TypeTween",
         "DISPLAY_NAME": "Tween Rotator",
         "TOOLTIP":      "Tweens an FRotator from [From] to [To].",
@@ -99,6 +111,8 @@ TWEEN_TYPES: list[dict[str, str]] = [
         "CPP_TYPE":     "FTransform",
         "DEFAULT_FROM": "",   # FTransform default-constructs to identity — no initialiser needed
         "DEFAULT_TO":   "",
+        "DEFAULT_FROM_VALUE": "FTransform::Identity",
+        "DEFAULT_TO_VALUE":   "FTransform::Identity",
         "CATEGORY":     "TypeTween",
         "DISPLAY_NAME": "Tween Transform",
         "TOOLTIP":      "Tweens an FTransform from [From] to [To].",
@@ -108,6 +122,8 @@ TWEEN_TYPES: list[dict[str, str]] = [
         "CPP_TYPE":     "int32",
         "DEFAULT_FROM": " = 0",
         "DEFAULT_TO":   " = 1",
+        "DEFAULT_FROM_VALUE": "0",
+        "DEFAULT_TO_VALUE":   "1",
         "CATEGORY":     "TypeTween",
         "DISPLAY_NAME": "Tween Int32",
         "TOOLTIP":      "Tweens an int32 from [From] to [To].",

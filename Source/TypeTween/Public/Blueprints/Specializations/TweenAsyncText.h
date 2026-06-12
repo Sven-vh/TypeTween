@@ -6,16 +6,13 @@
 #include "Blueprints/TweenAsyncBase.h"
 #include "TypeTween.h"
 #include "Tools/TextLerps.h"
+#include "Blueprints/TweenFunctionLibrary.h"
 #include "TweenAsyncText.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTextTweenUpdate, FText, CurrentValue);
 
-// -------------------------------------------------------------
-// Config struct - exposed to Blueprint details panel
-// -------------------------------------------------------------
-
 USTRUCT(BlueprintType)
-struct FTweenTextConfig : public FTweenSettingsConfig {
+struct FTweenTextSettings : public FTweenSettings {
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween")
@@ -34,11 +31,19 @@ struct FTweenTextConfig : public FTweenSettingsConfig {
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween",
 		meta = (EditCondition = "GlyphSet == ETextGlyphSet::Custom", EditConditionHides))
 	FString CustomGlyphs;
+
+	FTweenTextSettings& operator=(const FTweenSettings& Other) {
+		FTweenSettings::operator=(Other); // copies Duration, Ease, RepeatCount, etc.
+		return *this;
+	}
 };
 
-// -------------------------------------------------------------
-// Abstract base - OnUpdate + config + all events
-// -------------------------------------------------------------
+USTRUCT(BlueprintType)
+struct FTweenTextHandle {
+	GENERATED_BODY()
+
+	TypeTween::TTweenHandle<FText> Handle;
+};
 
 UCLASS(Abstract, BlueprintType)
 class TYPETWEEN_API UTweenAsyncTextBase : public UTweenAsyncBase {
@@ -50,7 +55,9 @@ public:
 
 protected:
 	UPROPERTY()
-	FTweenTextConfig TweenConfig;
+	FTweenTextSettings TweenSettings;
+
+	TypeTween::TTweenWeakHandle<FText> TweenHandle;
 
 	FORCEINLINE void CallOnUpdate(const FText& CurrentValue) {
 		if (OnUpdate.IsBound()) {
@@ -58,10 +65,6 @@ protected:
 		}
 	}
 };
-
-// -------------------------------------------------------------
-// Concrete async node - delegates + Activate, no factory fn
-// -------------------------------------------------------------
 
 UCLASS(meta = (HideCategories = Object))
 class TYPETWEEN_API UTweenAsyncText : public UTweenAsyncTextBase {
@@ -76,14 +79,11 @@ protected:
 			return;
 		}
 
-		const FTweenSettings Settings = TweenConfig.Resolve();
-
-		auto& Tween = TypeTween::Tween<FText>(WorldContextObject)
-			.From(TweenConfig.From)
-			.To(TweenConfig.To)
-			.Mode(TweenConfig.LerpMode)
-			.GlyphSet(TweenConfig.GlyphSet, TweenConfig.CustomGlyphs)
-			.Preset(Settings)
+		TweenHandle->From(TweenSettings.From)
+			.To(TweenSettings.To)
+			.Mode(TweenSettings.LerpMode)
+			.GlyphSet(TweenSettings.GlyphSet, TweenSettings.CustomGlyphs)
+			.Preset(TweenSettings)
 			.OnUpdate(
 				[this](float /*Alpha*/, const FText& CurrentValue) {
 					CallOnUpdate(CurrentValue);
@@ -95,16 +95,9 @@ protected:
 				}
 			);
 
-		ActivateAdvanced(Tween);
+		ActivateAdvanced(*TweenHandle.ToShared());
 	}
 };
-
-// -------------------------------------------------------------
-// Factory - NOT BlueprintType, invisible to UK2Node_AsyncAction
-// auto-scanner. K2Node sets ProxyFactoryClass to this and
-// ProxyClass to UTweenAsyncText (which keeps BlueprintType
-// for delegate pin generation).
-// -------------------------------------------------------------
 
 UCLASS()
 class TYPETWEEN_API UTweenAsyncTextFactory : public UObject {
@@ -120,12 +113,113 @@ public:
 			))
 	static UTweenAsyncText* TweenText(
 		UObject* InWorldContextObject,
-		FTweenTextConfig Tween
+		FTweenTextSettings Tween,
+		FTweenTextHandle& handle
 	) {
 		UTweenAsyncText* Node = NewObject<UTweenAsyncText>();
 		Node->WorldContextObject = InWorldContextObject;
-		Node->TweenConfig = Tween;
+		Node->TweenSettings = Tween;
+		Node->TweenHandle = TypeTween::Tween<FText>(InWorldContextObject);
 		Node->RegisterWithGameInstance(InWorldContextObject);
+
+		/* output */
+		handle.Handle = Node->TweenHandle.ToShared();
+
 		return Node;
+	}
+};
+
+/* conversion function library */
+UCLASS()
+class TYPETWEEN_API UTweenTextFunctionLibrary : public UBlueprintFunctionLibrary {
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintPure, Category = "TypeTween|Config|Text")
+	static FTweenTextSettings GetSettings(const FTweenTextHandle& In) {
+		if (!ensureMsgf(In.Handle, TEXT("GetSettings: Input handle has no tween (nullptr)!"))) {
+			return {};
+		}
+
+		FTweenTextSettings Settings;
+		Settings = In.Handle->GetSettings();
+		Settings.From = FText::FromString(In.Handle->GetStart().Get(FString()));
+		Settings.To = FText::FromString(In.Handle->GetEnd().Get(FString()));
+		return Settings;
+	}
+
+	UFUNCTION(BlueprintCallable, Category = "TypeTween|Config|Text")
+	static void SetSettings(UPARAM(ref) FTweenTextHandle& In, FTweenTextSettings Settings) {
+		if (!ensureMsgf(In.Handle, TEXT("SetSettings: Input handle has no tween (nullptr)!"))) {
+			return;
+		}
+		In.Handle->From(Settings.From)
+			.To(Settings.To)
+			.Mode(Settings.LerpMode)
+			.GlyphSet(Settings.GlyphSet, Settings.CustomGlyphs)
+			.Preset(Settings);
+	}
+
+	UFUNCTION(BlueprintPure, meta = (BlueprintAutocast, CompactNodeTitle = "->"), Category = "TypeTween|Conversions")
+	static FTweenHandle ConvertToTweenHandle(const FTweenTextHandle& In) {
+		if (!ensureMsgf(In.Handle, TEXT("ConvertToTweenHandle: Input handle has no tween (nullptr)!"))) {
+			return {};
+		}
+
+		TSharedPtr<TypeTween::ITweenControl, ESPMode::ThreadSafe> Pinned = In.Handle.GetTypedPtr();
+		if (!Pinned.IsValid()) {
+			return {};  // Tween was destroyed between the ensure and here
+		}
+
+		FTweenHandle Result;
+		Result.Handle = TypeTween::FTweenHandle(Pinned);
+		return Result;
+	}
+
+	/* Control - thin wrappers from UTypeTweenLibrary for UX and ease of use */
+	UFUNCTION(BlueprintCallable, Category = "TypeTween|Control|Text")
+	static void PauseTween(UPARAM(ref) FTweenTextHandle& In) {
+		UTypeTweenLibrary::PauseTween(ConvertToTweenHandle(In));
+	}
+
+	UFUNCTION(BlueprintCallable, Category = "TypeTween|Control|Text")
+	static void ResumeTween(UPARAM(ref) FTweenTextHandle& In) {
+		UTypeTweenLibrary::ResumeTween(ConvertToTweenHandle(In));
+	}
+
+	UFUNCTION(BlueprintCallable, Category = "TypeTween|Control|Text")
+	static void RestartTween(UPARAM(ref) FTweenTextHandle& In) {
+		UTypeTweenLibrary::RestartTween(ConvertToTweenHandle(In));
+	}
+
+	UFUNCTION(BlueprintCallable, Category = "TypeTween|Control|Text")
+	static void FinishTween(UPARAM(ref) FTweenTextHandle& In) {
+		UTypeTweenLibrary::FinishTween(ConvertToTweenHandle(In));
+	}
+
+	UFUNCTION(BlueprintCallable, Category = "TypeTween|Control|Text")
+	static void KillTween(UPARAM(ref) FTweenTextHandle& In) {
+		UTypeTweenLibrary::KillTween(ConvertToTweenHandle(In));
+	}
+
+	/* Querying - thin wrappers from UTypeTweenLibrary for UX and ease of use */
+	UFUNCTION(BlueprintPure, Category = "TypeTween|Control|Text")
+	static bool IsValid(const FTweenTextHandle& In) {
+		return UTypeTweenLibrary::IsValid(ConvertToTweenHandle(In));
+	}
+
+	UFUNCTION(BlueprintPure, Category = "TypeTween|Control|Text")
+	static bool IsDone(const FTweenTextHandle& In) {
+		return UTypeTweenLibrary::IsDone(ConvertToTweenHandle(In));
+	}
+
+	UFUNCTION(BlueprintPure, Category = "TypeTween|Control|Text")
+	static bool IsPlaying(const FTweenTextHandle& In) {
+		return UTypeTweenLibrary::IsPlaying(ConvertToTweenHandle(In));
+	}
+
+	UFUNCTION(BlueprintPure, Category = "TypeTween|Control|Text")
+	static bool IsPaused(const FTweenTextHandle& In) {
+		return UTypeTweenLibrary::IsPaused(ConvertToTweenHandle(In));
 	}
 };

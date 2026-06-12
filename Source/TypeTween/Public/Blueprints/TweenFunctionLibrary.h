@@ -30,13 +30,31 @@ public:
 	static void KillTween(FTweenHandle TweenHandle);
 
 	/* Querying Tweens */
-	UFUNCTION(BlueprintPure, Category = "TypeTween|Control")
+	UFUNCTION(BlueprintPure, Category = "TypeTween|Control",
+		meta = (
+			DisplayName = "Is Tween Valid",
+			ToolTip = "Returns true if a tween has been assigned and is valid."
+			))
+	static bool IsValid(const FTweenHandle& TweenHandle);
+	UFUNCTION(BlueprintPure, Category = "TypeTween|Control",
+		meta = (
+			DisplayName = "Is Tween Done",
+			ToolTip = "Returns true if the tween has completed. Infinite tweens will never be done."
+			))
 	static bool IsDone(const FTweenHandle& TweenHandle);
 
-	UFUNCTION(BlueprintPure, Category = "TypeTween|Control")
+	UFUNCTION(BlueprintPure, Category = "TypeTween|Control",
+		meta = (
+			DisplayName = "Is Tween Playing",
+			ToolTip = "Returns true if the tween is currently playing. False when done or paused."
+			))
 	static bool IsPlaying(const FTweenHandle& TweenHandle);
 
-	UFUNCTION(BlueprintPure, Category = "TypeTween|Control")
+	UFUNCTION(BlueprintPure, Category = "TypeTween|Control",
+		meta = (
+			DisplayName = "Is Tween Paused",
+			ToolTip = "Returns true if the tween is currently paused."
+			))
 	static bool IsPaused(const FTweenHandle& TweenHandle);
 
 	/* Getting/Setting Config during runtime */
@@ -44,5 +62,5 @@ public:
 	static const FTweenSettings& GetSettings(const FTweenHandle& TweenHandle);
 
 	UFUNCTION(BlueprintCallable, Category = "TypeTween|Config")
-	static void SetSettings(UPARAM(ref) FTweenHandle& TweenHandle, const FTweenSettings& Settings);
+	static void SetSettings(FTweenHandle TweenHandle, const FTweenSettings& Settings);
 };

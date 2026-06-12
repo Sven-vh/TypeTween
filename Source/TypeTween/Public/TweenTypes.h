@@ -86,10 +86,6 @@ struct TYPETWEEN_API FTweenSettings {
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timing")
 	FTweenDelays Delays;
 
-	bool IsSet() const {
-		return *this != FTweenSettings();
-	}
-
 	bool operator==(const FTweenSettings& Other) const = default;
 };
 
@@ -177,99 +173,104 @@ private:
 
 };
 
-/* Struct to specify which tween settings to override when using a preset. */
-/* A bit ugly to copy each field, but necessary for Unreal's property system. */
-/* Feel free to make an issue/PR to adress this! */
-USTRUCT()
-struct TYPETWEEN_API FTweenOverrides {
-	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, meta = (InlineEditConditionToggle), Category = "TypeTween")
-	bool bDuration = false;
-	UPROPERTY(EditAnywhere, Category = "TypeTween", meta = (EditCondition = "bDuration",
-		ToolTip = "Total time for one forward or reverse playthrough, not including delays."))
-	float Duration = 1.f;
+/* ARCHIVED */
+/* Decided to not use presets and overrides anymore */
 
-	UPROPERTY(EditAnywhere, meta = (InlineEditConditionToggle), Category = "TypeTween")
-	bool bEase = false;
-	UPROPERTY(EditAnywhere, Category = "TypeTween", meta = (EditCondition = "bEase",
-		ToolTip = "Easing function for the tween, see https://easings.net/"))
-	ETweenEase Ease = ETweenEase::Linear;
-
-	UPROPERTY(EditAnywhere, meta = (InlineEditConditionToggle), Category = "TypeTween")
-	bool bRepeatCount = false;
-	UPROPERTY(EditAnywhere, Category = "TypeTween", meta = (EditCondition = "bRepeatCount",
-		ToolTip = "0 = play once, -1 = infinite, N = play N+1 times total"))
-	int32 RepeatCount = 0;
-
-	UPROPERTY(EditAnywhere, meta = (InlineEditConditionToggle), Category = "TypeTween")
-	bool bLoopMode = false;
-	UPROPERTY(EditAnywhere, Category = "TypeTween", meta = (EditCondition = "bLoopMode",
-		ToolTip = "How the tween loops back after reaching the end."))
-	ETweenLoopMode LoopMode = ETweenLoopMode::Restart;
-
-	UPROPERTY(EditAnywhere, meta = (InlineEditConditionToggle), Category = "TypeTween")
-	bool bDelays = false;
-	UPROPERTY(EditAnywhere, Category = "TypeTween", meta = (EditCondition = "bDelays"))
-	FTweenDelays Delays;
-};
-
-/* Data asset class to hold tween presets. */
-UCLASS()
-class TYPETWEEN_API UTweenPreset : public UDataAsset {
-	GENERATED_BODY()
-public:
-	UPROPERTY(EditAnywhere, Category = "TypeTween")
-	FTweenSettings Settings;
-};
-
-USTRUCT(BlueprintType)
-struct TYPETWEEN_API FTweenConfig {
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, Category = "TypeTween", meta = (
-		DisplayName = "Preset (Optional)",
-		ToolTip = "Assign a shared preset asset to reuse settings across actors. Leave empty to configure inline below."
-		))
-	UTweenPreset* Preset = nullptr;
-
-	UPROPERTY(EditAnywhere, Category = "TypeTween", meta = (
-		EditCondition = "Preset == nullptr",
-		EditConditionHides
-		))
-	FTweenSettings Settings;
-
-	UPROPERTY(EditAnywhere, Category = "TypeTween", meta = (
-		DisplayName = "Overrides",
-		EditCondition = "Preset != nullptr", EditConditionHides,
-		ToolTip = "Check a field to override that value from the preset."
-		))
-	FTweenOverrides Overrides;
-
-	FTweenSettings Resolve() const {
-		if (!Preset) return Settings;
-
-		/* Copy preset settings and apply overrides */
-		/* Code duplication necessary due to Unreal's property system */
-		/* If you have any suggestions on how to make this cleaner, please make an issue/PR! */
-		FTweenSettings Out = Preset->Settings;
-		if (Overrides.bDuration) Out.Duration = Overrides.Duration;
-		if (Overrides.bEase) Out.Ease = Overrides.Ease;
-		if (Overrides.bRepeatCount) Out.RepeatCount = Overrides.RepeatCount;
-		if (Overrides.bLoopMode) Out.LoopMode = Overrides.LoopMode;
-		if (Overrides.bDelays) Out.Delays = Overrides.Delays;
-		return Out;
-	}
-
-	operator FTweenSettings() const { return Resolve(); }
-};
-
-UCLASS()
-class TYPETWEEN_API UTweenConfigLibrary : public UBlueprintFunctionLibrary {
-	GENERATED_BODY()
-
-	UFUNCTION(BlueprintPure, Category = "TypeTween|Conversions", meta = (CompactNodeTitle = "->", BlueprintAutocast))
-	static FTweenSettings TweenConfigToTweenSettings(FTweenConfig InConfig) {
-		return InConfig;
-	}
-};
+// /* Struct to specify which tween settings to override when using a preset. */
+// /* A bit ugly to copy each field, but necessary for Unreal's property system. */
+// /* Feel free to make an issue/PR to adress this! */
+// USTRUCT()
+// struct TYPETWEEN_API FTweenOverrides {
+// 	GENERATED_BODY()
+// 
+// 	UPROPERTY(EditAnywhere, meta = (InlineEditConditionToggle), Category = "TypeTween")
+// 	bool bDuration = false;
+// 	UPROPERTY(EditAnywhere, Category = "TypeTween", meta = (EditCondition = "bDuration",
+// 		ToolTip = "Total time for one forward or reverse playthrough, not including delays."))
+// 	float Duration = 1.f;
+// 
+// 	UPROPERTY(EditAnywhere, meta = (InlineEditConditionToggle), Category = "TypeTween")
+// 	bool bEase = false;
+// 	UPROPERTY(EditAnywhere, Category = "TypeTween", meta = (EditCondition = "bEase",
+// 		ToolTip = "Easing function for the tween, see https://easings.net/"))
+// 	ETweenEase Ease = ETweenEase::Linear;
+// 
+// 	UPROPERTY(EditAnywhere, meta = (InlineEditConditionToggle), Category = "TypeTween")
+// 	bool bRepeatCount = false;
+// 	UPROPERTY(EditAnywhere, Category = "TypeTween", meta = (EditCondition = "bRepeatCount",
+// 		ToolTip = "0 = play once, -1 = infinite, N = play N+1 times total"))
+// 	int32 RepeatCount = 0;
+// 
+// 	UPROPERTY(EditAnywhere, meta = (InlineEditConditionToggle), Category = "TypeTween")
+// 	bool bLoopMode = false;
+// 	UPROPERTY(EditAnywhere, Category = "TypeTween", meta = (EditCondition = "bLoopMode",
+// 		ToolTip = "How the tween loops back after reaching the end."))
+// 	ETweenLoopMode LoopMode = ETweenLoopMode::Restart;
+// 
+// 	UPROPERTY(EditAnywhere, meta = (InlineEditConditionToggle), Category = "TypeTween")
+// 	bool bDelays = false;
+// 	UPROPERTY(EditAnywhere, Category = "TypeTween", meta = (EditCondition = "bDelays"))
+// 	FTweenDelays Delays;
+// };
+// 
+// /* Data asset class to hold tween presets. */
+// UCLASS()
+// class TYPETWEEN_API UTweenPreset : public UDataAsset {
+// 	GENERATED_BODY()
+// public:
+// 	UPROPERTY(EditAnywhere, Category = "TypeTween")
+// 	FTweenSettings Settings;
+// };
+// 
+// USTRUCT(BlueprintType)
+// struct TYPETWEEN_API FTweenConfig {
+// 	GENERATED_BODY()
+// 
+// 	UPROPERTY(EditAnywhere, Category = "TypeTween", meta = (
+// 		DisplayName = "Preset (Optional)",
+// 		ToolTip = "Assign a shared preset asset to reuse settings across actors. Leave empty to configure inline below."
+// 		))
+// 	UTweenPreset* Preset = nullptr;
+// 
+// 	UPROPERTY(EditAnywhere, Category = "TypeTween", meta = (
+// 		EditCondition = "Preset == nullptr",
+// 		EditConditionHides
+// 		))
+// 	FTweenSettings Settings;
+// 
+// 	UPROPERTY(EditAnywhere, Category = "TypeTween", meta = (
+// 		DisplayName = "Overrides",
+// 		EditCondition = "Preset != nullptr", EditConditionHides,
+// 		ToolTip = "Check a field to override that value from the preset."
+// 		))
+// 	FTweenOverrides Overrides;
+// 
+// 	FTweenSettings Resolve() const {
+// 		if (!Preset) return Settings;
+// 
+// 		/* Copy preset settings and apply overrides */
+// 		/* Code duplication necessary due to Unreal's property system */
+// 		/* If you have any suggestions on how to make this cleaner, please make an issue/PR! */
+// 		FTweenSettings Out = Preset->Settings;
+// 		if (Overrides.bDuration) Out.Duration = Overrides.Duration;
+// 		if (Overrides.bEase) Out.Ease = Overrides.Ease;
+// 		if (Overrides.bRepeatCount) Out.RepeatCount = Overrides.RepeatCount;
+// 		if (Overrides.bLoopMode) Out.LoopMode = Overrides.LoopMode;
+// 		if (Overrides.bDelays) Out.Delays = Overrides.Delays;
+// 		return Out;
+// 	}
+// 
+// 	operator FTweenSettings() const { return Resolve(); }
+// };
+// 
+// UCLASS()
+// class TYPETWEEN_API UTweenConfigLibrary : public UBlueprintFunctionLibrary {
+// 	GENERATED_BODY()
+// 
+// 	UFUNCTION(BlueprintPure, Category = "TypeTween|Conversions", meta = (CompactNodeTitle = "->", BlueprintAutocast))
+// 	static FTweenSettings TweenConfigToTweenSettings(FTweenConfig InConfig) {
+// 		return InConfig;
+// 	}
+// };
+// 

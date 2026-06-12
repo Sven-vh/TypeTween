@@ -44,7 +44,6 @@ namespace TypeTween::Detail {
 			return Self();
 		}
 
-		Derived& Preset(FTweenConfig Preset) { Settings = Preset.Resolve(); return Self(); }
 		Derived& Preset(FTweenSettings Preset) { Settings = MoveTemp(Preset); return Self(); }
 
 		// -------------------------------------------------- callbacks (C++ TFunction setters)

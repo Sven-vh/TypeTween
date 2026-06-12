@@ -10,23 +10,6 @@
 #include "TweenAsyncBase.generated.h"
 
 USTRUCT(BlueprintType)
-struct TYPETWEEN_API FTweenSettingsConfig {
-	GENERATED_BODY()
-
-	/* Wire a runtime FTweenSettings directly (takes priority over Config below) */
-	UPROPERTY(BlueprintReadWrite, meta = (HideInDetailPanel), Category = "TypeTween")
-	FTweenSettings Settings;
-
-	/* Preset + overrides - visible in the Details panel */
-	UPROPERTY(EditAnywhere, meta = (DisplayName = "Settings"), Category = "TypeTween")
-	FTweenConfig Config;
-
-	FTweenSettings Resolve() const {
-		return Settings.IsSet() ? Settings : Config.Resolve();
-	}
-};
-
-USTRUCT(BlueprintType)
 struct TYPETWEEN_API FTweenHandle {
 	GENERATED_BODY()
 
