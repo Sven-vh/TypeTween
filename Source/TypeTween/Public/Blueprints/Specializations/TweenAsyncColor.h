@@ -11,7 +11,7 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnColorTweenUpdate, FLinearColor, CurrentValue);
 
 USTRUCT(BlueprintType)
-struct FTweenColorSettings : public FTweenSettings {
+struct FTweenColorSettings {
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween")
@@ -23,10 +23,9 @@ struct FTweenColorSettings : public FTweenSettings {
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween")
 	EColorLerpMode ColorSpace = EColorLerpMode::Linear;
 
-	FTweenColorSettings& operator=(const FTweenSettings& Other) {
-		FTweenSettings::operator=(Other); // copies Duration, Ease, RepeatCount, etc.
-		return *this;
-	}
+	/* Common tween settings */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween|Settings")
+	FTweenSettings Settings;
 };
 
 USTRUCT(BlueprintType)
@@ -73,7 +72,7 @@ protected:
 		TweenHandle->From(TweenSettings.From)
 			.To(TweenSettings.To)
 			.ColorSpace(TweenSettings.ColorSpace)
-			.Preset(TweenSettings)
+			.Preset(TweenSettings.Settings)
 			.OnUpdate(
 				[this](float /*Alpha*/, const FLinearColor& CurrentValue) {
 					CallOnUpdate(CurrentValue);
@@ -132,9 +131,9 @@ public:
 		}
 
 		FTweenColorSettings Settings;
-		Settings = In.Handle->GetSettings();
 		Settings.From = In.Handle->GetStart().Get(FLinearColor::Black);
 		Settings.To = In.Handle->GetEnd().Get(FLinearColor::White);
+		Settings.Settings = In.Handle->GetSettings();
 		return Settings;
 	}
 
@@ -146,7 +145,7 @@ public:
 		In.Handle->From(Settings.From)
 			.To(Settings.To)
 			.ColorSpace(Settings.ColorSpace)
-			.Preset(Settings);
+			.Preset(Settings.Settings);
 	}
 
 	UFUNCTION(BlueprintPure, meta = (BlueprintAutocast, CompactNodeTitle = "->"), Category = "TypeTween|Conversions")

@@ -12,7 +12,7 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTextTweenUpdate, FText, CurrentValue);
 
 USTRUCT(BlueprintType)
-struct FTweenTextSettings : public FTweenSettings {
+struct FTweenTextSettings  {
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween")
@@ -32,10 +32,9 @@ struct FTweenTextSettings : public FTweenSettings {
 		meta = (EditCondition = "GlyphSet == ETextGlyphSet::Custom", EditConditionHides))
 	FString CustomGlyphs;
 
-	FTweenTextSettings& operator=(const FTweenSettings& Other) {
-		FTweenSettings::operator=(Other); // copies Duration, Ease, RepeatCount, etc.
-		return *this;
-	}
+	/* Common tween settings */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween|Settings")
+	FTweenSettings Settings;
 };
 
 USTRUCT(BlueprintType)
@@ -83,7 +82,7 @@ protected:
 			.To(TweenSettings.To)
 			.Mode(TweenSettings.LerpMode)
 			.GlyphSet(TweenSettings.GlyphSet, TweenSettings.CustomGlyphs)
-			.Preset(TweenSettings)
+			.Preset(TweenSettings.Settings)
 			.OnUpdate(
 				[this](float /*Alpha*/, const FText& CurrentValue) {
 					CallOnUpdate(CurrentValue);
@@ -142,9 +141,9 @@ public:
 		}
 
 		FTweenTextSettings Settings;
-		Settings = In.Handle->GetSettings();
 		Settings.From = FText::FromString(In.Handle->GetStart().Get(FString()));
 		Settings.To = FText::FromString(In.Handle->GetEnd().Get(FString()));
+		Settings.Settings = In.Handle->GetSettings();
 		return Settings;
 	}
 
@@ -157,7 +156,7 @@ public:
 			.To(Settings.To)
 			.Mode(Settings.LerpMode)
 			.GlyphSet(Settings.GlyphSet, Settings.CustomGlyphs)
-			.Preset(Settings);
+			.Preset(Settings.Settings);
 	}
 
 	UFUNCTION(BlueprintPure, meta = (BlueprintAutocast, CompactNodeTitle = "->"), Category = "TypeTween|Conversions")
