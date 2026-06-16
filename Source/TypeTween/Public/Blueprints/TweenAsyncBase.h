@@ -43,9 +43,6 @@ UCLASS(Abstract, BlueprintType)
 class TYPETWEEN_API UTweenAsyncBase : public UTweenAsyncBaseSimple {
 	GENERATED_BODY()
 public:
-	// TODO: for handles
-	//UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
-	//FTweenSimpleDelegate OnCreated;
 
 	UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
 	FTweenSimpleDelegate OnStart;
