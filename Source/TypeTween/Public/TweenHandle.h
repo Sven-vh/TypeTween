@@ -59,7 +59,7 @@ namespace TypeTween {
 
 			/* Construct from typed shared pointer. */
 			explicit TypedTweenHandle(PtrType<TweenT> InTween)
-				: BaseType(PtrType<ITweenControl>(InTween))
+				: BaseType()
 				, TypedPtr(MoveTemp(InTween)) {
 			}
 
@@ -74,6 +74,10 @@ namespace TypeTween {
 
 			const PtrType<TweenT>& GetTypedPtr() const { return TypedPtr; }
 
+			const PtrType<ITweenControl> GetPtr() const {
+				return PtrType<ITweenControl>(TypedPtr);
+			}
+
 			bool IsValid() const { return TypedPtr.IsValid(); }
 			explicit operator bool() const { return IsValid(); }
 
@@ -83,7 +87,6 @@ namespace TypeTween {
 
 			void Reset() {
 				TypedPtr.Reset();
-				BaseType::Reset();
 			}
 
 		private:
@@ -102,4 +105,3 @@ namespace TypeTween {
 	using TTweenWeakHandle = Detail::TypedTweenHandle<ITween<T>, TWeakPtr>;
 
 }
-

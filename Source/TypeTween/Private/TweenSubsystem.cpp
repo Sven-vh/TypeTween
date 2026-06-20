@@ -27,10 +27,9 @@ void UTypeTweenSubsystem::Tick(float DeltaTime) {
 		UE_LOG(LogTemp, Display, TEXT("Tween Control Use Count: %d"), T.Control.GetSharedReferenceCount());
 	}
 
-	// Remove tweens that are done AND have no external handle keeping them alive.
-	// If a caller holds an FTweenHandle (shared_ptr), use_count > 1 - keep it.
+	// Remove tweens that are done AND have no intentional external handle.
 	ActiveTweens.RemoveAll([](const FActiveTween& T) {
-		return T.Control->IsDone() && T.Control.IsUnique();
+		return T.Control->IsDone() && T.Control.GetSharedReferenceCount() <= 2;
 		});
 }
 
@@ -38,9 +37,9 @@ void UTypeTweenSubsystem::KillAll(const bool IncludeHandles) {
 	if (IncludeHandles) {
 		ActiveTweens.Empty();
 	} else {
-		// Don't remove tweens that have external handles.
+		// Don't remove tweens that have intentional external handles (count > 2, same threshold as Tick).
 		ActiveTweens.RemoveAll([](const FActiveTween& T) {
-			return T.Control.IsUnique();
+			return T.Control.GetSharedReferenceCount() <= 2;
 			});
 	}
 }
