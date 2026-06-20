@@ -91,9 +91,19 @@ namespace TypeTween::Detail {
 
 		bool IsPaused() const override { return bPaused; }
 		bool IsDone()   const override {
+			if (bKilled) return true;
 			if (Settings.RepeatCount < 0) return false;
 			return Elapsed >= GetMaxElapsed();
 		}
+
+		/** Immediately stops the tween without firing any callbacks */
+		void Kill() override {
+			bKilled = true;
+			bCompleteFired = true;
+			bFinalized = true;
+		}
+
+		bool IsKilled() const override { return bKilled; }
 
 		// -------------------------------------------------- type-erased access (ITweenControl)
 		FTweenSettings& GetSettings() override { return Settings; }
@@ -236,6 +246,7 @@ namespace TypeTween::Detail {
 		float Elapsed = 0.f;
 		uint64 FrameCount = 0;
 		bool bPaused = false;
+		bool bKilled = false;
 		bool bStartFired = false;
 		bool bFinalized = false;
 		bool bCompleteFired = false;

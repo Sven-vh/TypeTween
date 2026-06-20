@@ -33,7 +33,7 @@ void UTypeTweenLibrary::KillTween(FTweenHandle TweenHandle) {
 	if (!ensureMsgf(TweenHandle.Handle, TEXT("KillTween: Tween handle has no tween (nullptr)!"))) {
 		return;
 	}
-	//TODO:
+	TweenHandle.Handle->Kill();
 }
 
 bool UTypeTweenLibrary::IsValid(const FTweenHandle& TweenHandle) {

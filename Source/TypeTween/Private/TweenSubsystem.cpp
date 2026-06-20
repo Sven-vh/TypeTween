@@ -28,8 +28,9 @@ void UTypeTweenSubsystem::Tick(float DeltaTime) {
 	}
 
 	// Remove tweens that are done AND have no intentional external handle.
+	// or that are killed, regardless of handles.
 	ActiveTweens.RemoveAll([](const FActiveTween& T) {
-		return T.Control->IsDone() && T.Control.GetSharedReferenceCount() <= 2;
+		return T.Control->IsKilled() || (T.Control->IsDone() && T.Control.GetSharedReferenceCount() <= 2);
 		});
 }
 
@@ -38,8 +39,9 @@ void UTypeTweenSubsystem::KillAll(const bool IncludeHandles) {
 		ActiveTweens.Empty();
 	} else {
 		// Don't remove tweens that have intentional external handles (count > 2, same threshold as Tick).
+		// Killed tweens are always removed regardless of handles.
 		ActiveTweens.RemoveAll([](const FActiveTween& T) {
-			return T.Control.GetSharedReferenceCount() <= 2;
+			return T.Control->IsKilled() || T.Control.GetSharedReferenceCount() <= 2;
 			});
 	}
 }
