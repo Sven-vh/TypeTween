@@ -79,11 +79,6 @@ protected:
 				[this](float /*Alpha*/, const FVector& CurrentValue) {
 					CallOnUpdate(CurrentValue);
 				}
-			)
-			.OnComplete(
-				[this]() {
-					OnTweenComplete();
-				}
 			);
 
 		ActivateAdvanced(*TweenHandle.ToShared());

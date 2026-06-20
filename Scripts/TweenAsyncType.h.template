@@ -79,11 +79,6 @@ protected:
 				[this](float /*Alpha*/, const ${CPP_TYPE}& CurrentValue) {
 					CallOnUpdate(CurrentValue);
 				}
-			)
-			.OnComplete(
-				[this]() {
-					OnTweenComplete();
-				}
 			);
 
 		ActivateAdvanced(*TweenHandle.ToShared());
