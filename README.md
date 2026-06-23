@@ -123,21 +123,99 @@ Click the ▼ arrow for more settings and callbacks:
 
 ### Handles
 
-Handles keep a tween alive and let you control it after creation:
+Handles keep a tween alive and let you control it after creation (type erased):
 
 ```cpp
-TypeTween::FTweenHandle Handle = TypeTween::Tween<float>(this)
+TypeTween::FTweenHandle Handle;
+ Handle = TypeTween::Tween<float>(this)
+    .From(0.f)
     .To(1.f)
     .Duration(2.f);
 
+/* Control */
 Handle->Pause();
 Handle->Resume();
 Handle->Restart();
-Handle->Finish();    // jump to end state immediately
-Handle->IsDone();
-Handle.Reset();      // release handle (tween is destroyed if no other refs remain)
+Handle->Finish();    // Jump to end state immediately
+Handle->Kill();      // Immediately stops the tween without firing any callbacks
+
+/* Checks */
+bool IsPaused = Handle->IsPaused();
+bool IsDone   = Handle->IsDone();
+bool IsKilled = Handle->IsKilled();
+
+/* Settings */
+Handle->GetSettings().Ease = ETweenEase::InOutQuad;
+Handle->GetSettings().Duration = 2.f;
+// Note: can't access ``From`` and ``To`` (see typed handles)
+
+/* Callbacks */
+Handle->GetCallbacks().OnStart([]() {
+  UE_LOG(LogTemp, Log, TEXT("[Handle Callback] Tween Started"));
+});
+// Note: can't access ``OnUpdate`` (see typed handles)
 ```
 
+In Blueprints:
+
+<picture>
+  <img alt="TypeTween blueprint handles" src="https://github.com/user-attachments/assets/8110ff77-d9c2-4823-8d4f-515ba5e053d8" />
+</picture>
+
+Typed Handles:
+
+```cpp
+TypeTween::TTweenHandle<float> Handle;
+Handle = TypeTween::Tween<float>(this)
+    .From(0.f)
+    .To(1.f);
+
+/* Access typed functions */
+Handle->From(1.f)
+Handle->To(2.f);
+
+/* Access typed callbacks */
+Handle->OnUpdate([](float t, const float& value) {
+  UE_LOG(LogTemp, Log, TEXT("[Typed Handle Callback] t: %f, value: %f"), t, value);
+});
+
+// Plus all of the type erased functions...
+```
+
+<details>
+<summary>Handles Example Use-Cases</summary>
+
+> Store different typed tweens in an array:
+> 
+> ```cpp
+> TArray<TypeTween::FTweenHandle> TweenHandles;
+> 
+> TweenHandles.Add(TypeTween::Tween<float>(this).From(0.f).To(1.f));
+> TweenHandles.Add(TypeTween::Tween<int>(this).From(1).To(100));
+> TweenHandles.Add(TypeTween::Tween<FVector>(this).From(FVector::ZeroVector).To(FVector(1.f, 2.f, 3.f)));
+> 
+> for (auto& Handle : TweenHandles) {
+>   Handle->Pause();
+>   bool IsDone = Handle->IsDone();
+>   Handle->GetSettings().Duration = 2.f;
+>   // etc...
+> }
+> ```
+>
+> Store typed tweens in an array:
+>
+> ```cpp
+> TArray<TypeTween::TTweenHandle<float>> FloatTweenHandles;
+> FloatTweenHandles.Add(TypeTween::Tween<float>(this).From(0.f).To(1.f));
+> FloatTweenHandles.Add(TypeTween::Tween<float>(this).From(1.f).To(100.f));
+>
+> for (auto& Handle : FloatTweenHandles) {
+>   Handle->From(1.f);
+>   Handle->To(1.f);
+> }
+> ``` 
+
+</details>
 
 ## Default Types
 
