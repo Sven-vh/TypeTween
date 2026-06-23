@@ -40,7 +40,7 @@ class TYPETWEEN_API UTweenAsyncColorBase : public UTweenAsyncBase {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
+	UPROPERTY(BlueprintAssignable, Category = "TypeTween|Events")
 	FOnColorTweenUpdate OnUpdate;
 
 protected:
@@ -124,7 +124,7 @@ class TYPETWEEN_API UTweenColorFunctionLibrary : public UBlueprintFunctionLibrar
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintPure, Category = "TypeTween|Config|Color")
+	UFUNCTION(BlueprintPure, Category = "TypeTween|Types|Color")
 	static FTweenColorSettings GetSettings(const FTweenColorHandle& In) {
 		if (!ensureMsgf(In.Handle, TEXT("GetSettings: Input handle has no tween (nullptr)!"))) {
 			return {};
@@ -137,7 +137,7 @@ public:
 		return Settings;
 	}
 
-	UFUNCTION(BlueprintCallable, Category = "TypeTween|Config|Color")
+	UFUNCTION(BlueprintCallable, Category = "TypeTween|Types|Color")
 	static void SetSettings(UPARAM(ref) FTweenColorHandle& In, FTweenColorSettings Settings) {
 		if (!ensureMsgf(In.Handle, TEXT("SetSettings: Input handle has no tween (nullptr)!"))) {
 			return;
@@ -148,7 +148,7 @@ public:
 			.Preset(Settings.Settings);
 	}
 
-	UFUNCTION(BlueprintPure, meta = (BlueprintAutocast, CompactNodeTitle = "->"), Category = "TypeTween|Conversions")
+	UFUNCTION(BlueprintPure, meta = (BlueprintAutocast, CompactNodeTitle = "->"), Category = "TypeTween|Types|Color")
 	static FTweenHandle ConvertToTweenHandle(const FTweenColorHandle& In) {
 		if (!ensureMsgf(In.Handle, TEXT("ConvertToTweenHandle: Input handle has no tween (nullptr)!"))) {
 			return {};
@@ -165,48 +165,48 @@ public:
 	}
 
 	/* Control - thin wrappers from UTypeTweenLibrary for UX and ease of use */
-	UFUNCTION(BlueprintCallable, Category = "TypeTween|Control|Color")
+	UFUNCTION(BlueprintCallable, Category = "TypeTween|Types|Color")
 	static void PauseTween(UPARAM(ref) FTweenColorHandle& In) {
 		UTypeTweenLibrary::PauseTween(ConvertToTweenHandle(In));
 	}
 
-	UFUNCTION(BlueprintCallable, Category = "TypeTween|Control|Color")
+	UFUNCTION(BlueprintCallable, Category = "TypeTween|Types|Color")
 	static void ResumeTween(UPARAM(ref) FTweenColorHandle& In) {
 		UTypeTweenLibrary::ResumeTween(ConvertToTweenHandle(In));
 	}
 
-	UFUNCTION(BlueprintCallable, Category = "TypeTween|Control|Color")
+	UFUNCTION(BlueprintCallable, Category = "TypeTween|Types|Color")
 	static void RestartTween(UPARAM(ref) FTweenColorHandle& In) {
 		UTypeTweenLibrary::RestartTween(ConvertToTweenHandle(In));
 	}
 
-	UFUNCTION(BlueprintCallable, Category = "TypeTween|Control|Color")
+	UFUNCTION(BlueprintCallable, Category = "TypeTween|Types|Color")
 	static void FinishTween(UPARAM(ref) FTweenColorHandle& In) {
 		UTypeTweenLibrary::FinishTween(ConvertToTweenHandle(In));
 	}
 
-	UFUNCTION(BlueprintCallable, Category = "TypeTween|Control|Color")
+	UFUNCTION(BlueprintCallable, Category = "TypeTween|Types|Color")
 	static void KillTween(UPARAM(ref) FTweenColorHandle& In) {
 		UTypeTweenLibrary::KillTween(ConvertToTweenHandle(In));
 	}
 
 	/* Querying - thin wrappers from UTypeTweenLibrary for UX and ease of use */
-	UFUNCTION(BlueprintPure, Category = "TypeTween|Control|Color")
+	UFUNCTION(BlueprintPure, Category = "TypeTween|Types|Color")
 	static bool IsValid(const FTweenColorHandle& In) {
 		return UTypeTweenLibrary::IsValid(ConvertToTweenHandle(In));
 	}
 
-	UFUNCTION(BlueprintPure, Category = "TypeTween|Control|Color")
+	UFUNCTION(BlueprintPure, Category = "TypeTween|Types|Color")
 	static bool IsDone(const FTweenColorHandle& In) {
 		return UTypeTweenLibrary::IsDone(ConvertToTweenHandle(In));
 	}
 
-	UFUNCTION(BlueprintPure, Category = "TypeTween|Control|Color")
+	UFUNCTION(BlueprintPure, Category = "TypeTween|Types|Color")
 	static bool IsPlaying(const FTweenColorHandle& In) {
 		return UTypeTweenLibrary::IsPlaying(ConvertToTweenHandle(In));
 	}
 
-	UFUNCTION(BlueprintPure, Category = "TypeTween|Control|Color")
+	UFUNCTION(BlueprintPure, Category = "TypeTween|Types|Color")
 	static bool IsPaused(const FTweenColorHandle& In) {
 		return UTypeTweenLibrary::IsPaused(ConvertToTweenHandle(In));
 	}

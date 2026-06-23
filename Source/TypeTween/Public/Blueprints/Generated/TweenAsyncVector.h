@@ -43,7 +43,7 @@ class TYPETWEEN_API UTweenAsyncVectorBase : public UTweenAsyncBase {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
+	UPROPERTY(BlueprintAssignable, Category = "TypeTween|Events")
 	FOnVectorTweenUpdate OnUpdate;
 
 protected:
@@ -121,8 +121,8 @@ class TYPETWEEN_API UTweenVectorFunctionLibrary : public UBlueprintFunctionLibra
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintPure, Category = "TypeTween|Config|Vector")
-	static FTweenVectorSettings GetSettings(const FTweenVectorHandle& In) {
+	UFUNCTION(BlueprintPure, Category = "TypeTween|Types|Vector")
+	static FTweenVectorSettings GetVectorSettings(const FTweenVectorHandle& In) {
 		if (!ensureMsgf(In.Handle, TEXT("GetSettings: Input handle has no tween (nullptr)!"))) {
 			return {};
 		}
@@ -134,8 +134,8 @@ public:
 		return Settings;
 	}
 
-	UFUNCTION(BlueprintCallable, Category = "TypeTween|Config|Vector")
-	static void SetSettings(UPARAM(ref) FTweenVectorHandle& In, FTweenVectorSettings Settings) {
+	UFUNCTION(BlueprintCallable, Category = "TypeTween|Types|Vector")
+	static void SetVectorSettings(UPARAM(ref) FTweenVectorHandle& In, FTweenVectorSettings Settings) {
 		if (!ensureMsgf(In.Handle, TEXT("SetSettings: Input handle has no tween (nullptr)!"))) {
 			return;
 		}
@@ -144,7 +144,7 @@ public:
 			.Preset(Settings.Settings);
 	}
 
-	UFUNCTION(BlueprintPure, meta = (BlueprintAutocast, CompactNodeTitle = "->"), Category = "TypeTween|Conversions")
+	UFUNCTION(BlueprintPure, meta = (BlueprintAutocast, CompactNodeTitle = "->"), Category = "TypeTween|Types|Vector")
 	static FTweenHandle ConvertToTweenHandle(const FTweenVectorHandle& In) {
 		if (!ensureMsgf(In.Handle, TEXT("ConvertToTweenHandle: Input handle has no tween (nullptr)!"))) {
 			return {};
@@ -161,48 +161,48 @@ public:
 	}
 
 	/* Control - thin wrappers from UTypeTweenLibrary for UX and ease of use */
-	UFUNCTION(BlueprintCallable, Category = "TypeTween|Control|Vector")
+	UFUNCTION(BlueprintCallable, Category = "TypeTween|Types|Vector")
 	static void PauseTween(UPARAM(ref) FTweenVectorHandle& In) {
 		UTypeTweenLibrary::PauseTween(ConvertToTweenHandle(In));
 	}
 
-	UFUNCTION(BlueprintCallable, Category = "TypeTween|Control|Vector")
+	UFUNCTION(BlueprintCallable, Category = "TypeTween|Types|Vector")
 	static void ResumeTween(UPARAM(ref) FTweenVectorHandle& In) {
 		UTypeTweenLibrary::ResumeTween(ConvertToTweenHandle(In));
 	}
 
-	UFUNCTION(BlueprintCallable, Category = "TypeTween|Control|Vector")
+	UFUNCTION(BlueprintCallable, Category = "TypeTween|Types|Vector")
 	static void RestartTween(UPARAM(ref) FTweenVectorHandle& In) {
 		UTypeTweenLibrary::RestartTween(ConvertToTweenHandle(In));
 	}
 
-	UFUNCTION(BlueprintCallable, Category = "TypeTween|Control|Vector")
+	UFUNCTION(BlueprintCallable, Category = "TypeTween|Types|Vector")
 	static void FinishTween(UPARAM(ref) FTweenVectorHandle& In) {
 		UTypeTweenLibrary::FinishTween(ConvertToTweenHandle(In));
 	}
 
-	UFUNCTION(BlueprintCallable, Category = "TypeTween|Control|Vector")
+	UFUNCTION(BlueprintCallable, Category = "TypeTween|Types|Vector")
 	static void KillTween(UPARAM(ref) FTweenVectorHandle& In) {
 		UTypeTweenLibrary::KillTween(ConvertToTweenHandle(In));
 	}
 
 	/* Querying - thin wrappers from UTypeTweenLibrary for UX and ease of use */
-	UFUNCTION(BlueprintPure, Category = "TypeTween|Control|Vector")
+	UFUNCTION(BlueprintPure, Category = "TypeTween|Types|Vector")
 	static bool IsValid(const FTweenVectorHandle& In) {
 		return UTypeTweenLibrary::IsValid(ConvertToTweenHandle(In));
 	}
 
-	UFUNCTION(BlueprintPure, Category = "TypeTween|Control|Vector")
+	UFUNCTION(BlueprintPure, Category = "TypeTween|Types|Vector")
 	static bool IsDone(const FTweenVectorHandle& In) {
 		return UTypeTweenLibrary::IsDone(ConvertToTweenHandle(In));
 	}
 
-	UFUNCTION(BlueprintPure, Category = "TypeTween|Control|Vector")
+	UFUNCTION(BlueprintPure, Category = "TypeTween|Types|Vector")
 	static bool IsPlaying(const FTweenVectorHandle& In) {
 		return UTypeTweenLibrary::IsPlaying(ConvertToTweenHandle(In));
 	}
 
-	UFUNCTION(BlueprintPure, Category = "TypeTween|Control|Vector")
+	UFUNCTION(BlueprintPure, Category = "TypeTween|Types|Vector")
 	static bool IsPaused(const FTweenVectorHandle& In) {
 		return UTypeTweenLibrary::IsPaused(ConvertToTweenHandle(In));
 	}

@@ -43,7 +43,7 @@ class TYPETWEEN_API UTweenAsyncRotatorBase : public UTweenAsyncBase {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
+	UPROPERTY(BlueprintAssignable, Category = "TypeTween|Events")
 	FOnRotatorTweenUpdate OnUpdate;
 
 protected:
@@ -121,8 +121,8 @@ class TYPETWEEN_API UTweenRotatorFunctionLibrary : public UBlueprintFunctionLibr
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintPure, Category = "TypeTween|Config|Rotator")
-	static FTweenRotatorSettings GetSettings(const FTweenRotatorHandle& In) {
+	UFUNCTION(BlueprintPure, Category = "TypeTween|Types|Rotator")
+	static FTweenRotatorSettings GetRotatorSettings(const FTweenRotatorHandle& In) {
 		if (!ensureMsgf(In.Handle, TEXT("GetSettings: Input handle has no tween (nullptr)!"))) {
 			return {};
 		}
@@ -134,8 +134,8 @@ public:
 		return Settings;
 	}
 
-	UFUNCTION(BlueprintCallable, Category = "TypeTween|Config|Rotator")
-	static void SetSettings(UPARAM(ref) FTweenRotatorHandle& In, FTweenRotatorSettings Settings) {
+	UFUNCTION(BlueprintCallable, Category = "TypeTween|Types|Rotator")
+	static void SetRotatorSettings(UPARAM(ref) FTweenRotatorHandle& In, FTweenRotatorSettings Settings) {
 		if (!ensureMsgf(In.Handle, TEXT("SetSettings: Input handle has no tween (nullptr)!"))) {
 			return;
 		}
@@ -144,7 +144,7 @@ public:
 			.Preset(Settings.Settings);
 	}
 
-	UFUNCTION(BlueprintPure, meta = (BlueprintAutocast, CompactNodeTitle = "->"), Category = "TypeTween|Conversions")
+	UFUNCTION(BlueprintPure, meta = (BlueprintAutocast, CompactNodeTitle = "->"), Category = "TypeTween|Types|Rotator")
 	static FTweenHandle ConvertToTweenHandle(const FTweenRotatorHandle& In) {
 		if (!ensureMsgf(In.Handle, TEXT("ConvertToTweenHandle: Input handle has no tween (nullptr)!"))) {
 			return {};
@@ -161,48 +161,48 @@ public:
 	}
 
 	/* Control - thin wrappers from UTypeTweenLibrary for UX and ease of use */
-	UFUNCTION(BlueprintCallable, Category = "TypeTween|Control|Rotator")
+	UFUNCTION(BlueprintCallable, Category = "TypeTween|Types|Rotator")
 	static void PauseTween(UPARAM(ref) FTweenRotatorHandle& In) {
 		UTypeTweenLibrary::PauseTween(ConvertToTweenHandle(In));
 	}
 
-	UFUNCTION(BlueprintCallable, Category = "TypeTween|Control|Rotator")
+	UFUNCTION(BlueprintCallable, Category = "TypeTween|Types|Rotator")
 	static void ResumeTween(UPARAM(ref) FTweenRotatorHandle& In) {
 		UTypeTweenLibrary::ResumeTween(ConvertToTweenHandle(In));
 	}
 
-	UFUNCTION(BlueprintCallable, Category = "TypeTween|Control|Rotator")
+	UFUNCTION(BlueprintCallable, Category = "TypeTween|Types|Rotator")
 	static void RestartTween(UPARAM(ref) FTweenRotatorHandle& In) {
 		UTypeTweenLibrary::RestartTween(ConvertToTweenHandle(In));
 	}
 
-	UFUNCTION(BlueprintCallable, Category = "TypeTween|Control|Rotator")
+	UFUNCTION(BlueprintCallable, Category = "TypeTween|Types|Rotator")
 	static void FinishTween(UPARAM(ref) FTweenRotatorHandle& In) {
 		UTypeTweenLibrary::FinishTween(ConvertToTweenHandle(In));
 	}
 
-	UFUNCTION(BlueprintCallable, Category = "TypeTween|Control|Rotator")
+	UFUNCTION(BlueprintCallable, Category = "TypeTween|Types|Rotator")
 	static void KillTween(UPARAM(ref) FTweenRotatorHandle& In) {
 		UTypeTweenLibrary::KillTween(ConvertToTweenHandle(In));
 	}
 
 	/* Querying - thin wrappers from UTypeTweenLibrary for UX and ease of use */
-	UFUNCTION(BlueprintPure, Category = "TypeTween|Control|Rotator")
+	UFUNCTION(BlueprintPure, Category = "TypeTween|Types|Rotator")
 	static bool IsValid(const FTweenRotatorHandle& In) {
 		return UTypeTweenLibrary::IsValid(ConvertToTweenHandle(In));
 	}
 
-	UFUNCTION(BlueprintPure, Category = "TypeTween|Control|Rotator")
+	UFUNCTION(BlueprintPure, Category = "TypeTween|Types|Rotator")
 	static bool IsDone(const FTweenRotatorHandle& In) {
 		return UTypeTweenLibrary::IsDone(ConvertToTweenHandle(In));
 	}
 
-	UFUNCTION(BlueprintPure, Category = "TypeTween|Control|Rotator")
+	UFUNCTION(BlueprintPure, Category = "TypeTween|Types|Rotator")
 	static bool IsPlaying(const FTweenRotatorHandle& In) {
 		return UTypeTweenLibrary::IsPlaying(ConvertToTweenHandle(In));
 	}
 
-	UFUNCTION(BlueprintPure, Category = "TypeTween|Control|Rotator")
+	UFUNCTION(BlueprintPure, Category = "TypeTween|Types|Rotator")
 	static bool IsPaused(const FTweenRotatorHandle& In) {
 		return UTypeTweenLibrary::IsPaused(ConvertToTweenHandle(In));
 	}

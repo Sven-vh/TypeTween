@@ -24,7 +24,7 @@ class TYPETWEEN_API UTweenAsyncBaseSimple : public UBlueprintAsyncActionBase {
 	GENERATED_BODY()
 public:
 
-	UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
+	UPROPERTY(BlueprintAssignable, Category = "TypeTween|Events")
 	FTweenSimpleDelegate OnComplete;
 
 protected:
@@ -44,22 +44,22 @@ class TYPETWEEN_API UTweenAsyncBase : public UTweenAsyncBaseSimple {
 	GENERATED_BODY()
 public:
 
-	UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
+	UPROPERTY(BlueprintAssignable, Category = "TypeTween|Events")
 	FTweenSimpleDelegate OnStart;
 
-	UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
+	UPROPERTY(BlueprintAssignable, Category = "TypeTween|Events")
 	FTweenSimpleDelegate OnCycleBegin;
 
-	UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
+	UPROPERTY(BlueprintAssignable, Category = "TypeTween|Events")
 	FTweenSimpleDelegate OnForwardEnd;
 
-	UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
+	UPROPERTY(BlueprintAssignable, Category = "TypeTween|Events")
 	FTweenSimpleDelegate OnReverseBegin;
 
-	UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
+	UPROPERTY(BlueprintAssignable, Category = "TypeTween|Events")
 	FTweenSimpleDelegate OnCycleEnd;
 
-	UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
+	UPROPERTY(BlueprintAssignable, Category = "TypeTween|Events")
 	FTweenSimpleDelegate OnRepeat;
 
 protected:
