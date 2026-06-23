@@ -44,7 +44,6 @@ namespace TypeTween::Detail {
 			return Self();
 		}
 
-		Derived& Preset(FTweenConfig Preset) { Settings = Preset.Resolve(); return Self(); }
 		Derived& Preset(FTweenSettings Preset) { Settings = MoveTemp(Preset); return Self(); }
 
 		// -------------------------------------------------- callbacks (C++ TFunction setters)
@@ -92,9 +91,19 @@ namespace TypeTween::Detail {
 
 		bool IsPaused() const override { return bPaused; }
 		bool IsDone()   const override {
+			if (bKilled) return true;
 			if (Settings.RepeatCount < 0) return false;
 			return Elapsed >= GetMaxElapsed();
 		}
+
+		/** Immediately stops the tween without firing any callbacks */
+		void Kill() override {
+			bKilled = true;
+			bCompleteFired = true;
+			bFinalized = true;
+		}
+
+		bool IsKilled() const override { return bKilled; }
 
 		// -------------------------------------------------- type-erased access (ITweenControl)
 		FTweenSettings& GetSettings() override { return Settings; }
@@ -207,13 +216,21 @@ namespace TypeTween::Detail {
 
 		// -------------------------------------------------- handle conversion
 		/** Convert to a storable typed handle. Keeps the tween alive. */
-		TTweenHandle<Derived> ToHandle() {
-			return TTweenHandle<Derived>(GetSelfShared());
+		Detail::TypedTweenHandle<Derived, TSharedPtr> ToHandle() {
+			return Detail::TypedTweenHandle<Derived, TSharedPtr>(GetSelfShared());
+		}
+
+		Detail::TypedTweenHandle<Derived, TWeakPtr> ToWeakHandle() {
+			return Detail::TypedTweenHandle<Derived, TWeakPtr>(TWeakPtr<Derived>(SelfWeak));
 		}
 
 		/** Implicit conversion to typed handle (enables assignment syntax). */
-		operator TTweenHandle<Derived>() {
+		operator Detail::TypedTweenHandle<Derived, TSharedPtr>() {
 			return ToHandle();
+		}
+
+		operator Detail::TypedTweenHandle<Derived, TWeakPtr>() {
+			return ToWeakHandle();
 		}
 
 		/** Implicit conversion to type-erased handle. */
@@ -229,6 +246,7 @@ namespace TypeTween::Detail {
 		float Elapsed = 0.f;
 		uint64 FrameCount = 0;
 		bool bPaused = false;
+		bool bKilled = false;
 		bool bStartFired = false;
 		bool bFinalized = false;
 		bool bCompleteFired = false;
@@ -252,7 +270,7 @@ namespace TypeTween::Detail {
 
 		float GetTotalAnimTime() const {
 			if (Settings.RepeatCount < 0) return TNumericLimits<float>::Max();
-			return GetCycleTime() * (Settings.Delays.Repeat + 1) - Settings.Delays.Repeat;
+			return GetCycleTime() * (Settings.RepeatCount + 1) - Settings.Delays.Repeat;
 		}
 
 		float GetMaxElapsed() const {

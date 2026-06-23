@@ -6,23 +6,14 @@
 #include "Kismet/BlueprintAsyncActionBase.h"
 #include "TweenTypes.h"
 #include "TweenControl.h"
+#include "TweenHandle.h"
 #include "TweenAsyncBase.generated.h"
 
 USTRUCT(BlueprintType)
-struct TYPETWEEN_API FTweenSettingsConfig {
+struct TYPETWEEN_API FTweenHandle {
 	GENERATED_BODY()
 
-	/* Wire a runtime FTweenSettings directly (takes priority over Config below) */
-	UPROPERTY(BlueprintReadWrite, meta = (HideInDetailPanel), Category = "TypeTween")
-	FTweenSettings Settings;
-
-	/* Preset + overrides - visible in the Details panel */
-	UPROPERTY(EditAnywhere, meta = (DisplayName = "Settings"), Category = "TypeTween")
-	FTweenConfig Config;
-
-	FTweenSettings Resolve() const {
-		return Settings.IsSet() ? Settings : Config.Resolve();
-	}
+	TypeTween::FTweenHandle Handle;
 };
 
 /*
@@ -33,7 +24,7 @@ class TYPETWEEN_API UTweenAsyncBaseSimple : public UBlueprintAsyncActionBase {
 	GENERATED_BODY()
 public:
 
-	UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
+	UPROPERTY(BlueprintAssignable, Category = "TypeTween|Events")
 	FTweenSimpleDelegate OnComplete;
 
 protected:
@@ -52,26 +43,23 @@ UCLASS(Abstract, BlueprintType)
 class TYPETWEEN_API UTweenAsyncBase : public UTweenAsyncBaseSimple {
 	GENERATED_BODY()
 public:
-	// TODO: for handles
-	//UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
-	//FTweenSimpleDelegate OnCreated;
 
-	UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
+	UPROPERTY(BlueprintAssignable, Category = "TypeTween|Events")
 	FTweenSimpleDelegate OnStart;
 
-	UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
+	UPROPERTY(BlueprintAssignable, Category = "TypeTween|Events")
 	FTweenSimpleDelegate OnCycleBegin;
 
-	UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
+	UPROPERTY(BlueprintAssignable, Category = "TypeTween|Events")
 	FTweenSimpleDelegate OnForwardEnd;
 
-	UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
+	UPROPERTY(BlueprintAssignable, Category = "TypeTween|Events")
 	FTweenSimpleDelegate OnReverseBegin;
 
-	UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
+	UPROPERTY(BlueprintAssignable, Category = "TypeTween|Events")
 	FTweenSimpleDelegate OnCycleEnd;
 
-	UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
+	UPROPERTY(BlueprintAssignable, Category = "TypeTween|Events")
 	FTweenSimpleDelegate OnRepeat;
 
 protected:

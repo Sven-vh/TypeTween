@@ -5,16 +5,13 @@
 #include "CoreMinimal.h"
 #include "Blueprints/TweenAsyncBase.h"
 #include "TypeTween.h"
+#include "Blueprints/TweenFunctionLibrary.h"
 #include "TweenAsyncColor.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnColorTweenUpdate, FLinearColor, CurrentValue);
 
-// ─────────────────────────────────────────────────────────────
-// Config struct — exposed to Blueprint details panel
-// ─────────────────────────────────────────────────────────────
-
 USTRUCT(BlueprintType)
-struct FTweenColorConfig : public FTweenSettingsConfig {
+struct FTweenColorSettings {
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween")
@@ -25,23 +22,32 @@ struct FTweenColorConfig : public FTweenSettingsConfig {
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween")
 	EColorLerpMode ColorSpace = EColorLerpMode::Linear;
+
+	/* Common tween settings */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween|Settings")
+	FTweenSettings Settings;
 };
 
-// ─────────────────────────────────────────────────────────────
-// Abstract base — OnUpdate + config + all events
-// ─────────────────────────────────────────────────────────────
+USTRUCT(BlueprintType)
+struct FTweenColorHandle {
+	GENERATED_BODY()
+
+	TypeTween::TTweenHandle<FLinearColor> Handle;
+};
 
 UCLASS(Abstract, BlueprintType)
 class TYPETWEEN_API UTweenAsyncColorBase : public UTweenAsyncBase {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(BlueprintAssignable, Category = "Tweening|Events")
+	UPROPERTY(BlueprintAssignable, Category = "TypeTween|Events")
 	FOnColorTweenUpdate OnUpdate;
 
 protected:
 	UPROPERTY()
-	FTweenColorConfig TweenConfig;
+	FTweenColorSettings TweenSettings;
+
+	TypeTween::TTweenWeakHandle<FLinearColor> TweenHandle;
 
 	FORCEINLINE void CallOnUpdate(const FLinearColor& CurrentValue) {
 		if (OnUpdate.IsBound()) {
@@ -49,10 +55,6 @@ protected:
 		}
 	}
 };
-
-// ─────────────────────────────────────────────────────────────
-// Concrete async node — delegates + Activate, no factory fn
-// ─────────────────────────────────────────────────────────────
 
 UCLASS(meta = (HideCategories = Object))
 class TYPETWEEN_API UTweenAsyncColor : public UTweenAsyncColorBase {
@@ -67,13 +69,10 @@ protected:
 			return;
 		}
 
-		const FTweenSettings Settings = TweenConfig.Resolve();
-
-		auto& Tween = TypeTween::Tween<FLinearColor>(WorldContextObject)
-			.From(TweenConfig.From)
-			.To(TweenConfig.To)
-			.ColorSpace(TweenConfig.ColorSpace)
-			.Preset(Settings)
+		TweenHandle->From(TweenSettings.From)
+			.To(TweenSettings.To)
+			.ColorSpace(TweenSettings.ColorSpace)
+			.Preset(TweenSettings.Settings)
 			.OnUpdate(
 				[this](float /*Alpha*/, const FLinearColor& CurrentValue) {
 					CallOnUpdate(CurrentValue);
@@ -85,16 +84,9 @@ protected:
 				}
 			);
 
-		ActivateAdvanced(Tween);
+		ActivateAdvanced(*TweenHandle.ToShared());
 	}
 };
-
-// ─────────────────────────────────────────────────────────────
-// Factory — NOT BlueprintType, invisible to UK2Node_AsyncAction
-// auto-scanner. K2Node sets ProxyFactoryClass to this and
-// ProxyClass to UTweenAsyncLinearColor (which keeps BlueprintType
-// for delegate pin generation).
-// ─────────────────────────────────────────────────────────────
 
 UCLASS()
 class TYPETWEEN_API UTweenAsyncColorFactory : public UObject {
@@ -110,13 +102,112 @@ public:
 			))
 	static UTweenAsyncColor* TweenColor(
 		UObject* InWorldContextObject,
-		FTweenColorConfig Tween
+		FTweenColorSettings Tween,
+		FTweenColorHandle& handle
 	) {
 		UTweenAsyncColor* Node = NewObject<UTweenAsyncColor>();
 		Node->WorldContextObject = InWorldContextObject;
-		Node->TweenConfig = Tween;
+		Node->TweenSettings = Tween;
+		Node->TweenHandle = TypeTween::Tween<FLinearColor>(InWorldContextObject);
 		Node->RegisterWithGameInstance(InWorldContextObject);
+
+		/* output */
+		handle.Handle = Node->TweenHandle.ToShared();
+
 		return Node;
 	}
 };
 
+/* conversion function library */
+UCLASS()
+class TYPETWEEN_API UTweenColorFunctionLibrary : public UBlueprintFunctionLibrary {
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintPure, Category = "TypeTween|Types|Color")
+	static FTweenColorSettings GetSettings(const FTweenColorHandle& In) {
+		if (!ensureMsgf(In.Handle, TEXT("GetSettings: Input handle has no tween (nullptr)!"))) {
+			return {};
+		}
+
+		FTweenColorSettings Settings;
+		Settings.From = In.Handle->GetStart().Get(FLinearColor::Black);
+		Settings.To = In.Handle->GetEnd().Get(FLinearColor::White);
+		Settings.Settings = In.Handle->GetSettings();
+		return Settings;
+	}
+
+	UFUNCTION(BlueprintCallable, Category = "TypeTween|Types|Color")
+	static void SetSettings(UPARAM(ref) FTweenColorHandle& In, FTweenColorSettings Settings) {
+		if (!ensureMsgf(In.Handle, TEXT("SetSettings: Input handle has no tween (nullptr)!"))) {
+			return;
+		}
+		In.Handle->From(Settings.From)
+			.To(Settings.To)
+			.ColorSpace(Settings.ColorSpace)
+			.Preset(Settings.Settings);
+	}
+
+	UFUNCTION(BlueprintPure, meta = (BlueprintAutocast, CompactNodeTitle = "->"), Category = "TypeTween|Types|Color")
+	static FTweenHandle ConvertToTweenHandle(const FTweenColorHandle& In) {
+		if (!ensureMsgf(In.Handle, TEXT("ConvertToTweenHandle: Input handle has no tween (nullptr)!"))) {
+			return {};
+		}
+
+		TSharedPtr<TypeTween::ITweenControl, ESPMode::ThreadSafe> Pinned = In.Handle.GetTypedPtr();
+		if (!Pinned.IsValid()) {
+			return {};  // Tween was destroyed between the ensure and here
+		}
+
+		FTweenHandle Result;
+		Result.Handle = TypeTween::FTweenHandle(Pinned);
+		return Result;
+	}
+
+	/* Control - thin wrappers from UTypeTweenLibrary for UX and ease of use */
+	UFUNCTION(BlueprintCallable, Category = "TypeTween|Types|Color")
+	static void PauseTween(UPARAM(ref) FTweenColorHandle& In) {
+		UTypeTweenLibrary::PauseTween(ConvertToTweenHandle(In));
+	}
+
+	UFUNCTION(BlueprintCallable, Category = "TypeTween|Types|Color")
+	static void ResumeTween(UPARAM(ref) FTweenColorHandle& In) {
+		UTypeTweenLibrary::ResumeTween(ConvertToTweenHandle(In));
+	}
+
+	UFUNCTION(BlueprintCallable, Category = "TypeTween|Types|Color")
+	static void RestartTween(UPARAM(ref) FTweenColorHandle& In) {
+		UTypeTweenLibrary::RestartTween(ConvertToTweenHandle(In));
+	}
+
+	UFUNCTION(BlueprintCallable, Category = "TypeTween|Types|Color")
+	static void FinishTween(UPARAM(ref) FTweenColorHandle& In) {
+		UTypeTweenLibrary::FinishTween(ConvertToTweenHandle(In));
+	}
+
+	UFUNCTION(BlueprintCallable, Category = "TypeTween|Types|Color")
+	static void KillTween(UPARAM(ref) FTweenColorHandle& In) {
+		UTypeTweenLibrary::KillTween(ConvertToTweenHandle(In));
+	}
+
+	/* Querying - thin wrappers from UTypeTweenLibrary for UX and ease of use */
+	UFUNCTION(BlueprintPure, Category = "TypeTween|Types|Color")
+	static bool IsValid(const FTweenColorHandle& In) {
+		return UTypeTweenLibrary::IsValid(ConvertToTweenHandle(In));
+	}
+
+	UFUNCTION(BlueprintPure, Category = "TypeTween|Types|Color")
+	static bool IsDone(const FTweenColorHandle& In) {
+		return UTypeTweenLibrary::IsDone(ConvertToTweenHandle(In));
+	}
+
+	UFUNCTION(BlueprintPure, Category = "TypeTween|Types|Color")
+	static bool IsPlaying(const FTweenColorHandle& In) {
+		return UTypeTweenLibrary::IsPlaying(ConvertToTweenHandle(In));
+	}
+
+	UFUNCTION(BlueprintPure, Category = "TypeTween|Types|Color")
+	static bool IsPaused(const FTweenColorHandle& In) {
+		return UTypeTweenLibrary::IsPaused(ConvertToTweenHandle(In));
+	}
+};

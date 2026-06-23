@@ -16,7 +16,7 @@ namespace TypeTween {
 		virtual ~ITweenControl() = default;
 
 		// ---- Runtime control ----
-		
+
 		/** Pause the tween. */
 		virtual void Pause() = 0;
 
@@ -35,8 +35,16 @@ namespace TypeTween {
 		/** Returns true if the tween has completed (false for infinite repeats). */
 		virtual bool IsDone() const = 0;
 
+		/** Immediately stops the tween without firing any callbacks.
+		 *  Works for infinite tweens. The subsystem removes it on the next tick
+		 *  regardless of how many handles are still held. */
+		virtual void Kill() = 0;
+
+		/** Returns true if Kill() has been called on this tween. */
+		virtual bool IsKilled() const = 0;
+
 		// ---- Type-erased access to settings and callbacks ----
-		
+
 		/** Access tween settings (Duration, Ease, RepeatCount, etc.) */
 		virtual FTweenSettings& GetSettings() = 0;
 		virtual const FTweenSettings& GetSettings() const = 0;
@@ -47,4 +55,3 @@ namespace TypeTween {
 	};
 
 }
-

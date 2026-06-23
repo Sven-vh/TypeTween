@@ -6,30 +6,52 @@
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 
-UTweenSubsystem* UTweenSubsystem::Get(const UObject* WorldContext) {
+UTypeTweenSubsystem* UTypeTweenSubsystem::Get(const UObject* WorldContext) {
 	if (!WorldContext) return nullptr;
 	const UWorld* World = GEngine->GetWorldFromContextObject(
 		WorldContext, EGetWorldErrorMode::LogAndReturnNull);
 	if (!World) return nullptr;
 	const UGameInstance* GI = World->GetGameInstance();
-	return GI ? GI->GetSubsystem<UTweenSubsystem>() : nullptr;
+	return GI ? GI->GetSubsystem<UTypeTweenSubsystem>() : nullptr;
 }
 
-void UTweenSubsystem::Tick(float DeltaTime) {
-	for (FActiveTween& T : ActiveTweens)
+void UTypeTweenSubsystem::Tick(float DeltaTime) {
+
+	//log the amount of active tweens
+	UE_LOG(LogTemp, Display, TEXT("UTypeTweenSubsystem::Tick - Active Tweens: %d"), ActiveTweens.Num());
+
+	for (FActiveTween& T : ActiveTweens) {
 		T.FnTick(DeltaTime);
 
-	// Remove tweens that are done AND have no external handle keeping them alive.
-	// If a caller holds an FTweenHandle (shared_ptr), use_count > 1 - keep it.
+		//log use count of the control shared pointer and whether the tween is done
+		UE_LOG(LogTemp, Display, TEXT("Tween Control Use Count: %d"), T.Control.GetSharedReferenceCount());
+	}
+
+	// Remove tweens that are done AND have no intentional external handle.
+	// or that are killed, regardless of handles.
 	ActiveTweens.RemoveAll([](const FActiveTween& T) {
-		return T.FnIsDone() && T.Lifetime.IsUnique();
+		return T.Control->IsKilled() || (T.Control->IsDone() && T.Control.GetSharedReferenceCount() <= 2);
 		});
 }
 
-void UTweenSubsystem::StopAll() {
-	ActiveTweens.Empty();
+void UTypeTweenSubsystem::KillAll(const bool IncludeHandles) {
+	if (IncludeHandles) {
+		ActiveTweens.Empty();
+	} else {
+		// Don't remove tweens that have intentional external handles (count > 2, same threshold as Tick).
+		// Killed tweens are always removed regardless of handles.
+		ActiveTweens.RemoveAll([](const FActiveTween& T) {
+			return T.Control->IsKilled() || T.Control.GetSharedReferenceCount() <= 2;
+			});
+	}
 }
 
-TStatId UTweenSubsystem::GetStatId() const {
-	RETURN_QUICK_DECLARE_CYCLE_STAT(UTweenSubsystem, STATGROUP_Tickables);
+void UTypeTweenSubsystem::PauseTweens() {
+	for (FActiveTween& T : ActiveTweens) {
+		T.Control->Pause();
+	}
+}
+
+TStatId UTypeTweenSubsystem::GetStatId() const {
+	RETURN_QUICK_DECLARE_CYCLE_STAT(UTypeTweenSubsystem, STATGROUP_Tickables);
 }

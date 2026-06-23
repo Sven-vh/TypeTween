@@ -132,6 +132,12 @@ namespace TypeTween {
 		Derived& DontRotate() { ComponentsToTween &= ~EComponent::Rotation; return static_cast<Derived&>(*this); }
 		Derived& DontScale() { ComponentsToTween &= ~EComponent::Scale; return static_cast<Derived&>(*this); }
 
+		TOptional<FTransform>& GetStart() { return Start; }
+		const TOptional<FTransform>& GetStart() const { return Start; }
+
+		TOptional<FTransform>& GetEnd() { return End; }
+		const TOptional<FTransform>& GetEnd() const { return End; }
+
 	protected:
 		TOptional<FTransform> Start;
 		TOptional<FTransform> End;

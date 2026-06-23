@@ -6,9 +6,14 @@
 void UTweenAsyncBaseSimple::ActivateSimple(TypeTween::ITweenControl& Tween) {
 	auto& CB = Tween.GetCallbacks();
 
-	/* Only connect OnComplete */
+	/* Connect on complete */
 	TWeakObjectPtr<UTweenAsyncBaseSimple> WeakThis(this);
-	CB.OnComplete([WeakThis]() { if (auto* P = WeakThis.Get()) P->OnComplete.Broadcast();     });
+	CB.OnComplete([WeakThis]() {
+		if (auto* P = WeakThis.Get()) {
+			P->OnComplete.Broadcast();
+			P->OnTweenComplete();
+		}
+	});
 }
 
 void UTweenAsyncBase::ActivateAdvanced(TypeTween::ITweenControl& Tween) {
@@ -29,4 +34,3 @@ void UTweenAsyncBase::ActivateAdvanced(TypeTween::ITweenControl& Tween) {
 void UTweenAsyncBaseSimple::OnTweenComplete() {
 	SetReadyToDestroy();
 }
-
