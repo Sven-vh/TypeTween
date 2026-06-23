@@ -15,7 +15,7 @@ echo. >> "%LOG_FILE%"
 REM ============================================================
 REM  Build prebuilt binary packages per engine version
 REM ============================================================
-for %%V in (5.5 5.6 5.7) do (
+for %%V in (5.5 5.6 5.7 5.8) do (
     set "ENGINE_DIR="
     for /f "tokens=2*" %%A in (
         'reg query "HKLM\SOFTWARE\EpicGames\Unreal Engine\%%V" /v InstalledDirectory 2^>nul'

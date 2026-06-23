@@ -306,7 +306,7 @@ TypeTween::Tween<FText>(this)
 2. Extract the zip into your project's `Plugins/` directory.
 3. Restart the Unreal Editor, the plugin will be enabled automatically.
 
-> Prebuilt binaries are available for **UE 5.5**, **5.6**, and **5.7**.
+> Prebuilt binaries are available for **UE 5.5**, **5.6**, **5.7**, and **5.8**.
 
 **[Option B] Building from Source**
 1. Clone or download this repository into your project's `Plugins/` directory.
