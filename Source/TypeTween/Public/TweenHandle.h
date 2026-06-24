@@ -18,6 +18,8 @@ namespace TypeTween {
 		template<typename T>
 		FORCEINLINE const T* PtrGet(const TWeakPtr<T>& Ptr) { return Ptr.Pin().Get(); }
 
+		template<typename T> using TDefaultSharedPtr = TSharedPtr<T>;
+		template<typename T> using TDefaultWeakPtr = TWeakPtr<T>;
 
 		/* Type-erased handle */
 		template<template<typename> typename PtrType>
@@ -81,8 +83,8 @@ namespace TypeTween {
 			bool IsValid() const { return TypedPtr.IsValid(); }
 			explicit operator bool() const { return IsValid(); }
 
-			TypedTweenHandle<TweenT, TSharedPtr> ToShared() {
-				return TypedTweenHandle<TweenT, TSharedPtr>(TypedPtr.Pin());
+			TypedTweenHandle<TweenT, TDefaultSharedPtr> ToShared() {
+				return TypedTweenHandle<TweenT, TDefaultSharedPtr>(TypedPtr.Pin());
 			}
 
 			void Reset() {
@@ -96,12 +98,12 @@ namespace TypeTween {
 
 
 	/* aliases */
-	using FTweenHandle = Detail::TweenHandle<TSharedPtr>;
-	using FTweenWeakHandle = Detail::TweenHandle<TWeakPtr>;
+	using FTweenHandle = Detail::TweenHandle<Detail::TDefaultSharedPtr>;
+	using FTweenWeakHandle = Detail::TweenHandle<Detail::TDefaultWeakPtr>;
 
 	template<typename T>
-	using TTweenHandle = Detail::TypedTweenHandle<ITween<T>, TSharedPtr>;
+	using TTweenHandle = Detail::TypedTweenHandle<ITween<T>, Detail::TDefaultSharedPtr>;
 	template<typename T>
-	using TTweenWeakHandle = Detail::TypedTweenHandle<ITween<T>, TWeakPtr>;
+	using TTweenWeakHandle = Detail::TypedTweenHandle<ITween<T>, Detail::TDefaultWeakPtr>;
 
 }

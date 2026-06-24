@@ -24,27 +24,27 @@ namespace TypeTween::Detail {
 	public:
 		// ------------------------------------------------------------------ config
 		/* Delay before the tween starts after being interpolated */
-		Derived& StartDelay(float Secs) { Settings.Delays.Start = Secs; return Self(); }
+		Derived& StartDelay(float Secs) { this->Settings.Delays.Start = Secs; return Self(); }
 		/* Total time for one forward or reverse playthrough, not including delays. Required. */
-		Derived& Duration(float Secs) { Settings.Duration = Secs; return Self(); }
+		Derived& Duration(float Secs) { this->Settings.Duration = Secs; return Self(); }
 		/* [Ping Pong Only] Delay between forward and reverse play */
-		Derived& ReverseDelay(float Secs) { Settings.Delays.Reverse = Secs; return Self(); }
+		Derived& ReverseDelay(float Secs) { this->Settings.Delays.Reverse = Secs; return Self(); }
 		/* Delay between the end of one cycle and the start of the next */
-		Derived& RepeatDelay(float Secs) { Settings.Delays.Repeat = Secs; return Self(); }
+		Derived& RepeatDelay(float Secs) { this->Settings.Delays.Repeat = Secs; return Self(); }
 		/* Delay after the tween finishes before firing OnComplete */
-		Derived& EndDelay(float Secs) { Settings.Delays.End = Secs;  return Self(); }
+		Derived& EndDelay(float Secs) { this->Settings.Delays.End = Secs;  return Self(); }
 
 		/* 0 = play once, -1 = infinite, N = play N+1 times total */
-		Derived& Repeat(int32 Count) { Settings.RepeatCount = Count; return Self(); }
+		Derived& Repeat(int32 Count) { this->Settings.RepeatCount = Count; return Self(); }
 		/* Easing function for the tween, see https://easings.net/ for visualization */
-		Derived& Ease(ETweenEase E) { Settings.Ease = E; return Self(); }
+		Derived& Ease(ETweenEase E) { this->Settings.Ease = E; return Self(); }
 		/* Tween will reverse direction each cycle instead of jumping back to start */
 		Derived& PingPong(bool Enable = true) {
-			Settings.LoopMode = Enable ? ETweenLoopMode::PingPong : ETweenLoopMode::Restart;
+			this->Settings.LoopMode = Enable ? ETweenLoopMode::PingPong : ETweenLoopMode::Restart;
 			return Self();
 		}
 
-		Derived& Preset(FTweenSettings Preset) { Settings = MoveTemp(Preset); return Self(); }
+		Derived& Preset(FTweenSettings Preset) { this->Settings = MoveTemp(Preset); return Self(); }
 
 		// -------------------------------------------------- callbacks (C++ TFunction setters)
 		/* Fired first frame when the tween is triggered, before StartDelay begins */
@@ -92,7 +92,7 @@ namespace TypeTween::Detail {
 		bool IsPaused() const override { return bPaused; }
 		bool IsDone()   const override {
 			if (bKilled) return true;
-			if (Settings.RepeatCount < 0) return false;
+			if (this->Settings.RepeatCount < 0) return false;
 			return Elapsed >= GetMaxElapsed();
 		}
 
@@ -106,8 +106,8 @@ namespace TypeTween::Detail {
 		bool IsKilled() const override { return bKilled; }
 
 		// -------------------------------------------------- type-erased access (ITweenControl)
-		FTweenSettings& GetSettings() override { return Settings; }
-		const FTweenSettings& GetSettings() const override { return Settings; }
+		FTweenSettings& GetSettings() override { return this->Settings; }
+		const FTweenSettings& GetSettings() const override { return this->Settings; }
 
 		FTweenCallbacks& GetCallbacks() override { return Callbacks; }
 		const FTweenCallbacks& GetCallbacks() const override { return Callbacks; }
@@ -119,13 +119,13 @@ namespace TypeTween::Detail {
 			if (Elapsed == 0.f) Callbacks.BroadcastOnPreStart();
 
 			Elapsed += DeltaTime;
-			if (Settings.RepeatCount >= 0)
+			if (this->Settings.RepeatCount >= 0)
 				Elapsed = FMath::Min(Elapsed, GetMaxElapsed());
 
 			/* Fires every frame, even during delays */
 			Callbacks.BroadcastOnTick();
 
-			if (Elapsed < Settings.Delays.Start) return;
+			if (Elapsed < this->Settings.Delays.Start) return;
 
 			if (!bStartFired) {
 				bStartFired = true;
@@ -133,15 +133,15 @@ namespace TypeTween::Detail {
 				Callbacks.BroadcastOnCycleBegin();
 			}
 
-			const float AnimElapsed = Elapsed - Settings.Delays.Start;
+			const float AnimElapsed = Elapsed - this->Settings.Delays.Start;
 			const float TotalAnimTime = GetTotalAnimTime();
 
 			if (AnimElapsed >= TotalAnimTime) {
 				if (!bFinalized) {
 					bFinalized = true;
 
-					const float FinalRaw = (Settings.LoopMode == ETweenLoopMode::PingPong) ? 0.f : 1.f;
-					const float FinalAlpha = Detail::ApplyEase(FinalRaw, Settings.Ease);
+					const float FinalRaw = (this->Settings.LoopMode == ETweenLoopMode::PingPong) ? 0.f : 1.f;
+					const float FinalAlpha = Detail::ApplyEase(FinalRaw, this->Settings.Ease);
 					Interpolate({ FinalAlpha, FrameCount });
 					FrameCount++;
 					if (LastPhase == ECyclePhase::Forward) Callbacks.BroadcastOnForwardEnd();
@@ -161,8 +161,8 @@ namespace TypeTween::Detail {
 			ECyclePhase Phase = ECyclePhase::Forward;
 			const float RawAlpha = ComputeProgress(AnimElapsed, bReversing, Phase);
 			const float Alpha = bReversing
-				? 1.f - Detail::ApplyEase(RawAlpha, Settings.Ease)
-				: Detail::ApplyEase(RawAlpha, Settings.Ease);
+				? 1.f - Detail::ApplyEase(RawAlpha, this->Settings.Ease)
+				: Detail::ApplyEase(RawAlpha, this->Settings.Ease);
 
 			const bool bActivePhase = (Phase == ECyclePhase::Forward || Phase == ECyclePhase::Reverse);
 			if (bActivePhase) {
@@ -171,7 +171,7 @@ namespace TypeTween::Detail {
 
 			if (FrameCount > 0) {
 				if (LastPhase == ECyclePhase::Forward && Phase != ECyclePhase::Forward) {
-					Interpolate({ Detail::ApplyEase(1.f, Settings.Ease), FrameCount });
+					Interpolate({ Detail::ApplyEase(1.f, this->Settings.Ease), FrameCount });
 					Callbacks.BroadcastOnForwardEnd();
 				}
 
@@ -180,8 +180,8 @@ namespace TypeTween::Detail {
 				}
 
 				if (Phase == ECyclePhase::RepeatDelay && LastPhase != ECyclePhase::RepeatDelay) {
-					if (Settings.LoopMode == ETweenLoopMode::PingPong && LastPhase == ECyclePhase::Reverse) {
-						Interpolate({ Detail::ApplyEase(0.f, Settings.Ease), FrameCount });
+					if (this->Settings.LoopMode == ETweenLoopMode::PingPong && LastPhase == ECyclePhase::Reverse) {
+						Interpolate({ Detail::ApplyEase(0.f, this->Settings.Ease), FrameCount });
 					}
 					Callbacks.BroadcastOnCycleEnd();
 				}
@@ -194,9 +194,9 @@ namespace TypeTween::Detail {
 
 			if (bNewCycle) {
 				if (LastPhase != ECyclePhase::RepeatDelay) {
-					const float BoundaryRaw = (Settings.LoopMode == ETweenLoopMode::PingPong) ? 0.f : 1.f;
-					Interpolate({ Detail::ApplyEase(BoundaryRaw, Settings.Ease), FrameCount });
-					if (Settings.LoopMode == ETweenLoopMode::Restart) Callbacks.BroadcastOnForwardEnd();
+					const float BoundaryRaw = (this->Settings.LoopMode == ETweenLoopMode::PingPong) ? 0.f : 1.f;
+					Interpolate({ Detail::ApplyEase(BoundaryRaw, this->Settings.Ease), FrameCount });
+					if (this->Settings.LoopMode == ETweenLoopMode::Restart) Callbacks.BroadcastOnForwardEnd();
 					Callbacks.BroadcastOnCycleEnd();
 				}
 				Callbacks.BroadcastOnRepeat();
@@ -216,20 +216,20 @@ namespace TypeTween::Detail {
 
 		// -------------------------------------------------- handle conversion
 		/** Convert to a storable typed handle. Keeps the tween alive. */
-		Detail::TypedTweenHandle<Derived, TSharedPtr> ToHandle() {
-			return Detail::TypedTweenHandle<Derived, TSharedPtr>(GetSelfShared());
+		Detail::TypedTweenHandle<Derived, TDefaultSharedPtr> ToHandle() {
+			return Detail::TypedTweenHandle<Derived, TDefaultSharedPtr>(GetSelfShared());
 		}
 
-		Detail::TypedTweenHandle<Derived, TWeakPtr> ToWeakHandle() {
-			return Detail::TypedTweenHandle<Derived, TWeakPtr>(TWeakPtr<Derived>(SelfWeak));
+		Detail::TypedTweenHandle<Derived, TDefaultWeakPtr> ToWeakHandle() {
+			return Detail::TypedTweenHandle<Derived, TDefaultWeakPtr>(TWeakPtr<Derived>(SelfWeak));
 		}
 
 		/** Implicit conversion to typed handle (enables assignment syntax). */
-		operator Detail::TypedTweenHandle<Derived, TSharedPtr>() {
+		operator Detail::TypedTweenHandle<Derived, TDefaultSharedPtr>() {
 			return ToHandle();
 		}
 
-		operator Detail::TypedTweenHandle<Derived, TWeakPtr>() {
+		operator Detail::TypedTweenHandle<Derived, TDefaultWeakPtr>() {
 			return ToWeakHandle();
 		}
 
@@ -263,18 +263,18 @@ namespace TypeTween::Detail {
 		Derived& Self() { return *static_cast<Derived*>(this); }
 
 		float GetCycleTime() const {
-			const float Base = (Settings.LoopMode == ETweenLoopMode::PingPong)
-				? 2.f * Settings.Duration + Settings.Delays.Reverse : Settings.Duration;
-			return Base + Settings.Delays.Repeat;
+			const float Base = (this->Settings.LoopMode == ETweenLoopMode::PingPong)
+				? 2.f * this->Settings.Duration + this->Settings.Delays.Reverse : this->Settings.Duration;
+			return Base + this->Settings.Delays.Repeat;
 		}
 
 		float GetTotalAnimTime() const {
-			if (Settings.RepeatCount < 0) return TNumericLimits<float>::Max();
-			return GetCycleTime() * (Settings.RepeatCount + 1) - Settings.Delays.Repeat;
+			if (this->Settings.RepeatCount < 0) return TNumericLimits<float>::Max();
+			return GetCycleTime() * (this->Settings.RepeatCount + 1) - this->Settings.Delays.Repeat;
 		}
 
 		float GetMaxElapsed() const {
-			return Settings.Delays.Start + GetTotalAnimTime() + Settings.Delays.End;
+			return this->Settings.Delays.Start + GetTotalAnimTime() + this->Settings.Delays.End;
 		}
 
 		float ComputeProgress(float AnimElapsed, bool& bOutReversing, ECyclePhase& OutPhase) const {
@@ -282,26 +282,26 @@ namespace TypeTween::Detail {
 			const float CycleTime = GetCycleTime();
 			const float CyclePos = CycleTime > 0.f ? FMath::Fmod(AnimElapsed, CycleTime) : 0.f;
 
-			if (Settings.LoopMode == ETweenLoopMode::Restart) {
-				if (CyclePos >= Settings.Duration) { OutPhase = ECyclePhase::RepeatDelay; return 1.f; }
+			if (this->Settings.LoopMode == ETweenLoopMode::Restart) {
+				if (CyclePos >= this->Settings.Duration) { OutPhase = ECyclePhase::RepeatDelay; return 1.f; }
 				OutPhase = ECyclePhase::Forward;
-				return Settings.Duration > 0.f ? CyclePos / Settings.Duration : 1.f;
+				return this->Settings.Duration > 0.f ? CyclePos / this->Settings.Duration : 1.f;
 			}
 
 			// PingPong
-			if (CyclePos <= Settings.Duration) {
+			if (CyclePos <= this->Settings.Duration) {
 				OutPhase = ECyclePhase::Forward;
-				return Settings.Duration > 0.f ? CyclePos / Settings.Duration : 1.f;
+				return this->Settings.Duration > 0.f ? CyclePos / this->Settings.Duration : 1.f;
 			}
-			if (CyclePos <= Settings.Duration + Settings.Delays.Reverse) {
+			if (CyclePos <= this->Settings.Duration + this->Settings.Delays.Reverse) {
 				OutPhase = ECyclePhase::ReverseDelay;
 				return 1.f;
 			}
-			if (CyclePos <= 2.f * Settings.Duration + Settings.Delays.Reverse) {
+			if (CyclePos <= 2.f * this->Settings.Duration + this->Settings.Delays.Reverse) {
 				bOutReversing = true;
 				OutPhase = ECyclePhase::Reverse;
-				const float RevElapsed = CyclePos - Settings.Duration - Settings.Delays.Reverse;
-				return Settings.Duration > 0.f ? RevElapsed / Settings.Duration : 1.f;
+				const float RevElapsed = CyclePos - this->Settings.Duration - this->Settings.Delays.Reverse;
+				return this->Settings.Duration > 0.f ? RevElapsed / this->Settings.Duration : 1.f;
 			}
 			OutPhase = ECyclePhase::RepeatDelay;
 			return 0.f;
