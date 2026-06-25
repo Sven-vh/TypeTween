@@ -301,14 +301,17 @@ TypeTween::Tween<FText>(this)
 
 ### Installation
 
-**[Option A] Prebuilt Binaries**
+**[Option A] Fab** *(easiest)*
+1. Download the plugin directly from fab: [www.fab.com/listings/ef75203e-5571-4ecf-ab16-09fd1e3df0f6](https://www.fab.com/listings/ef75203e-5571-4ecf-ab16-09fd1e3df0f6)
+
+**[Option B] Prebuilt Binaries**
 1. Go to the [Releases](../../releases) page and download the "Binary" zip for your engine version.
 2. Extract the zip into your project's `Plugins/` directory.
 3. Restart the Unreal Editor, the plugin will be enabled automatically.
 
 > Prebuilt binaries are available for **UE 5.5**, **5.6**, **5.7**, and **5.8**.
 
-**[Option B] Building from Source**
+**[Option C] Building from Source**
 1. Clone or download this repository into your project's `Plugins/` directory.
 2. Restart the Unreal Editor. It will prompt you to compile the plugin automatically.
 
