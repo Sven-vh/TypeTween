@@ -78,6 +78,8 @@ public:
 			Reg.AddBlueprintAction(Cls, UBlueprintNodeSpawner::Create(Cls));
 	}
 
+	virtual void PinDefaultValueChanged(UEdGraphPin* Pin) override;
+
 protected:
 	/* Optional splits pins for types */
 	virtual void CustomizedSplits() {};
