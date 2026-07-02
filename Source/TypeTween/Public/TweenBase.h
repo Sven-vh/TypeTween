@@ -141,7 +141,7 @@ namespace TypeTween::Detail {
 					bFinalized = true;
 
 					const float FinalRaw = (this->Settings.LoopMode == ETweenLoopMode::PingPong) ? 0.f : 1.f;
-					const float FinalAlpha = Detail::ApplyEase(FinalRaw, this->Settings.Ease);
+					const float FinalAlpha = EvaluateEase(FinalRaw);
 					Interpolate({ FinalAlpha, FrameCount });
 					FrameCount++;
 					if (LastPhase == ECyclePhase::Forward) Callbacks.BroadcastOnForwardEnd();
@@ -161,8 +161,8 @@ namespace TypeTween::Detail {
 			ECyclePhase Phase = ECyclePhase::Forward;
 			const float RawAlpha = ComputeProgress(AnimElapsed, bReversing, Phase);
 			const float Alpha = bReversing
-				? 1.f - Detail::ApplyEase(RawAlpha, this->Settings.Ease)
-				: Detail::ApplyEase(RawAlpha, this->Settings.Ease);
+				? 1.f - EvaluateEase(RawAlpha)
+				: EvaluateEase(RawAlpha);
 
 			const bool bActivePhase = (Phase == ECyclePhase::Forward || Phase == ECyclePhase::Reverse);
 			if (bActivePhase) {
@@ -171,7 +171,7 @@ namespace TypeTween::Detail {
 
 			if (FrameCount > 0) {
 				if (LastPhase == ECyclePhase::Forward && Phase != ECyclePhase::Forward) {
-					Interpolate({ Detail::ApplyEase(1.f, this->Settings.Ease), FrameCount });
+					Interpolate({ EvaluateEase(1.f), FrameCount });
 					Callbacks.BroadcastOnForwardEnd();
 				}
 
@@ -181,7 +181,7 @@ namespace TypeTween::Detail {
 
 				if (Phase == ECyclePhase::RepeatDelay && LastPhase != ECyclePhase::RepeatDelay) {
 					if (this->Settings.LoopMode == ETweenLoopMode::PingPong && LastPhase == ECyclePhase::Reverse) {
-						Interpolate({ Detail::ApplyEase(0.f, this->Settings.Ease), FrameCount });
+						Interpolate({ EvaluateEase(0.f), FrameCount });
 					}
 					Callbacks.BroadcastOnCycleEnd();
 				}
@@ -195,7 +195,7 @@ namespace TypeTween::Detail {
 			if (bNewCycle) {
 				if (LastPhase != ECyclePhase::RepeatDelay) {
 					const float BoundaryRaw = (this->Settings.LoopMode == ETweenLoopMode::PingPong) ? 0.f : 1.f;
-					Interpolate({ Detail::ApplyEase(BoundaryRaw, this->Settings.Ease), FrameCount });
+					Interpolate({ EvaluateEase(BoundaryRaw), FrameCount });
 					if (this->Settings.LoopMode == ETweenLoopMode::Restart) Callbacks.BroadcastOnForwardEnd();
 					Callbacks.BroadcastOnCycleEnd();
 				}
@@ -261,6 +261,22 @@ namespace TypeTween::Detail {
 		}
 
 		Derived& Self() { return *static_cast<Derived*>(this); }
+
+		float EvaluateEase(float Alpha) const {
+			const ETweenEase Ease = this->Settings.Ease;
+			if (Ease == ETweenEase::CustomCurve) {
+				const FRuntimeFloatCurve& CustomEase = this->Settings.CustomEaseCurve;
+				const FRichCurve* Curve = CustomEase.GetRichCurveConst();
+				if (Curve && Curve->GetNumKeys() >= 2) {
+					/* Evaluate custom curve */
+					return Curve->Eval(Alpha, 0.f);
+				}
+				/* Fallback to linear if no curve is set */
+				return Alpha;
+			}
+			/* Evaluate built-in easing function */
+			return Detail::ApplyEase(Alpha, this->Settings.Ease);
+		}
 
 		float GetCycleTime() const {
 			const float Base = (this->Settings.LoopMode == ETweenLoopMode::PingPong)
