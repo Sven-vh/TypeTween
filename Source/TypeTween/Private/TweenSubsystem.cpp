@@ -17,8 +17,9 @@ UTypeTweenSubsystem* UTypeTweenSubsystem::Get(const UObject* WorldContext) {
 
 void UTypeTweenSubsystem::Tick(float DeltaTime) {
 
-	for (FActiveTween& T : ActiveTweens) {
-		T.FnTick(DeltaTime);
+	const int32 Count = ActiveTweens.Num();
+	for (int32 i = 0; i < Count; ++i) {
+		ActiveTweens[i].FnTick(DeltaTime);
 	}
 
 	// Remove tweens that are done AND have no intentional external handle.
@@ -41,8 +42,9 @@ void UTypeTweenSubsystem::KillAll(const bool IncludeHandles) {
 }
 
 void UTypeTweenSubsystem::PauseTweens() {
-	for (FActiveTween& T : ActiveTweens) {
-		T.Control->Pause();
+	const int32 Count = ActiveTweens.Num();
+	for (int32 i = 0; i < Count; ++i) {
+		ActiveTweens[i].Control->Pause();
 	}
 }
 
