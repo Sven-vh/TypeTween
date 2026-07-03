@@ -136,7 +136,7 @@ namespace TypeTween::Detail {
 			const float AnimElapsed = Elapsed - this->Settings.Delays.Start;
 			const float TotalAnimTime = GetTotalAnimTime();
 
-			if (AnimElapsed >= TotalAnimTime) {
+			if (AnimElapsed + KINDA_SMALL_NUMBER >= TotalAnimTime) {
 				if (!bFinalized) {
 					bFinalized = true;
 
