@@ -46,37 +46,15 @@ public:
 
 	// -- Pin allocation --------------------------------------------------------
 
-	virtual void AllocateDefaultPins() override {
-		Super::AllocateDefaultPins();
+	virtual void AllocateDefaultPins() override;
 
-		// Mark the advanced output delegate pins that Super created.
-		// The input sub-pins don't exist yet (splitting happens in
-		// PostPlacedNewNode / PostReconstructNode), so they're handled there.
-		for (const FName& Name : AdvancedDelegatePins())
-			if (UEdGraphPin* P = FindPin(Name))
-				P->bAdvancedView = true;
+	virtual void PostPlacedNewNode() override;
 
-		AdvancedPinDisplay = ENodeAdvancedPins::Hidden;
-	}
+	virtual void PostReconstructNode() override;
 
-	virtual void PostPlacedNewNode() override {
-		Super::PostPlacedNewNode();
-		EnsureSplitState();
-		EnsureAdvancedView();
-	}
+	virtual void GetMenuActions(FBlueprintActionDatabaseRegistrar& Reg) const override;
 
-	virtual void PostReconstructNode() override {
-		Super::PostReconstructNode();
-		EnsureAdvancedView();
-	}
-
-	virtual void GetMenuActions(FBlueprintActionDatabaseRegistrar& Reg) const override {
-		UClass* Cls = GetClass();
-		/* Only register concrete subclasses, never the base itself */
-		if (Cls == UK2Node_Tween::StaticClass()) { return; }
-		if (Reg.IsOpenForRegistration(Cls))
-			Reg.AddBlueprintAction(Cls, UBlueprintNodeSpawner::Create(Cls));
-	}
+	virtual void PinDefaultValueChanged(UEdGraphPin* Pin) override;
 
 protected:
 	/* Optional splits pins for types */
@@ -87,41 +65,9 @@ protected:
 
 private:
 
-	void EnsureSplitState() {
-		const UEdGraphSchema_K2* Schema = GetDefault<UEdGraphSchema_K2>();
+	void EnsureSplitState();
 
-		// Level 1: FTweenFloatConfig  From, To, Settings
-		if (UEdGraphPin* P = FindPin(TEXT("Tween")))
-			if (P->SubPins.Num() == 0)
-				Schema->SplitPin(P);
+	void EnsureHiddenState();
 
-		// Level 2: FTweenSettings  Duration, Ease, RepeatCount, LoopMode, Delays
-		if (UEdGraphPin* P = FindPin(TEXT("Tween_Settings")))
-			if (P->SubPins.Num() == 0)
-				Schema->SplitPin(P);
-
-		// Level 3: FTweenDelays Start, Reverse, Repeat, End
-		// Pre-splitting here means individual float pins are already visible
-		// when \/ is opened, rather than a blob the user would need to split.
-		if (UEdGraphPin* P = FindPin(TEXT("Tween_Settings_Delays")))
-			if (P->SubPins.Num() == 0)
-				Schema->SplitPin(P);
-
-		CustomizedSplits();
-	}
-
-	void EnsureAdvancedView() {
-		/* Hide all Tween settings except Duration and Ease by default */
-		for (UEdGraphPin* P : Pins) {
-			const FString Name = P->PinName.ToString();
-
-			if (!Name.StartsWith(TEXT("Tween_Settings"))) { continue; }
-			if (Name == TEXT("Tween_Settings_Duration")) { continue; }
-			if (Name == TEXT("Tween_Settings_Ease")) { continue; }
-
-			P->bAdvancedView = true;
-		}
-
-		CustomizedAdvanced();
-	}
+	void EnsureAdvancedView();
 };

@@ -16,7 +16,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTweenAlphaDelegate, float, Alpha);
 
 UENUM(BlueprintType)
 enum class ETweenEase : uint8 {
-	Linear,
+	Linear, CustomCurve,
 	InSine, OutSine, InOutSine,
 	InQuad, OutQuad, InOutQuad,
 	InCubic, OutCubic, InOutCubic,
@@ -74,6 +74,13 @@ struct TYPETWEEN_API FTweenSettings {
 	ETweenEase Ease = ETweenEase::Linear;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween", meta = (
+		ToolTip = "Custom easing curve.\nX = tween progress (0-1)\nY = eased output (0-1, expected)\nOvershoot beyond 0-1 on Y-axis is allowed. Default value = Linear. Active only when Ease = CustomCurve.",
+		EditCondition = "Ease == ETweenEase::CustomCurve",
+		EditConditionHides
+		))
+	FRuntimeFloatCurve CustomEaseCurve;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween", meta = (
 		ToolTip = "0 = play once, -1 = infinite, N = play N+1 times total"
 		))
 	int32 RepeatCount = 0;
@@ -85,6 +92,12 @@ struct TYPETWEEN_API FTweenSettings {
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timing")
 	FTweenDelays Delays;
+
+	FTweenSettings() {
+		/* Default Value */
+		CustomEaseCurve.EditorCurveData.AddKey(0.0f, 0.0f);
+		CustomEaseCurve.EditorCurveData.AddKey(1.0f, 1.0f);
+	}
 
 	bool operator==(const FTweenSettings& Other) const = default;
 };
