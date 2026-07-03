@@ -31,7 +31,7 @@ for %%V in (5.5 5.6 5.7 5.8) do (
 
         call "!ENGINE_DIR!\Engine\Build\BatchFiles\RunUAT.bat" BuildPlugin ^
             -Plugin="!PLUGIN!" ^
-            -Package="!OUTPUT_ROOT!\TypeTween_v1.0_UE%%V_Binaries" ^
+            -Package="!OUTPUT_ROOT!\TypeTween_v1.2_UE%%V_Binaries" ^
             -Rocket >> "%LOG_FILE%" 2>&1
 
         set ERR=!ERRORLEVEL!
@@ -45,25 +45,25 @@ for %%V in (5.5 5.6 5.7 5.8) do (
             echo [UE %%V] SUCCESS >> "%LOG_FILE%"
 
             echo Cleaning intermediate files for UE %%V...
-            rd /s /q "!OUTPUT_ROOT!\TypeTween_v1.0_UE%%V_Binaries\Intermediate"
+            rd /s /q "!OUTPUT_ROOT!\TypeTween_v1.2_UE%%V_Binaries\Intermediate"
             echo [UE %%V] Intermediate cleaned >> "%LOG_FILE%"
 
             REM ------------------------------------------------
             REM  Zip Binaries (inner folder named "TypeTween")
             REM ------------------------------------------------
             echo Zipping Binaries for UE %%V...
-            set "BIN_ZIP=!OUTPUT_ROOT!\TypeTween_v1.0_UE%%V_Binaries.zip"
+            set "BIN_ZIP=!OUTPUT_ROOT!\TypeTween_v1.2_UE%%V_Binaries.zip"
             set "STAGE=!OUTPUT_ROOT!\TypeTween"
             if exist "!BIN_ZIP!" del /f /q "!BIN_ZIP!"
             if exist "!STAGE!" rd /s /q "!STAGE!"
-            xcopy /e /i /q "!OUTPUT_ROOT!\TypeTween_v1.0_UE%%V_Binaries" "!STAGE!" >nul
+            xcopy /e /i /q "!OUTPUT_ROOT!\TypeTween_v1.2_UE%%V_Binaries" "!STAGE!" >nul
             powershell -NoProfile -Command "Compress-Archive -Path '!STAGE!' -DestinationPath '!BIN_ZIP!'"
             rd /s /q "!STAGE!"
             if !ERRORLEVEL! NEQ 0 (
                 echo [WARN] Zip failed for Binaries UE %%V
                 echo [UE %%V] Binaries zip FAILED >> "%LOG_FILE%"
             ) else (
-                echo [OK] Binaries zip created: TypeTween_v1.0_UE%%V_Binaries.zip
+                echo [OK] Binaries zip created: TypeTween_v1.2_UE%%V_Binaries.zip
                 echo [UE %%V] Binaries zip created >> "%LOG_FILE%"
             )
 
@@ -74,10 +74,10 @@ for %%V in (5.5 5.6 5.7 5.8) do (
             echo Creating Source copy for UE %%V...
             echo [UE %%V] Creating source copy >> "%LOG_FILE%"
 
-            set SOURCE_OUT=!OUTPUT_ROOT!\TypeTween_v1.0_UE%%V_Source
+            set SOURCE_OUT=!OUTPUT_ROOT!\TypeTween_v1.2_UE%%V_Source
 
             if exist "!SOURCE_OUT!" rd /s /q "!SOURCE_OUT!"
-            xcopy /e /i /q "!OUTPUT_ROOT!\TypeTween_v1.0_UE%%V_Binaries" "!SOURCE_OUT!" >> "%LOG_FILE%"
+            xcopy /e /i /q "!OUTPUT_ROOT!\TypeTween_v1.2_UE%%V_Binaries" "!SOURCE_OUT!" >> "%LOG_FILE%"
             rd /s /q "!SOURCE_OUT!\Binaries"
 
             echo [OK] Source copy created at: !SOURCE_OUT!
@@ -87,7 +87,7 @@ for %%V in (5.5 5.6 5.7 5.8) do (
             REM  Zip Source (inner folder named "TypeTween")
             REM ------------------------------------------------
             echo Zipping Source for UE %%V...
-            set "SRC_ZIP=!OUTPUT_ROOT!\TypeTween_v1.0_UE%%V_Source.zip"
+            set "SRC_ZIP=!OUTPUT_ROOT!\TypeTween_v1.2_UE%%V_Source.zip"
             if exist "!SRC_ZIP!" del /f /q "!SRC_ZIP!"
             if exist "!STAGE!" rd /s /q "!STAGE!"
             xcopy /e /i /q "!SOURCE_OUT!" "!STAGE!" >nul
@@ -97,7 +97,7 @@ for %%V in (5.5 5.6 5.7 5.8) do (
                 echo [WARN] Zip failed for Source UE %%V
                 echo [UE %%V] Source zip FAILED >> "%LOG_FILE%"
             ) else (
-                echo [OK] Source zip created: TypeTween_v1.0_UE%%V_Source.zip
+                echo [OK] Source zip created: TypeTween_v1.2_UE%%V_Source.zip
                 echo [UE %%V] Source zip created >> "%LOG_FILE%"
             )
         )
@@ -114,18 +114,18 @@ echo ================================
 echo Done! Output folder structure:
 echo.
 echo   Build\
-echo   ├── TypeTween_v1.0_UE5.5_Binaries\       ^<-- GitHub Release, Option A
-echo   ├── TypeTween_v1.0_UE5.5_Binaries.zip    ^<-- contains TypeTween\
-echo   ├── TypeTween_v1.0_UE5.5_Source\          ^<-- Fab submission folder
-echo   ├── TypeTween_v1.0_UE5.5_Source.zip       ^<-- contains TypeTween\
-echo   ├── TypeTween_v1.0_UE5.6_Binaries\
-echo   ├── TypeTween_v1.0_UE5.6_Binaries.zip
-echo   ├── TypeTween_v1.0_UE5.6_Source\
-echo   ├── TypeTween_v1.0_UE5.6_Source.zip
-echo   ├── TypeTween_v1.0_UE5.7_Binaries\
-echo   ├── TypeTween_v1.0_UE5.7_Binaries.zip
-echo   ├── TypeTween_v1.0_UE5.7_Source\
-echo   └── TypeTween_v1.0_UE5.7_Source.zip
+echo   ├── TypeTween_v1.2_UE5.5_Binaries\       ^<-- GitHub Release, Option A
+echo   ├── TypeTween_v1.2_UE5.5_Binaries.zip    ^<-- contains TypeTween\
+echo   ├── TypeTween_v1.2_UE5.5_Source\          ^<-- Fab submission folder
+echo   ├── TypeTween_v1.2_UE5.5_Source.zip       ^<-- contains TypeTween\
+echo   ├── TypeTween_v1.2_UE5.6_Binaries\
+echo   ├── TypeTween_v1.2_UE5.6_Binaries.zip
+echo   ├── TypeTween_v1.2_UE5.6_Source\
+echo   ├── TypeTween_v1.2_UE5.6_Source.zip
+echo   ├── TypeTween_v1.2_UE5.7_Binaries\
+echo   ├── TypeTween_v1.2_UE5.7_Binaries.zip
+echo   ├── TypeTween_v1.2_UE5.7_Source\
+echo   └── TypeTween_v1.2_UE5.7_Source.zip
 echo.
 echo Open build_log.txt for details:
 echo %LOG_FILE%

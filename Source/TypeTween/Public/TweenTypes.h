@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "Curves/CurveFloat.h"
 #include "TweenTraits.h"
 #include "TweenTypes.generated.h"
 
