@@ -17,14 +17,8 @@ UTypeTweenSubsystem* UTypeTweenSubsystem::Get(const UObject* WorldContext) {
 
 void UTypeTweenSubsystem::Tick(float DeltaTime) {
 
-	//log the amount of active tweens
-	UE_LOG(LogTemp, Display, TEXT("UTypeTweenSubsystem::Tick - Active Tweens: %d"), ActiveTweens.Num());
-
 	for (FActiveTween& T : ActiveTweens) {
 		T.FnTick(DeltaTime);
-
-		//log use count of the control shared pointer and whether the tween is done
-		UE_LOG(LogTemp, Display, TEXT("Tween Control Use Count: %d"), T.Control.GetSharedReferenceCount());
 	}
 
 	// Remove tweens that are done AND have no intentional external handle.
