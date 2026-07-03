@@ -44,6 +44,13 @@ namespace TypeTween::Detail {
 			return Self();
 		}
 
+		/* Custom easing curve. Overrides ease value. */
+		Derived& CustomEaseCurve(const FRuntimeFloatCurve& Curve) {
+			this->Settings.Ease = ETweenEase::CustomCurve;
+			this->Settings.CustomEaseCurve = Curve;
+			return Self();
+		}
+
 		Derived& Preset(FTweenSettings Preset) { this->Settings = MoveTemp(Preset); return Self(); }
 
 		// -------------------------------------------------- callbacks (C++ TFunction setters)
