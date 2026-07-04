@@ -99,8 +99,6 @@ struct TYPETWEEN_API FTweenSettings {
 		CustomEaseCurve.EditorCurveData.AddKey(0.0f, 0.0f);
 		CustomEaseCurve.EditorCurveData.AddKey(1.0f, 1.0f);
 	}
-
-	bool operator==(const FTweenSettings& Other) const = default;
 };
 
 // -----------------------------------------------------------------------
