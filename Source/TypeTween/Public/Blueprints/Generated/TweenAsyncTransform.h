@@ -24,7 +24,7 @@ struct FTweenTransformSettings {
 	FTransform From;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween")
-	FTransform To;
+	TArray<FTransform> To;
 
 	/* Common tween settings */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween|Settings")
@@ -129,7 +129,7 @@ public:
 
 		FTweenTransformSettings Settings;
 		Settings.From = In.Handle->GetStart().Get(FTransform::Identity);
-		Settings.To = In.Handle->GetEnd().Get(FTransform::Identity);
+		Settings.To = In.Handle->GetWaypoints();
 		Settings.Settings = In.Handle->GetSettings();
 		return Settings;
 	}

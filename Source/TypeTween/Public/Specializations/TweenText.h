@@ -21,7 +21,16 @@ namespace TypeTween {
 
 		/** End string [T=1]. If not provided, uses current value. */
 		ITween& To(FText InEnd) {
-			End = InEnd.ToString();
+			Waypoints.Add(InEnd.ToString());
+			return *this;
+		}
+
+		/** Multiple waypoints, interpolates through each in order. */
+		ITween& To(TArray<FText> InWaypoints) {
+			Waypoints.Reset(InWaypoints.Num());
+			for (FText& Text : InWaypoints) {
+				Waypoints.Add(Text.ToString());
+			}
 			return *this;
 		}
 
@@ -54,21 +63,43 @@ namespace TypeTween {
 			if (Frame.FrameCount == 0) {
 				// Snapshot current value as fallback if From/To were not provided
 				if (!Start.IsSet() && Value) Start = Value->ToString();
-				if (!End.IsSet() && Value) End = Value->ToString();
+				if (Waypoints.Num() == 0 && Value) Waypoints.Add(Value->ToString());
 
-				// Pre-compute edit operations once - O(M*N), cached for all subsequent ticks
-				if (LerpMode == ETextLerpMode::EditDistance && Start.IsSet() && End.IsSet())
-					CachedOps = Detail::TextLerp::ComputeEditOps(Start.GetValue(), End.GetValue());
+				// Pre-compute edit operations once per segment - O(M*N) each, cached for all subsequent ticks
+				if (LerpMode == ETextLerpMode::EditDistance && Start.IsSet() && Waypoints.Num() > 0) {
+					CachedOpsPerSegment.Reset(Waypoints.Num());
+					for (int32 i = 0; i < Waypoints.Num(); ++i) {
+						const FString& A = (i == 0) ? Start.GetValue() : Waypoints[i - 1];
+						const FString& B = Waypoints[i];
+						CachedOpsPerSegment.Add(Detail::TextLerp::ComputeEditOps(A, B));
+					}
+				}
 			}
 
-			if (Value && Start.IsSet() && End.IsSet()) {
+			if (Value && Start.IsSet() && Waypoints.Num() > 0) {
+				const int32 Segments = Waypoints.Num(); // Start->WP0, WP0->WP1, ...
+				const float Scaled = FMath::Clamp(Frame.Alpha, 0.0f, 1.0f) * Segments;
+
+				int32 SegIndex = FMath::Clamp(FMath::FloorToInt(Scaled), 0, Segments - 1);
+				float LocalAlpha = Scaled - SegIndex;
+
+				// Edge case: Alpha == 1.0 exactly lands on the last point cleanly
+				if (SegIndex == Segments - 1 && Scaled >= Segments) LocalAlpha = 1.0f;
+
+				const FString& A = (SegIndex == 0) ? Start.GetValue() : Waypoints[SegIndex - 1];
+				const FString& B = Waypoints[SegIndex];
+
+				static const TArray<Detail::TextLerp::FEditOp> EmptyOps;
+				const TArray<Detail::TextLerp::FEditOp>& Ops =
+					CachedOpsPerSegment.IsValidIndex(SegIndex) ? CachedOpsPerSegment[SegIndex] : EmptyOps;
+
 				const FString Result = Detail::TextLerp::Lerp(
-					Start.GetValue(),
-					End.GetValue(),
-					Frame.Alpha,
+					A,
+					B,
+					LocalAlpha,
 					LerpMode,
 					Glyphs,
-					CachedOps);
+					Ops);
 
 				*Value = FText::FromString(Result);
 			}
@@ -84,8 +115,8 @@ namespace TypeTween {
 		TOptional<FString>& GetStart() { return Start; }
 		const TOptional<FString>& GetStart() const { return Start; }
 
-		TOptional<FString>& GetEnd() { return End; }
-		const TOptional<FString>& GetEnd() const { return End; }
+		TArray<FString>& GetWaypoints() { return Waypoints; }
+		const TArray<FString>& GetWaypoints() const { return Waypoints; }
 
 		ETextLerpMode GetMode() const { return LerpMode; }
 
@@ -93,14 +124,14 @@ namespace TypeTween {
 		FText* Value = nullptr;
 
 		TOptional<FString> Start;
-		TOptional<FString> End;
+		TArray<FString> Waypoints;
 
 		ETextLerpMode LerpMode = ETextLerpMode::Scramble;
 
 		FString Glyphs = Detail::TextLerp::GetGlyphs(ETextGlyphSet::Alphanumeric, FString());
 
 		TFunction<void(float, const FText&)> OnUpdateCB;
-		TArray<Detail::TextLerp::FEditOp> CachedOps; // only populated for EditDistance mode
+		TArray<TArray<Detail::TextLerp::FEditOp>> CachedOpsPerSegment; // only populated for EditDistance mode, one entry per segment
 	};
 
 } // namespace TypeTween

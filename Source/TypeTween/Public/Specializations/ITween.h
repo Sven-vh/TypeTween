@@ -20,15 +20,17 @@ namespace TypeTween {
 		/* Start Value [T=0], if not provided, will use current value */
 		ITween& From(T InStart) { Start = MoveTemp(InStart); return *this; }
 		/* End Value [T=1], if not provided, will use current value */
-		ITween& To(T InEnd) { End = MoveTemp(InEnd);   return *this; }
+		ITween& To(T InEnd) { Waypoints.Add(MoveTemp(InEnd)); return *this; }
+		/* Multiple waypoints, interpolates through each in order */
+		ITween& To(TArray<T> InWaypoints) { Waypoints = MoveTemp(InWaypoints); return *this; }
 		/* Relative Value, adds to Start. If Start not provided, uses current value as Start */
 		ITween& By(T InDelta) {
-			if (!Start.IsSet() && Value) {
-				Start = *Value;
-			}
-			if (Start.IsSet()) {
-				End = Start.GetValue() + MoveTemp(InDelta);
-			}
+			T Base;
+			if (Waypoints.Num() > 0)	Base = Waypoints.Last();
+			else if (Start.IsSet())		Base = Start.GetValue();
+			else if (Value)				Base = *Value;
+
+			Waypoints.Add(Base + MoveTemp(InDelta));
 			return *this;
 		}
 
@@ -45,20 +47,26 @@ namespace TypeTween {
 		// ---- Only contract with TweenBase: called each tick ----
 		void Interpolate(const Detail::FTweenFrame& Frame) {
 			if (Frame.FrameCount == 0) {
-				/* If no start or end provided, use current value */
 				if (!Start.IsSet() && Value) Start = *Value;
-				if (!End.IsSet() && Value) End = *Value;
+				if (Waypoints.Num() == 0 && Value) Waypoints.Add(*Value);
 			}
 
-			if (Value && Start.IsSet() && End.IsSet()) {
-				const T& A = Start.GetValue();
-				const T& B = End.GetValue();
-				/* Default interpolation */
-				//*Value = A + (B - A) * Frame.Alpha;
-				*Value = Lerp(A, B, Frame.Alpha);
+			if (Value && Start.IsSet() && Waypoints.Num() > 0) {
+				const int32 Segments = Waypoints.Num(); // Start->WP0, WP0->WP1, ...
+				const float Scaled = FMath::Clamp(Frame.Alpha, 0.0f, 1.0f) * Segments;
+
+				int32 SegIndex = FMath::Clamp(FMath::FloorToInt(Scaled), 0, Segments - 1);
+				float LocalAlpha = Scaled - SegIndex;
+
+				// Edge case: Alpha == 1.0 exactly lands on the last point cleanly
+				if (SegIndex == Segments - 1 && Scaled >= Segments) LocalAlpha = 1.0f;
+
+				const T& A = (SegIndex == 0) ? Start.GetValue() : Waypoints[SegIndex - 1];
+				const T& B = Waypoints[SegIndex];
+
+				*Value = Lerp(A, B, LocalAlpha);
 			}
 
-			// Fire typed OnUpdate callback with value
 			if (OnUpdateCB && Value) OnUpdateCB(Frame.Alpha, *Value);
 		}
 
@@ -69,13 +77,13 @@ namespace TypeTween {
 		TOptional<T>& GetStart() { return Start; }
 		const TOptional<T>& GetStart() const { return Start; }
 
-		TOptional<T>& GetEnd() { return End; }
-		const TOptional<T>& GetEnd() const { return End; }
+		TArray<T>& GetWaypoints() { return Waypoints; }
+		const TArray<T>& GetWaypoints() const { return Waypoints; }
 
 	private:
 		T* Value = nullptr;
 		TOptional<T> Start;
-		TOptional<T> End;
+		TArray<T> Waypoints;
 		TFunction<void(float, const T&)> OnUpdateCB;
 	};
 

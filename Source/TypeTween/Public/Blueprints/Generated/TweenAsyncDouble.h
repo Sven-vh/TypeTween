@@ -24,7 +24,7 @@ struct FTweenDoubleSettings {
 	double From = 0.0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween")
-	double To = 1.0;
+	TArray<double> To = {1.0};
 
 	/* Common tween settings */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween|Settings")
@@ -129,7 +129,7 @@ public:
 
 		FTweenDoubleSettings Settings;
 		Settings.From = In.Handle->GetStart().Get(0.0);
-		Settings.To = In.Handle->GetEnd().Get(1.0);
+		Settings.To = In.Handle->GetWaypoints();
 		Settings.Settings = In.Handle->GetSettings();
 		return Settings;
 	}

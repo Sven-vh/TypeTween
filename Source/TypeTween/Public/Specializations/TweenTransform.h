@@ -27,14 +27,25 @@ namespace TypeTween {
 			ComponentsToTween = EComponent::All;
 			return static_cast<Derived&>(*this);
 		}
+		/* End Value [T=1], if not provided, will use current value */
 		Derived& To(FTransform InEnd) {
-			End = MoveTemp(InEnd);
+			Waypoints.Add(MoveTemp(InEnd));
+			ComponentsToTween = EComponent::All;
+			return static_cast<Derived&>(*this);
+		}
+		/* Multiple waypoints, interpolates through each in order */
+		Derived& To(TArray<FTransform> InWaypoints) {
+			Waypoints = MoveTemp(InWaypoints);
 			ComponentsToTween = EComponent::All;
 			return static_cast<Derived&>(*this);
 		}
 		Derived& By(FTransform InDelta) {
-			DefaultStart();
-			End = Start.GetValue() + MoveTemp(InDelta);
+			FTransform Base;
+			if (Waypoints.Num() > 0)	Base = Waypoints.Last();
+			else if (Start.IsSet())		Base = Start.GetValue();
+			else							Base = GetCurrentTransform();
+
+			Waypoints.Add(Base + MoveTemp(InDelta));
 			ComponentsToTween = EComponent::All;
 			return static_cast<Derived&>(*this);
 		}
@@ -47,15 +58,13 @@ namespace TypeTween {
 			return static_cast<Derived&>(*this);
 		}
 		Derived& MoveTo(const FVector& InEnd) {
-			DefaultEnd();
-			End->SetTranslation(InEnd);
+			GetOrAddLastWaypoint().SetTranslation(InEnd);
 			ComponentsToTween |= EComponent::Translation;
 			return static_cast<Derived&>(*this);
 		}
 		Derived& MoveBy(const FVector& Offset) {
 			DefaultStart();
-			DefaultEnd();
-			End->SetTranslation(Start->GetTranslation() + Offset);
+			GetOrAddLastWaypoint().SetTranslation(Start->GetTranslation() + Offset);
 			ComponentsToTween |= EComponent::Translation;
 			return static_cast<Derived&>(*this);
 		}
@@ -68,15 +77,13 @@ namespace TypeTween {
 			return static_cast<Derived&>(*this);
 		}
 		Derived& RotateTo(const FQuat& InEnd) {
-			DefaultEnd();
-			End->SetRotation(InEnd);
+			GetOrAddLastWaypoint().SetRotation(InEnd);
 			ComponentsToTween |= EComponent::Rotation;
 			return static_cast<Derived&>(*this);
 		}
 		Derived& RotateBy(const FQuat& Offset) {
 			DefaultStart();
-			DefaultEnd();
-			End->SetRotation(Offset * Start->GetRotation());
+			GetOrAddLastWaypoint().SetRotation(Offset * Start->GetRotation());
 			ComponentsToTween |= EComponent::Rotation;
 			return static_cast<Derived&>(*this);
 		}
@@ -89,15 +96,13 @@ namespace TypeTween {
 			return static_cast<Derived&>(*this);
 		}
 		Derived& RotateTo(const FRotator& InEnd) {
-			DefaultEnd();
-			End->SetRotation(FQuat(InEnd));
+			GetOrAddLastWaypoint().SetRotation(FQuat(InEnd));
 			ComponentsToTween |= EComponent::Rotation;
 			return static_cast<Derived&>(*this);
 		}
 		Derived& RotateBy(const FRotator& Offset) {
 			DefaultStart();
-			DefaultEnd();
-			End->SetRotation(FQuat(Offset) * Start->GetRotation());
+			GetOrAddLastWaypoint().SetRotation(FQuat(Offset) * Start->GetRotation());
 			ComponentsToTween |= EComponent::Rotation;
 			return static_cast<Derived&>(*this);
 		}
@@ -110,15 +115,13 @@ namespace TypeTween {
 			return static_cast<Derived&>(*this);
 		}
 		Derived& ScaleTo(const FVector& InEnd) {
-			DefaultEnd();
-			End->SetScale3D(InEnd);
+			GetOrAddLastWaypoint().SetScale3D(InEnd);
 			ComponentsToTween |= EComponent::Scale;
 			return static_cast<Derived&>(*this);
 		}
 		Derived& ScaleBy(const FVector& Offset) {
 			DefaultStart();
-			DefaultEnd();
-			End->SetScale3D(Start->GetScale3D() + Offset);
+			GetOrAddLastWaypoint().SetScale3D(Start->GetScale3D() + Offset);
 			ComponentsToTween |= EComponent::Scale;
 			return static_cast<Derived&>(*this);
 		}
@@ -135,12 +138,12 @@ namespace TypeTween {
 		TOptional<FTransform>& GetStart() { return Start; }
 		const TOptional<FTransform>& GetStart() const { return Start; }
 
-		TOptional<FTransform>& GetEnd() { return End; }
-		const TOptional<FTransform>& GetEnd() const { return End; }
+		TArray<FTransform>& GetWaypoints() { return Waypoints; }
+		const TArray<FTransform>& GetWaypoints() const { return Waypoints; }
 
 	protected:
 		TOptional<FTransform> Start;
-		TOptional<FTransform> End;
+		TArray<FTransform> Waypoints;
 		EComponent ComponentsToTween = EComponent::None;
 
 		/** Must be implemented by derived class to provide current transform value */
@@ -152,33 +155,45 @@ namespace TypeTween {
 			}
 		}
 
-		void DefaultEnd() {
-			if (!End.IsSet()) {
-				End = GetCurrentTransform();
+		/** Returns the waypoint currently being built, creating one from the current transform if none exists yet */
+		FTransform& GetOrAddLastWaypoint() {
+			if (Waypoints.Num() == 0) {
+				Waypoints.Add(GetCurrentTransform());
 			}
+			return Waypoints.Last();
 		}
 
 		/** Computes the interpolated transform for the current frame without applying it */
 		FTransform ComputeInterpolatedTransform(const FTransform& Current, float Alpha) const {
 			FTransform Result = Current;
-			if (Start.IsSet() && End.IsSet()) {
-				const FTransform& A = Start.GetValue();
-				const FTransform& B = End.GetValue();
+			if (Start.IsSet() && Waypoints.Num() > 0) {
+				const int32 Segments = Waypoints.Num(); // Start->WP0, WP0->WP1, ...
+				const float Scaled = FMath::Clamp(Alpha, 0.0f, 1.0f) * Segments;
+
+				int32 SegIndex = FMath::Clamp(FMath::FloorToInt(Scaled), 0, Segments - 1);
+				float LocalAlpha = Scaled - SegIndex;
+
+				// Edge case: Alpha == 1.0 exactly lands on the last point cleanly
+				if (SegIndex == Segments - 1 && Scaled >= Segments) LocalAlpha = 1.0f;
+
+				const FTransform& A = (SegIndex == 0) ? Start.GetValue() : Waypoints[SegIndex - 1];
+				const FTransform& B = Waypoints[SegIndex];
+
 				if (EnumHasAnyFlags(ComponentsToTween, EComponent::Translation))
-					Result.SetTranslation(Lerp(A.GetTranslation(), B.GetTranslation(), Alpha));
+					Result.SetTranslation(Lerp(A.GetTranslation(), B.GetTranslation(), LocalAlpha));
 				if (EnumHasAnyFlags(ComponentsToTween, EComponent::Rotation))
-					Result.SetRotation(FQuat::Slerp(A.GetRotation(), B.GetRotation(), Alpha));
+					Result.SetRotation(FQuat::Slerp(A.GetRotation(), B.GetRotation(), LocalAlpha));
 				if (EnumHasAnyFlags(ComponentsToTween, EComponent::Scale))
-					Result.SetScale3D(Lerp(A.GetScale3D(), B.GetScale3D(), Alpha));
+					Result.SetScale3D(Lerp(A.GetScale3D(), B.GetScale3D(), LocalAlpha));
 			}
 			return Result;
 		}
 
-		/** Initializes Start/End from current transform if not set. Call on first frame. */
+		/** Initializes Start/Waypoints from current transform if not set. Call on first frame. */
 		void InitializeDefaults() {
 			const FTransform Current = GetCurrentTransform();
 			if (!Start.IsSet()) Start = Current;
-			if (!End.IsSet()) End = Current;
+			if (Waypoints.Num() == 0) Waypoints.Add(Current);
 		}
 	};
 
@@ -206,7 +221,7 @@ namespace TypeTween {
 			if (Frame.FrameCount == 0) {
 				Mixin::InitializeDefaults();
 			}
-			if (Value && Mixin::Start.IsSet() && Mixin::End.IsSet()) {
+			if (Value && Mixin::Start.IsSet() && Mixin::Waypoints.Num() > 0) {
 				*Value = Mixin::ComputeInterpolatedTransform(*Value, Frame.Alpha);
 			}
 			// Fire typed OnUpdate callback with value
@@ -282,7 +297,7 @@ namespace TypeTween {
 				Mixin::InitializeDefaults();
 			}
 
-			if (Mixin::Start.IsSet() && Mixin::End.IsSet()) {
+			if (Mixin::Start.IsSet() && Mixin::Waypoints.Num() > 0) {
 				const FTransform NewTransform = Mixin::ComputeInterpolatedTransform(Actor->GetActorTransform(), Frame.Alpha);
 
 				// Apply to actor with appropriate method
@@ -315,4 +330,3 @@ namespace TypeTween {
 		TFunction<void(float, const FTransform&)> OnTransformUpdateCB;
 	};
 }
-

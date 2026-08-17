@@ -24,7 +24,7 @@ struct FTweenRotatorSettings {
 	FRotator From = FRotator::ZeroRotator;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween")
-	FRotator To = FRotator::ZeroRotator;
+	TArray<FRotator> To = {FRotator::ZeroRotator};
 
 	/* Common tween settings */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween|Settings")
@@ -129,7 +129,7 @@ public:
 
 		FTweenRotatorSettings Settings;
 		Settings.From = In.Handle->GetStart().Get(FRotator::ZeroRotator);
-		Settings.To = In.Handle->GetEnd().Get(FRotator::ZeroRotator);
+		Settings.To = In.Handle->GetWaypoints();
 		Settings.Settings = In.Handle->GetSettings();
 		return Settings;
 	}

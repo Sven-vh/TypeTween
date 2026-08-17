@@ -24,7 +24,7 @@ struct FTweenVector2DSettings {
 	FVector2D From = FVector2D::ZeroVector;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween")
-	FVector2D To = FVector2D::UnitVector;
+	TArray<FVector2D> To = {FVector2D::UnitVector};
 
 	/* Common tween settings */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween|Settings")
@@ -129,7 +129,7 @@ public:
 
 		FTweenVector2DSettings Settings;
 		Settings.From = In.Handle->GetStart().Get(FVector2D::ZeroVector);
-		Settings.To = In.Handle->GetEnd().Get(FVector2D::UnitVector);
+		Settings.To = In.Handle->GetWaypoints();
 		Settings.Settings = In.Handle->GetSettings();
 		return Settings;
 	}

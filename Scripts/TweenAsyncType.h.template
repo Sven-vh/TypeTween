@@ -24,7 +24,7 @@ struct FTween${TYPE_NAME}Settings {
 	${CPP_TYPE} From${DEFAULT_FROM};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween")
-	${CPP_TYPE} To${DEFAULT_TO};
+	TArray<${CPP_TYPE}> To${DEFAULT_TO};
 
 	/* Common tween settings */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween|Settings")
@@ -129,7 +129,7 @@ public:
 
 		FTween${TYPE_NAME}Settings Settings;
 		Settings.From = In.Handle->GetStart().Get(${DEFAULT_FROM_VALUE});
-		Settings.To = In.Handle->GetEnd().Get(${DEFAULT_TO_VALUE});
+		Settings.To = In.Handle->GetWaypoints();
 		Settings.Settings = In.Handle->GetSettings();
 		return Settings;
 	}

@@ -19,7 +19,7 @@ struct FTweenTextSettings {
 	FText From = FText::GetEmpty();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween")
-	FText To = FText::GetEmpty();
+	TArray<FText> To = { FText::GetEmpty() };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween")
 	ETextLerpMode LerpMode = ETextLerpMode::Scramble;
@@ -142,7 +142,11 @@ public:
 
 		FTweenTextSettings Settings;
 		Settings.From = FText::FromString(In.Handle->GetStart().Get(FString()));
-		Settings.To = FText::FromString(In.Handle->GetEnd().Get(FString()));
+		//Settings.To = In.Handle->GetWaypoints();
+		Settings.To.Reset(In.Handle->GetWaypoints().Num());
+		for(const FString& Waypoint : In.Handle->GetWaypoints()) {
+			Settings.To.Add(FText::FromString(Waypoint));
+		}
 		Settings.Settings = In.Handle->GetSettings();
 		return Settings;
 	}

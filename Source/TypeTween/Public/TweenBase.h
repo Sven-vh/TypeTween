@@ -81,6 +81,10 @@ namespace TypeTween::Detail {
 		Derived& OnTick(TFunction<void()> Fn) { Callbacks.OnTickFn = MoveTemp(Fn); return Self(); }
 		/* [Note] OnUpdate callback is handled by ITween<T> specialization and gets called during the interpolation */
 
+		Derived& Chain() {
+
+		}
+
 		// --------------------------------------------------------------- control
 		void Pause() override { bPaused = true; }
 		void Resume() override { bPaused = false; }

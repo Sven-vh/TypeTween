@@ -18,7 +18,7 @@ struct FTweenColorSettings {
 	FLinearColor From = FLinearColor::Black;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween")
-	FLinearColor To = FLinearColor::White;
+	TArray<FLinearColor> To = {FLinearColor::White};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TypeTween")
 	EColorLerpMode ColorSpace = EColorLerpMode::Linear;
@@ -132,7 +132,7 @@ public:
 
 		FTweenColorSettings Settings;
 		Settings.From = In.Handle->GetStart().Get(FLinearColor::Black);
-		Settings.To = In.Handle->GetEnd().Get(FLinearColor::White);
+		Settings.To = In.Handle->GetWaypoints();
 		Settings.Settings = In.Handle->GetSettings();
 		return Settings;
 	}
