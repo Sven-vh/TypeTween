@@ -121,16 +121,35 @@ Click the ▼ arrow for more settings and callbacks:
   <img alt="Tween Float Blueprint Advanced" src="https://github.com/user-attachments/assets/cefd8f07-86d0-4e91-ac8b-53e334015a0b" />
 </picture>
 
+### Waypoints
+
+Chain multiple ``To`` functions:
+
+```cpp
+TypeTween::Tween<float>(this)
+  .From(0.0f)
+  .To(10.0f)
+  .To(100.0f)
+  .To(1000.0f)
+  .Duration(6.0f)
+  .Ease(ETweenEase::Linear)
+```
+
+<picture>
+  <source media="(prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/8c1c1de0-a776-4d9c-a7d8-3d6a3fe5ae71" />
+  <img width="50%" alt="TypeTween-value-over-time" src="https://github.com/user-attachments/assets/18a12897-fc6b-46e9-b48e-34b492935190" />
+</picture>
+
 ### Handles
 
 Handles keep a tween alive and let you control it after creation (type erased):
 
 ```cpp
 TypeTween::FTweenHandle Handle;
- Handle = TypeTween::Tween<float>(this)
-    .From(0.f)
-    .To(1.f)
-    .Duration(2.f);
+Handle = TypeTween::Tween<float>(this)
+  .From(0.f)
+  .To(1.f)
+  .Duration(2.f);
 
 /* Control */
 Handle->Pause();
